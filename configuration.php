@@ -57,8 +57,8 @@ class JConfig {
 	public $unicodeslugs = '0';
 	public $feed_limit = '10';
 	public $feed_email = 'none';
-	public $log_path = '/home/corpogua/public_html/verdes/administrator/logs';
-	public $tmp_path = '/home/corpogua/public_html/verdes/tmp';
+	public $log_path = '/home/vagrant/verdes/administrator/logs';
+	public $tmp_path = '/home/vagrant/verdes/tmp';
 	public $lifetime = '15';
 	public $session_handler = 'database';
 	public $shared_session = '0';
