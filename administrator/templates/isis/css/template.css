@@ -909,9 +909,9 @@ input[type="color"]:not(#app-admin-container *),
 	border-radius: 3px;
 	vertical-align: middle;
 }
-input:not(#app-admin-container *),
-textarea:not(#app-admin-container *),
-.uneditable-input:not(#app-admin-container *) {
+input,
+textarea,
+.uneditable-input {
 	width: 206px;
 }
 textarea:not(#app-admin-container *) {
