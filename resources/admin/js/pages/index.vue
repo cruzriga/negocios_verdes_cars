@@ -1,5 +1,5 @@
 <template>
-    <div id="app-admin-container" style="height: 100vh">
+    <div id="app-admin-container">
       <panel/>
     </div>
 </template>
@@ -11,6 +11,10 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+  #app-admin-container{
+    height: calc(100vh - 100px);
+    width: 100%;
+  }
 
 </style>
