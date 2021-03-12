@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import store from './store';
-//import router from './router';
-import index from './pages/index'
+import router from './router';
+import index from './index'
 import Quasar from "quasar";
 
 Vue.use(Quasar, {
@@ -14,7 +14,7 @@ Vue.use(Quasar, {
 
 
 window.vue  = new Vue({
-                         // router,
+                          router,
                           store,
                           data:{},
                           render: h => h(index)}

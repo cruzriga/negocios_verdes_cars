@@ -16,3 +16,6 @@
 2021-03-06T01:35:29+00:00	INFO 2800:484:d79:c800:8057:96fa:5373:dbfe	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
 2021-03-07T02:30:46+00:00	INFO 201.185.187.155	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
 2021-03-09T08:21:30+00:00	INFO 192.168.10.1	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
+2021-03-12T05:35:03+00:00	INFO 192.168.10.1	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
+2021-03-12T05:35:05+00:00	INFO 192.168.10.1	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
+2021-03-12T05:35:20+00:00	INFO 192.168.10.1	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.

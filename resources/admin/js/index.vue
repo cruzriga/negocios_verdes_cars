@@ -1,13 +1,13 @@
 <template>
-    <div id="app-admin-container">
-      <panel/>
-    </div>
+  <layout>
+    <router-view />
+  </layout>
 </template>
 
 <script>
-import panel from "./panel";
+import layout from "./layouts/layout";
 export default {
-    components:{ panel}
+    components:{ layout}
 }
 </script>
 

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import index from "./pages/index";
+import dashboard from "./pages/dashboard";
 
 Vue.use(VueRouter);
 
@@ -13,7 +13,7 @@ const router = new VueRouter(
                 redirect: '/',
             },
             {
-                path: '/', component: index, props:true,
+                path: '/', component: dashboard, props:true,
                 children: [
                     /* {
                      path: '/',
