@@ -4,34 +4,18 @@
 
       <q-header elevated class="bg-white text-grey">
         <q-toolbar>
-          <q-btn dense flat round icon="menu" @click="left = !left" />
-
           <q-toolbar-title>
             Negocios verdes Corpoguajira
           </q-toolbar-title>
+          <q-tabs>
+            <q-route-tab to="/" icon="eco" name="Negocios" label="Negocios" />
+            <q-route-tab to="/categorias" icon="list" name="Categorias" label="Categorias" />
+            <q-route-tab to="/archivos" icon="attach_file" name="Archivos" label="Archivos" />
+          </q-tabs>
         </q-toolbar>
+
+
       </q-header>
-
-      <q-drawer show-if-above v-model="left" side="left" behavior="desktop" bordered>
-        <!-- drawer content -->
-        <q-scroll-area class="fit">
-          <q-list>
-
-            <template v-for="(menuItem, index) in menuList">
-              <q-item :key="index" clickable :active="menuItem.label === 'Outbox'" v-ripple>
-                <q-item-section avatar>
-                  <q-icon :name="menuItem.icon" />
-                </q-item-section>
-                <q-item-section>
-                  {{ menuItem.label }}
-                </q-item-section>
-              </q-item>
-              <q-separator :key="'sep' + index" v-if="menuItem.separator" />
-            </template>
-
-          </q-list>
-        </q-scroll-area>
-      </q-drawer>
 
       <q-page-container style="height: calc(100vh - 100px); overflow-y: auto">
         <q-page style="padding: 20px">
@@ -47,7 +31,7 @@
 export default {
   data(){
       return {
-        left: true,
+        tab: 'Negocios',
         menuList : [
           {
             icon: 'inbox',

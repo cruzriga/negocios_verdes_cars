@@ -1,7 +1,7 @@
 <template>
-  <h1>
-    hola mundo
-  </h1>
+  <h2>
+    categorias
+  </h2>
 </template>
 
 <script>

@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import dashboard from "./pages/dashboard";
+import negocios from "./pages/negocios";
+import categorias from "./pages/categorias";
+import archivos from "./pages/archivos";
 
 Vue.use(VueRouter);
 
@@ -13,7 +15,27 @@ const router = new VueRouter(
                 redirect: '/',
             },
             {
-                path: '/', component: dashboard, props:true,
+                path: '/', component: negocios, props:true,
+                children: [
+                    /* {
+                     path: '/',
+                     component: Business,
+                     name: 'main'
+                     },*/
+                ]
+            },
+            {
+                path: '/categorias', component: categorias, props:true,
+                children: [
+                    /* {s
+                     path: '/',
+                     component: Business,
+                     name: 'main'
+                     },*/
+                ]
+            },
+            {
+                path: '/archivos', component: archivos, props:true,
                 children: [
                     /* {
                      path: '/',
