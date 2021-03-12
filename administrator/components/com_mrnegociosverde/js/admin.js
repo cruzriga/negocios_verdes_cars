@@ -177,7 +177,28 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({});
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  data: function data() {
+    return {
+      search: ''
+    };
+  }
+});
 
 /***/ }),
 
@@ -47556,11 +47577,73 @@ var render = function() {
         "q-list",
         { staticClass: "rounded-borders", attrs: { bordered: "" } },
         [
-          _c("q-item-label", { attrs: { header: "" } }, [
-            _vm._v("Google Inbox style")
-          ]),
+          _c(
+            "q-item-label",
+            { attrs: { header: "" } },
+            [
+              _c(
+                "q-toolbar",
+                {
+                  staticClass: "text-primary",
+                  staticStyle: { height: "50px" }
+                },
+                [
+                  _c("q-input", {
+                    staticClass: "GPL__toolbar-input",
+                    attrs: {
+                      dense: "",
+                      standout: "bg-primary",
+                      placeholder: "Buscar"
+                    },
+                    scopedSlots: _vm._u([
+                      {
+                        key: "prepend",
+                        fn: function() {
+                          return [
+                            _vm.search === ""
+                              ? _c("q-icon", { attrs: { name: "search" } })
+                              : _c("q-icon", {
+                                  staticClass: "cursor-pointer",
+                                  attrs: { name: "clear" },
+                                  on: {
+                                    click: function($event) {
+                                      _vm.search = ""
+                                    }
+                                  }
+                                })
+                          ]
+                        },
+                        proxy: true
+                      }
+                    ]),
+                    model: {
+                      value: _vm.search,
+                      callback: function($$v) {
+                        _vm.search = $$v
+                      },
+                      expression: "search"
+                    }
+                  }),
+                  _vm._v(" "),
+                  _c("q-space"),
+                  _vm._v(" "),
+                  _c("q-btn", {
+                    attrs: {
+                      flat: "",
+                      rounded: "",
+                      dense: "",
+                      icon: "add_circle_outline",
+                      label: "Nuevo"
+                    }
+                  })
+                ],
+                1
+              )
+            ],
+            1
+          ),
           _vm._v(" "),
-          _vm._l(50, function(n) {
+          _vm._l(20, function(n) {
             return [
               _c("q-separator", { attrs: { spaced: "" } }),
               _vm._v(" "),

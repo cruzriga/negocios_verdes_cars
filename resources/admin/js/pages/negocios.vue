@@ -1,8 +1,22 @@
 <template>
   <q-page >
     <q-list bordered class="rounded-borders" >
-      <q-item-label  header>Google Inbox style</q-item-label>
-      <template v-for="n in 50">
+      <q-item-label  header>
+        <q-toolbar class="text-primary" style="height: 50px">
+          <q-input class="GPL__toolbar-input" dense standout="bg-primary" v-model="search" placeholder="Buscar">
+            <template v-slot:prepend>
+              <q-icon v-if="search === ''" name="search" />
+              <q-icon v-else name="clear" class="cursor-pointer" @click="search = ''" />
+            </template>
+          </q-input>
+          <q-space/>
+          <q-btn flat rounded dense icon="add_circle_outline" label="Nuevo" />
+        </q-toolbar>
+      </q-item-label>
+
+
+
+      <template v-for="n in 20">
         <q-separator spaced />
         <q-item>
           <q-item-section avatar top>
@@ -35,13 +49,18 @@
           </q-item-section>
         </q-item>
       </template>
+
     </q-list>
   </q-page>
 </template>
 
 <script>
 export default {
-
+  data(){
+    return {
+      search:''
+    }
+  }
 }
 </script>
 
