@@ -47432,9 +47432,7 @@ var render = function() {
               _c(
                 "q-toolbar",
                 [
-                  _c("q-toolbar-title", [
-                    _vm._v("\n          Negocios verdes Corpoguajira\n        ")
-                  ]),
+                  _c("q-toolbar-title"),
                   _vm._v(" "),
                   _c(
                     "q-tabs",

@@ -5,7 +5,7 @@
       <q-header elevated class="bg-white text-grey">
         <q-toolbar>
           <q-toolbar-title>
-            Negocios verdes Corpoguajira
+           
           </q-toolbar-title>
           <q-tabs>
             <q-route-tab to="/" icon="eco" name="Negocios" label="Negocios" />
