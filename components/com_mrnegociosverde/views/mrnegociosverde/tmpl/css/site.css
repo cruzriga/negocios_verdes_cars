@@ -12256,3 +12256,7 @@ body.body--dark {
     opacity: 0.5;
   }
 }
+.container-fluid.container-main {
+  padding: 0 !important;
+  margin: 0 !important;
+}
