@@ -3,7 +3,8 @@ import store from './store';
 // import router from './router';
 import index from './index'
 import Quasar from "quasar";
-
+import VueMasonry from 'vue-masonry-css'
+import Croppa from 'vue-croppa'
 Vue.use(Quasar, {
     config: {
         dark: false,
@@ -12,6 +13,8 @@ Vue.use(Quasar, {
     }
 })
 
+Vue.use(VueMasonry);
+Vue.use(Croppa);
 
 window.vue  = new Vue({
                         //   router,

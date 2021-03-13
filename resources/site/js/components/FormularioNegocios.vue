@@ -1,5 +1,5 @@
 <template>
-    <div class="q-pa-md" style="width: 1000px">
+    <div class="q-pa-md" >
         <masonry :cols="{default: 2, 1000: 2, 700: 1}" :gutter="10">
         <q-card class="my-card q-ma-md">
             <q-card-section>
@@ -260,9 +260,10 @@
 
 import EmpresaAvatar from './EmpresaAvatar'
 
+
 export default {
   name: 'FormularioNegocios',
-  components: { EmpresaAvatar },
+  components: { EmpresaAvatar},
   props: {
     propformulario: {
       type: Object,
