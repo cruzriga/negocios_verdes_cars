@@ -1,5 +1,7 @@
 <template>
-  <FormularioNegocios v-bind:propformulario="datos"/>
+  <div id="app-site-container">
+    <FormularioNegocios v-bind:propformulario="datos"/>
+  </div>
 </template>
 
 <script>
@@ -12,15 +14,15 @@ export default {
   data () {
     return {
       datos: {
-        nombre: 'test',
+        nombreempresa: 'test',
         descripcion: 'test',
         email: 'test',
-        tel: 'test',
+        telefono: 'test',
         linkvideo: 'test',
         imagenlogo: 'test',
-        categoria: 'test',
-        subcategoria: 'test',
-        tiposubcategoria: 'test'
+        categoria:  { idcategoria: "2", nombre: "ECOPRODUCTOS INDUSTRIALES" },
+        subcategoria: { idsubcategoria: "6", nombre: "Negocios para la restauración", idcategoria: "2" },
+        tiposubcategoria: { idtiposubcategoria: "6", nombre: "Geotérmica", idsubcategoria: "1" },
       }
     }
   }

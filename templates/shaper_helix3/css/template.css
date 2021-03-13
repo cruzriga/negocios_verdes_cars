@@ -1741,7 +1741,7 @@ a {
   -webkit-transition: color 400ms, background-color 400ms;
   transition: color 400ms, background-color 400ms;
 }
-body {
+body:not(#app-site-container *) {
   line-height: 24px;
   -webkit-transition: all 400ms ease;
   transition: all 400ms ease;
@@ -1753,7 +1753,7 @@ a:focus,
 a:active {
   text-decoration: none;
 }
-label {
+label:not(#app-site-container *) {
   font-weight: normal;
 }
 legend {
@@ -1773,23 +1773,23 @@ img {
 .offline-inner {
   margin-top: 100px;
 }
-select,
-textarea,
-input[type="text"],
-input[type="password"],
-input[type="datetime"],
-input[type="datetime-local"],
-input[type="date"],
-input[type="month"],
-input[type="time"],
-input[type="week"],
-input[type="number"],
-input[type="email"],
-input[type="url"],
-input[type="search"],
-input[type="tel"],
-input[type="color"],
-.uneditable-input {
+select:not(#app-site-container *),
+textarea:not(#app-site-container *),
+input[type="text"]:not(#app-site-container *),
+input[type="password"]:not(#app-site-container *),
+input[type="datetime"]:not(#app-site-container *),
+input[type="datetime-local"]:not(#app-site-container *),
+input[type="date"]:not(#app-site-container *),
+input[type="month"]:not(#app-site-container *),
+input[type="time"]:not(#app-site-container *),
+input[type="week"]:not(#app-site-container *),
+input[type="number"]:not(#app-site-container *),
+input[type="email"]:not(#app-site-container *),
+input[type="url"]:not(#app-site-container *),
+input[type="search"]:not(#app-site-container *),
+input[type="tel"]:not(#app-site-container *),
+input[type="color"]:not(#app-site-container *),
+.uneditable-input:not(#app-site-container *) {
   display: block;
   height: 34px;
   padding: 6px 12px;

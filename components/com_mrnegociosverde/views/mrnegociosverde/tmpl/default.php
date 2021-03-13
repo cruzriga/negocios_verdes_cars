@@ -11,7 +11,6 @@
 defined('_JEXEC') or die('Restricted access');
 ?>
 <div>
-    <h1><?php echo $this->msg; ?></h1>
     <link href="<?=JURI::base()?>components/com_MrNegociosVerde/views/MrNegociosVerde/tmpl/css/site.css" rel="stylesheet">
     <div id="appsite"></div>
     <script src="<?=JURI::base()?>components/com_MrNegociosVerde/views/MrNegociosVerde/tmpl/js/site.js"></script>
