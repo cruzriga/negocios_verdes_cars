@@ -2750,7 +2750,7 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
               case 0:
                 commit = _ref.commit;
                 _context.next = 3;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('http://verdes.test/index.php?option=com_mrnegociosverde&task=categorias&format=json');
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=categorias&format=json');
 
               case 3:
                 resp = _context.sent;

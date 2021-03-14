@@ -23,7 +23,7 @@ const store = new Vuex.Store(
         },
         actions:{
             async CARGAR_CATEGORIA ({ commit }){
-                let resp = await request('http://verdes.test/index.php?option=com_mrnegociosverde&task=categorias&format=json')
+                let resp = await request('?option=com_mrnegociosverde&task=categorias&format=json')
                 console.log(resp);
                 if(resp.ok){
                     commit(CATEGORIAS,resp)
