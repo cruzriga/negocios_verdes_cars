@@ -110,7 +110,8 @@ class MrNegociosVerdeController extends JControllerLegacy {
     {
         $app = JFactory::getApplication();
         $rawDataPost = $app->input->getArray($_POST);
-        $Itemid = json_decode($rawDataPost['json']);$db = JFactory::getDBO();
+        $Itemid = json_decode($rawDataPost['json']);
+        $db = JFactory::getDBO();
         $result = $db->insertObject('#__negocios_v_empresas', $Itemid);
         $ultimoid = $db->insertid();
         echo ($ultimoid);
@@ -119,7 +120,8 @@ class MrNegociosVerdeController extends JControllerLegacy {
     {
         $app = JFactory::getApplication();
         $rawDataPost = $app->input->getArray($_POST);
-        $Itemid = json_decode($rawDataPost['json']);$db = JFactory::getDBO();
+        $Itemid = json_decode($rawDataPost['json']);
+        $db = JFactory::getDBO();
         foreach ($Itemid as $key => $value) {
             $result = $db->insertObject('#__negocios_v_productos', $value);            
         }
@@ -129,7 +131,8 @@ class MrNegociosVerdeController extends JControllerLegacy {
     {
         $app = JFactory::getApplication();
         $rawDataPost = $app->input->getArray($_POST);
-        $Itemid = json_decode($rawDataPost['json']);$db = JFactory::getDBO();
+        $Itemid = json_decode($rawDataPost['json']);
+        $db = JFactory::getDBO();
         foreach ($Itemid as $key => $value) {
             $result = $db->insertObject('#__negocios_v_documentos', $value);            
         }

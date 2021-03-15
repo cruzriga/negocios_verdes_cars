@@ -10,6 +10,7 @@
                 remove-button-color="black"
                 :show-loading="true"
                 :loading-size="50"
+                :disable-drag-and-drop="true"
                 @new-image-drawn="onNewImage"                
                 initial-image="https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
                 accept=".jpeg,.png">

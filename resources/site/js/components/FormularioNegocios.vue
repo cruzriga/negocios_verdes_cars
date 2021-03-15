@@ -53,6 +53,52 @@
                   </template>
                   </q-input>
               </div>
+            </div>            
+            <div class="row justify-center items-center">
+              <!-- <div class="col-12 col-md-3">
+                  <div class="text-subtitle2">Descripcion</div>
+              </div> -->
+              <div class="col-12 col-md-9">
+                  <!-- <q-input v-model="formulario.municipio.data" label="Municipio" type="text" counter maxlength="200" :rules="formulario.municipio.rules">
+                  </q-input> -->
+                   <!-- <q-select
+                      v-model="formulario.municipio.data"
+                      :options="optionsmunicipios"
+                      :name="formulario.municipio.nombre"
+                      :label="formulario.municipio.label"
+                      color="primary"
+                      clearable
+                    > -->
+                    <q-select                      
+                      v-model="formulario.municipio.data"
+                      :name="formulario.municipio.nombre"
+                      :label="formulario.municipio.label"
+                      :options="options"
+                      clearable
+                    >
+                    <template v-slot:no-option>
+                      <q-item>
+                        <q-item-section class="text-grey">
+                          Sin Resultados
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                    <template v-slot:option="scope">
+                      <q-item
+                        v-bind="scope.itemProps"
+                        v-on="scope.itemEvents"
+                      >
+                        <q-item-section avatar>
+                          <q-icon :name="scope.opt.icon" />
+                        </q-item-section>
+                        <q-item-section>
+                          <q-item-label v-html="scope.opt.label" />
+                          <!-- <q-item-label caption>{{ scope.opt.description }}</q-item-label> -->
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+              </div>
             </div>
             <div class="row justify-center items-center">
               <!-- <div class="col-12 col-md-3">
@@ -60,18 +106,9 @@
               </div> -->
               <div class="col-12 col-md-9">
                   <q-input v-model="formulario.direccion.data" label="Direccion" type="text" counter maxlength="12" :dense="dense" :rules="formulario.direccion.rules">
-                  <template v-slot:prepend>
-                      <q-icon class="location_on" />
-                  </template>
-                  </q-input>
-              </div>
-            </div>
-            <div class="row justify-center items-center">
-              <!-- <div class="col-12 col-md-3">
-                  <div class="text-subtitle2">Descripcion</div>
-              </div> -->
-              <div class="col-12 col-md-9">
-                  <q-input v-model="formulario.municipio.data" label="Municipio" type="text" counter maxlength="200" :rules="formulario.municipio.rules">
+                  <!-- <template v-slot:prepend>
+                      <q-icon class="room" />
+                  </template> -->
                   </q-input>
               </div>
             </div>
@@ -182,6 +219,7 @@
               :options="this.$store.state.categoria.resp!=null?this.$store.state.categoria.resp.categorias:[]"
               @input="onchange"
               filled
+              :rules="formulario.categoria.rules"
             >
               <template v-if="formulario.categoria.data!=null" v-slot:append>
                 <q-icon name="cancel" @click.stop="nullselect" class="cursor-pointer" />
@@ -269,13 +307,41 @@
             </div> -->
             <q-card-section>           
               <!-- <q-separator spaced />    -->
+              <q-item class="row justify-center items-center">
+                  <!-- <q-item-section avatar top>
+                    <q-icon name="account_tree" color="black" size="34px" />
+                  </q-item-section>
+
+                  <q-item-section top class="col-2 gt-sm">
+                    <q-item-label class="q-mt-sm">GitHub</q-item-label>
+                  </q-item-section> -->
+
+                  <q-item-section top>
+                    <q-item-label lines="1">
+                      <q-input v-model="formulario.productos[0].nombre" label="Nombrel del producto" type="text" :rules="[ val => val && val.length > 0 || 'Campo vacio']">
+                      </q-input>
+                    </q-item-label>
+                    <q-item-label lines="1">
+                      <q-input v-model="formulario.productos[0].descripcion" label="Descripcion" type="text" :rules="[ val => val && val.length > 0 || 'Campo vacio']">
+                      </q-input>
+                    </q-item-label>
+                  </q-item-section>
+
+                  <q-item-section top side>
+                    <!-- <div class="text-grey-8 q-gutter-xs">
+                      <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
+                      <q-btn class="gt-xs" size="12px" flat dense round icon="done" />
+                      <q-btn size="12px" flat dense round icon="more_vert" />
+                    </div> -->
+                  </q-item-section>
+                </q-item>
+                <q-separator spaced /> 
               <q-intersection
-                transition-hide="jump-up"
                 v-for="(applicant, counter) in formulario.productos" v-bind:key="counter"
                 transition="scale"
                 leave="scale"
                 >
-                 <q-item class="row justify-center items-center">
+                 <q-item v-if="counter>0" class="row justify-center items-center">
                   <!-- <q-item-section avatar top>
                     <q-icon name="account_tree" color="black" size="34px" />
                   </q-item-section>
@@ -296,7 +362,7 @@
                   </q-item-section>
 
                   <q-item-section top side>
-                    <q-icon style="margin: 0px 5px 17px 5px" size="2rem" color="red" @click="deleteVisa(counter)" name="delete" />
+                      <q-icon style="margin: 0px 5px 17px 5px" size="2rem" color="red" @click="deleteVisa(counter)" name="delete" />
                     <!-- <div class="text-grey-8 q-gutter-xs">
                       <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
                       <q-btn class="gt-xs" size="12px" flat dense round icon="done" />
@@ -312,65 +378,174 @@
           </q-card>
           <q-card class="my-card q-ma-md">
             <q-card-section>
-                <div class="text-h6">Descargar Formularios</div>
+                <div class="text-h6">Anexo</div>
                 <!-- <div class="text-subtitle2">by John Doe</div> -->
             </q-card-section>
             <q-separator />
             <q-card-section>
               <div class="row justify-center items-center">
-                <q-uploader
-                    label="Subir Documentos"
+                <q-uploader class="divuploader"
+                    label="Formato - Ficha de inscripción"
                     auto-upload
-                    multiple
-                    max-files="3"
+                    flat
+                    bordered
+                    max-files="1"
                     :factory="factoryFn"
                     accept=".xls , .xlsx, .docx, .pdf"
                     
                     style="max-width: 600px"
                   />
-                  <!-- <div class="col-12 col-md-2">
-                      <q-icon color="primary" size="2rem" name="attach_file" />
-                  </div>
-                  <div class="col-12 col-md-10">
-                      <div class="text-subtitle2">Formulario 1</div>
-                  </div>
-                  </div>
-                  <div class="row justify-center items-center">
-                  <div class="col-12 col-md-2">
-                      <q-icon color="primary" size="2rem" name="attach_file" />
-                  </div>
-                  <div class="col-12 col-md-10">
-                      <div class="text-subtitle2">Formulario 2</div>
-                  </div>
-                  </div>
-                  <div class="row justify-center items-center">
-                  <div class="col-12 col-md-2">
-                      <q-icon color="primary" size="2rem" name="attach_file" />
-                  </div>
-                  <div class="col-12 col-md-10">
-                      <div class="text-subtitle2">Formulario 3</div>
-                  </div> -->
+              </div>
+              <div class="row justify-center items-center">
+                <q-uploader class="divuploader"
+                    label="Anexo - Listado de asociados"
+                    auto-upload
+                    flat
+                    bordered
+                    max-files="1"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"                    
+                    style="max-width: 600px"
+                  />
+              </div>
+              <div class="row justify-center items-center">
+                <q-uploader class="divuploader"
+                    label="Anexo - Carta de consentimiento"
+                    auto-upload
+                    flat
+                    bordered
+                    max-files="1"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"                    
+                    style="max-width: 600px"
+                  />
+              </div>
+              <div class="row justify-center items-center">
+                <q-uploader class="divuploader"
+                    label="Anexo - Carta de intención"
+                    auto-upload
+                    flat
+                    bordered
+                    max-files="1"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"                    
+                    style="max-width: 600px"
+                  />
               </div>
             </q-card-section>
-          </q-card>        
-        </masonry>
-            <q-toggle v-model="accept" label="I accept the license and terms" />
-
-          <div>
-            <q-btn label="Submit" type="submit" color="primary"/>
-            <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
+          </q-card>
+           <q-card class="my-card q-ma-md">
+            <q-card-section>
+                <div class="text-h6">Documentación que se debe anexar a la solicitud</div>
+                <!-- <div class="text-subtitle2">by John Doe</div> -->
+            </q-card-section>
+            <q-separator />
+            <q-card-section>
+              <div class="row justify-center items-center">
+                <q-uploader class="divuploader"
+                    label="Certificado de existencia y representación legal vigente"
+                    auto-upload
+                    flat
+                    bordered
+                    max-files="1"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"
+                    
+                    style="max-width: 600px"
+                  />
+              </div>
+              <div class="row justify-center items-center">
+                <q-uploader class="divuploader"
+                    label="Certificaciones con las que dispone actualmente la empresa"
+                    auto-upload
+                    flat
+                    bordered
+                    max-files="1"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"                    
+                    style="max-width: 600px"
+                  />
+              </div>
+              <div class="row justify-center items-center">
+                <q-uploader class="divuploader"
+                    label="Permisos o registros con los que cuenta actualmente la empresa"
+                    auto-upload
+                    flat
+                    bordered
+                    max-files="1"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"                    
+                    style="max-width: 600px"
+                  />
+              </div>
+              <div class="row justify-center items-center">
+                <q-uploader class="divuploader"
+                    label="RUT o resolución de facturación DIAN"
+                    auto-upload
+                    flat
+                    bordered
+                    max-files="1"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"                    
+                    style="max-width: 600px"
+                  />
+              </div>
+              <div class="row justify-center items-center">
+                <q-uploader class="divuploader"
+                    label="Listado de asociados diligenciado"
+                    auto-upload
+                    flat
+                    bordered
+                    max-files="1"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"                    
+                    style="max-width: 600px"
+                  />
+              </div>
+              <div class="row justify-center items-center">
+                <q-uploader class="divuploader"
+                    label="Carta de consentimiento informado diligenciada y firmada - Anexo 2"
+                    auto-upload
+                    flat
+                    bordered
+                    max-files="1"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"                    
+                    style="max-width: 600px"
+                  />
+              </div>
+            </q-card-section>
+          </q-card>
+            <div style="
+                      display: flex;
+                      flex-direction: row;
+                      align-content: center;
+                      justify-content: center;
+                  ">
+              <q-btn
+                type="submit"
+                size="22px"
+                class="q-px-xl q-py-xs"
+                color="primary"
+                label="Enviar Formulario"
+              />
+            <!-- <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" /> -->
           </div>
+        </masonry>
+            <!-- <q-toggle v-model="accept" label="I accept the license and terms" /> -->
+
+          
         </q-form>
         <!-- {{this.$store.state.cargando}} -->
         <q-inner-loading :showing="this.$store.state.cargando">
           <q-spinner-hourglass size="5.5em" color="green" />
         </q-inner-loading>
-        <q-btn
+        <!-- <q-btn
           size="35px"
           round
           icon="map"
           @click="uploadimg" 
-        />
+        /> -->
     </div>
 </template>
 
@@ -378,7 +553,83 @@
 
 import EmpresaAvatar from './EmpresaAvatar'
 // import { mapState } from 'vuex'
-
+const optionsmunicipios = [
+          {
+              label: 'Albania',
+              value: 'Albania',
+              icon: 'img:./../media/iconospng/Flag_of_Albania.png'
+          },
+          {
+              label: 'Barrancas',
+              value: 'Barrancas',
+              icon: 'img:./../media/iconospng/Flag_of_Barrancas.png'
+          },
+          {
+              label: 'Dibulla',
+              value: 'Dibulla',
+              icon: 'img:./../media/iconospng/Flag_of_Dibulla.png'
+          },
+          {
+              label: 'Distracción',
+              value: 'Distracción',
+              icon: 'img:./../media/iconospng/Flag_of_Distracción.png'
+          },
+          {
+              label: 'El Molino',
+              value: 'El Molino',
+              icon: 'img:./../media/iconospng/Flag_of_El_Molino.png'
+          },
+          {
+              label: 'Fonseca',
+              value: 'Fonseca',
+              icon: 'img:./../media/iconospng/Flag_of_Fonseca.png'
+          },
+          {
+              label: 'Hatonuevo',
+              value: 'Hatonuevo',
+              icon: 'img:./../media/iconospng/Flag_of_Hatonuevo.png'
+          },
+          {
+              label: 'La Jagua del Pilar',
+              value: 'La Jagua del Pilar',
+              icon: 'img:./../media/iconospng/Flag_of_La_Jagua_del_Pilar.png'
+          },
+          {
+              label: 'Maicao',
+              value: 'Maicao',
+              icon: 'img:./../media/iconospng/Flag_of_Maicao.png'
+          },
+          {
+              label: 'Manaure',
+              value: 'Manaure',
+              icon: 'img:./../media/iconospng/Flag_of_Manaure.png'
+          },
+          {
+              label: 'Riohacha',
+              value: 'Riohacha',
+              icon: 'img:./../media/iconospng/Flag_of_Riohacha.png'
+          },
+          {
+              label: 'San Juan del Cesar',
+              value: 'San Juan del Cesar',
+              icon: 'img:./../media/iconospng/Flag_of_San_Juan_del_Cesar.png'
+          },
+          {
+              label: 'Uribia',
+              value: 'Uribia',
+              icon: 'img:./../media/iconospng/Flag_of_Uribia.png'
+          },
+          {
+              label: 'Urumita',
+              value: 'Urumita',
+              icon: 'img:./../media/iconospng/Flag_of_Urumita.png'
+          },
+          {
+              label: 'Villanueva',
+              value: 'Villanueva',
+              icon: 'img:./../media/iconospng/Flag_of_Villanueva.png'
+          }
+      ];
 export default {
   name: 'FormularioNegocios',
   components: { EmpresaAvatar},
@@ -456,7 +707,7 @@ export default {
           type: 'email',
           data: null,
           label: 'Email',
-          rules: [v => !v || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || 'E-mail debe ser valido']
+          rules: [v => !v || /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(v) || 'E-mail debe ser valido', v => v && v.length > 0 || 'Campo vacio']
         },
         twitter: {
           nombre: 'twitter',
@@ -500,7 +751,7 @@ export default {
           type: null,
           data: null,
           label: 'Categoria',
-          rules: [ val => val && val.length > 0 || 'Campo vacio']
+          rules: [ val => val && val != null || 'Campo vacio']
         },
         subcategoria: {
           nombre: 'subcategoria',
@@ -523,6 +774,8 @@ export default {
           }
         ]
       },
+      options: optionsmunicipios,
+      documentos: [],
       submitResult: null,
       dense: false,
       accept: false
@@ -535,8 +788,12 @@ export default {
       // this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
       //     console.log(resp)
       // })
+      const app = this;
       return new Promise((resolve) => {
-        this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
+        app.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
+          app.documentos.push({
+            urldocumento:resp.resp
+          });
           resolve(resp.resp)
         })  
       })
@@ -578,8 +835,6 @@ export default {
         if (value.data!='' && value.data!=null) {
           if(key=='categoria' || key=='subcategoria' || key=='tiposubcategoria'){
               submitResult['id'+key] = value.data['id'+key]==''?null:value.data['id'+key]
-          }if(key=='municipio'){
-              submitResult['id'+key] = value.data==''?null:value.data
           }else{
             submitResult[key] = value.data==''?null:value.data
           }
@@ -605,7 +860,8 @@ export default {
         let obj = {
           prop1: fd,
           prop2: submitResult,
-          prop2: submitResult,
+          prop3: this.formulario.productos,
+          prop4: this.documentos
         }
         return new Promise((resolve) => {
           this.$store.dispatch('GUARDAR_IMG',obj).then(function(resp) {
@@ -625,15 +881,7 @@ export default {
       this.formulario.productos.splice(counter, 1);
     },
     onSubmit (evt) {
-      console.log('@submit - do something here', evt)
-      if (this.accept !== true) {
-        this.$q.notify({
-          color: 'red-5',
-          textColor: 'white',
-          icon: 'warning',
-          message: 'You need to accept the license and terms first'
-        })
-      } else {
+      const app = this;
       if (!this.$refs.child.croppa.hasImage()) {
         console.log('no image to upload')
         return
@@ -643,8 +891,6 @@ export default {
         if (value.data!='' && value.data!=null) {        
           if(key=='categoria' || key=='subcategoria' || key=='tiposubcategoria'){
               submitResult['id'+key] = value.data['id'+key]==''?null:value.data['id'+key]
-          }if(key=='municipio'){
-              submitResult['id'+key] = value.data==''?null:value.data
           }else{
             submitResult[key] = value.data==''?null:value.data
           }
@@ -658,11 +904,11 @@ export default {
           prop1: fd,
           prop2: submitResult,
           prop3: this.formulario.productos,
-          prop4: this.$store.state.documentos
+          prop4: this.documentos
         }
         return new Promise((resolve) => {
-          this.$store.dispatch('GUARDAR_IMG',obj).then(function(resp) {
-            this.onReset()
+          app.$store.dispatch('GUARDAR_IMG',obj).then(function(resp) {
+            app.onReset()
             resolve(resp)
           })  
         })
@@ -674,7 +920,6 @@ export default {
           icon: 'cloud_done',
           message: 'Submitted'
         })
-      }
     },
     onReset () {
       Object.entries(this.formulario).forEach(([key, value]) => {
@@ -682,8 +927,14 @@ export default {
             this.formulario[key].data = null
         }
       })
-      this.formulario.productos = [];
-      this.$store.commit('BORRARDOCUMENTO');
+      this.formulario.productos = [
+          {
+            nombre: null,
+            descripcion: null,
+            urlimagen: null
+          }
+        ];
+      this.documentos = [];
     }
   }
 }
@@ -704,4 +955,6 @@ export default {
   height: 100%
 .row + .row
   margin-top: 1rem
+.divuploader
+  width: 100%
 </style>

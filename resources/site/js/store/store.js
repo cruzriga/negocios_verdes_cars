@@ -11,14 +11,11 @@ export const GUARDAR_PRODUCTOS = 'GUARDAR_PRODUCTOS'
 export const GUARDAR_IMG = 'GUARDAR_IMG'
 export const GUARDAR_DOC = 'GUARDAR_DOC'
 export const CARGANDO = 'CARGANDO'
-export const ADDDOCUMENTO = 'ADDDOCUMENTO'
-export const BORRARDOCUMENTO  = 'BORRARDOCUMENTO '
 
 const store = new Vuex.Store(
     {
         state: {
             categoria:[],
-            documentos:[],
             cargando:false
         },
         getters:{
@@ -32,14 +29,6 @@ const store = new Vuex.Store(
             },
             [CARGANDO](state, bool){
                 state.cargando = bool;
-            },
-            [ADDDOCUMENTO](state, datos){
-                state.documentos.push({
-                    urldocumento: datos 
-                })      
-            },
-            [BORRARDOCUMENTO](state){
-                state.documentos = []
             },
             
         },
@@ -66,7 +55,6 @@ const store = new Vuex.Store(
             async GUARDAR_DOC ({ commit },datos){
                 let resp = await request('?option=com_mrnegociosverde&task=uploaddoc&format=json',datos)
                 if(resp.ok){
-                    commit(ADDDOCUMENTO,resp.resp)
                     return resp
                 }
             },
@@ -109,7 +97,6 @@ const store = new Vuex.Store(
                 let resp = await request('?option=com_mrnegociosverde&task=adddocumentos&format=json',datopost)
                 if(resp.ok){
                     commit(CARGANDO,false)
-                    commit(BORRARDOCUMENTO)
                     return resp
                 }
                 commit(CARGANDO,false)
