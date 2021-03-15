@@ -1950,7 +1950,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _EmpresaAvatar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./EmpresaAvatar */ "./resources/site/js/components/EmpresaAvatar.vue");
-function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
@@ -1964,6 +1964,37 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2333,6 +2364,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
   },
   data: function data() {
     return {
+      documentos: [],
       selected: [],
       ticked: [],
       expanded: [],
@@ -2409,36 +2441,28 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
           type: 'text',
           data: null,
           label: 'Twitter',
-          rules: [function (val) {
-            return val && val.length > 0 || 'Campo vacio';
-          }]
+          rules: null
         },
         facebook: {
           nombre: 'facebook',
           type: 'text',
           data: null,
           label: 'Facebook',
-          rules: [function (val) {
-            return val && val.length > 0 || 'Campo vacio';
-          }]
+          rules: null
         },
         instagram: {
           nombre: 'instagram',
           type: 'text',
           data: null,
           label: 'Instagram',
-          rules: [function (val) {
-            return val && val.length > 0 || 'Campo vacio';
-          }]
+          rules: null
         },
         linkvideo: {
           nombre: 'linkvideo',
           type: 'text',
           data: null,
           label: 'Link Video YouTube',
-          rules: [function (val) {
-            return val && val.length > 0 || 'Campo vacio';
-          }]
+          rules: null
         },
         imagenlogo: {
           nombre: 'imagenlogo',
@@ -2455,13 +2479,19 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
           nombre: 'categoria',
           type: null,
           data: null,
-          label: 'Categoria'
+          label: 'Categoria',
+          rules: [function (val) {
+            return val && val.length > 0 || 'Campo vacio';
+          }]
         },
         subcategoria: {
           nombre: 'subcategoria',
           type: null,
           data: null,
-          label: 'Sub Categoria'
+          label: 'Sub Categoria',
+          rules: [function (val) {
+            return val && val.length > 0 || 'Campo vacio';
+          }]
         },
         tiposubcategoria: {
           nombre: 'tipesubcategoria',
@@ -2470,18 +2500,31 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
           label: 'Tipo Sub Categoria'
         },
         productos: [{
-          nombre: '',
-          descripcion: '',
-          tipo: ''
+          nombre: null,
+          descripcion: null,
+          urlimagen: null
         }]
       },
       submitResult: null,
       dense: false,
-      propstree: [],
-      tickStrategy: 'leaf-filtered'
+      accept: false
     };
   },
   methods: {
+    factoryFn: function factoryFn(files) {
+      var _this = this;
+
+      var formData = new FormData();
+      formData.append('file', files[0]); // this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
+      //     console.log(resp)
+      // })
+
+      return new Promise(function (resolve) {
+        _this.$store.dispatch('GUARDAR_DOC', formData).then(function (resp) {
+          resolve(resp.resp);
+        });
+      });
+    },
     AXIO_GET_CATEGORIAS: function AXIO_GET_CATEGORIAS() {
       this.$store.dispatch('CARGAR_CATEGORIA');
     },
@@ -2500,94 +2543,94 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
       this.formulario.subcategoria.data = null;
       this.formulario.tiposubcategoria.data = null;
     },
-    resetFilter: function resetFilter() {
-      this.filter = '';
-      this.$refs.filter.focus();
-    },
-    myFilterMethod: function myFilterMethod(node, filter) {
-      var filt = filter.toLowerCase();
-      return node.label && node.label.toLowerCase().indexOf(filt) > -1;
-    },
     onclick: function onclick(node) {
       console.log(node);
-    },
-    onLazyLoad: function onLazyLoad(_ref) {
-      var node = _ref.node,
-          key = _ref.key,
-          done = _ref.done,
-          fail = _ref.fail;
-      //  var params = { parentId: node.id, userId: this.UserInfo.userId, type: 1 }
-      console.log(node);
-    },
-    agregarCategorias: function agregarCategorias() {
-      var _this = this;
-
-      this.categoria.forEach(function (value, key) {
-        var filtrosubcategoria = _this.subcategoria.filter(function (subcategoria) {
-          return subcategoria.idcategoria === value.value;
-        });
-
-        var addtree = [];
-        filtrosubcategoria.forEach(function (valuesub, key) {
-          var filtrotiposubcategoria = _this.tiposubcategoria.filter(function (tiposubcategoria) {
-            return tiposubcategoria.idsubcategoria === valuesub.value && tiposubcategoria.idcategoria === value.value;
-          });
-
-          addtree.push({
-            label: valuesub.label,
-            value: valuesub.value,
-            handler: function handler(node) {
-              return _this.onclick(node);
-            },
-            idcategoria: valuesub.idcategoria,
-            children: filtrotiposubcategoria
-          });
-        });
-
-        _this.propstree.push({
-          label: value.label,
-          value: value.value,
-          handler: function handler(node) {
-            return _this.onclick(node);
-          },
-          children: addtree
-        });
-      });
     },
     verificarProps: function verificarProps() {
       var _this2 = this;
 
       if (this.propformulario != null) {
-        // Object.entries(this.formulario).forEach(([key, value]) => {
-        //     console.log(key + ' ' + value); // "a 5", "b 7", "c 9"
-        // })
-        Object.entries(this.propformulario).forEach(function (_ref2) {
-          var _ref3 = _slicedToArray(_ref2, 2),
-              key = _ref3[0],
-              value = _ref3[1];
+        Object.entries(this.propformulario).forEach(function (_ref) {
+          var _ref2 = _slicedToArray(_ref, 2),
+              key = _ref2[0],
+              value = _ref2[1];
 
-          // console.log(key + ' ' + value) // "a 5", "b 7", "c 9"
           _this2.formulario[key].data = value;
         });
       }
     },
     uploadimg: function uploadimg() {
-      console.log(this.$refs.child.croppa.hasImage());
-      console.log(this.$refs.child.croppa);
+      var _this3 = this;
+
+      if (!this.$refs.child.croppa.hasImage()) {
+        console.log('no image to upload');
+        return;
+      }
+
+      var submitResult = {};
+      Object.entries(this.formulario).forEach(function (_ref3) {
+        var _ref4 = _slicedToArray(_ref3, 2),
+            key = _ref4[0],
+            value = _ref4[1];
+
+        if (value.data != '' && value.data != null) {
+          if (key == 'categoria' || key == 'subcategoria' || key == 'tiposubcategoria') {
+            submitResult['id' + key] = value.data['id' + key] == '' ? null : value.data['id' + key];
+          }
+
+          if (key == 'municipio') {
+            submitResult['id' + key] = value.data == '' ? null : value.data;
+          } else {
+            submitResult[key] = value.data == '' ? null : value.data;
+          }
+        }
+
+        if (key == 'productos') {
+          submitResult[key] = value;
+        }
+      });
+      console.log(this.formulario.productos);
+      console.log(submitResult); // let obj = {
+      //   prop1: null,
+      //   prop2: null,
+      //   prop3: this.formulario.productos
+      // }
+      // return new Promise((resolve) => {
+      //   this.$store.dispatch('GUARDAR_PRODUCTOS',obj).then(function(resp) {
+      //     resolve(resp)
+      //   })  
+      // })
+
+      this.$refs.child.croppa.generateBlob(function (blob) {
+        var fd = new FormData();
+        fd.append('file', blob, 'filename.jpg');
+
+        var obj = _defineProperty({
+          prop1: fd,
+          prop2: submitResult
+        }, "prop2", submitResult);
+
+        return new Promise(function (resolve) {
+          _this3.$store.dispatch('GUARDAR_IMG', obj).then(function (resp) {
+            resolve(resp);
+          });
+        });
+      });
     },
     addVisa: function addVisa() {
       this.formulario.productos.push({
-        nombre: '',
-        descripcion: '',
-        tipo: ''
+        nombre: null,
+        descripcion: null,
+        urlimagen: null
       });
     },
     deleteVisa: function deleteVisa(counter) {
       this.formulario.productos.splice(counter, 1);
     },
     onSubmit: function onSubmit(evt) {
+      var _this4 = this;
+
       console.log('@submit - do something here', evt);
-      evt.target.submit();
 
       if (this.accept !== true) {
         this.$q.notify({
@@ -2597,44 +2640,69 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
           message: 'You need to accept the license and terms first'
         });
       } else {
+        if (!this.$refs.child.croppa.hasImage()) {
+          console.log('no image to upload');
+          return;
+        }
+
+        var submitResult = {};
+        Object.entries(this.formulario).forEach(function (_ref5) {
+          var _ref6 = _slicedToArray(_ref5, 2),
+              key = _ref6[0],
+              value = _ref6[1];
+
+          if (value.data != '' && value.data != null) {
+            if (key == 'categoria' || key == 'subcategoria' || key == 'tiposubcategoria') {
+              submitResult['id' + key] = value.data['id' + key] == '' ? null : value.data['id' + key];
+            }
+
+            if (key == 'municipio') {
+              submitResult['id' + key] = value.data == '' ? null : value.data;
+            } else {
+              submitResult[key] = value.data == '' ? null : value.data;
+            }
+          }
+        }); // console.log(submitResult)
+
+        this.$refs.child.croppa.generateBlob(function (blob) {
+          var fd = new FormData();
+          fd.append('file', blob, 'filename.jpg');
+          var obj = {
+            prop1: fd,
+            prop2: submitResult,
+            prop3: _this4.formulario.productos,
+            prop4: _this4.$store.state.documentos
+          };
+          return new Promise(function (resolve) {
+            _this4.$store.dispatch('GUARDAR_IMG', obj).then(function (resp) {
+              this.onReset();
+              resolve(resp);
+            });
+          });
+        });
+        console.log(submitResult);
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
           icon: 'cloud_done',
           message: 'Submitted'
         });
-        var formData = new FormData(evt.target);
-        var submitResult = [];
-
-        var _iterator = _createForOfIteratorHelper(formData.entries()),
-            _step;
-
-        try {
-          for (_iterator.s(); !(_step = _iterator.n()).done;) {
-            var _step$value = _slicedToArray(_step.value, 2),
-                name = _step$value[0],
-                value = _step$value[1];
-
-            submitResult.push({
-              name: name,
-              value: value
-            });
-          }
-        } catch (err) {
-          _iterator.e(err);
-        } finally {
-          _iterator.f();
-        }
-
-        console.log(submitResult);
-        this.submitResult = submitResult;
       }
     },
-    onReset: function onReset() {// this.name = null
-      // this.age = null
-      // this.accept = false
-      // this.$refs.name.resetValidation()
-      // this.$refs.age.resetValidation()
+    onReset: function onReset() {
+      var _this5 = this;
+
+      Object.entries(this.formulario).forEach(function (_ref7) {
+        var _ref8 = _slicedToArray(_ref7, 2),
+            key = _ref8[0],
+            value = _ref8[1];
+
+        if (value.data != '' && value.data != null) {
+          _this5.formulario[key].data = null;
+        }
+      });
+      this.formulario.productos = [];
+      this.$store.commit('BORRARDOCUMENTO');
     }
   }
 });
@@ -2707,6 +2775,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CARGAR_CATEGORIA": () => (/* binding */ CARGAR_CATEGORIA),
 /* harmony export */   "CATEGORIAS": () => (/* binding */ CATEGORIAS),
+/* harmony export */   "GUARDAR_FORMULARIO": () => (/* binding */ GUARDAR_FORMULARIO),
+/* harmony export */   "GUARDAR_DOCUMENTOS": () => (/* binding */ GUARDAR_DOCUMENTOS),
+/* harmony export */   "GUARDAR_PRODUCTOS": () => (/* binding */ GUARDAR_PRODUCTOS),
+/* harmony export */   "GUARDAR_IMG": () => (/* binding */ GUARDAR_IMG),
+/* harmony export */   "GUARDAR_DOC": () => (/* binding */ GUARDAR_DOC),
+/* harmony export */   "CARGANDO": () => (/* binding */ CARGANDO),
+/* harmony export */   "ADDDOCUMENTO": () => (/* binding */ ADDDOCUMENTO),
+/* harmony export */   "BORRARDOCUMENTO": () => (/* binding */ BORRARDOCUMENTO),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
@@ -2714,6 +2790,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util */ "./resources/site/js/store/util.js");
+var _mutations;
+
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -2728,18 +2806,36 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.default);
 var CARGAR_CATEGORIA = 'CARGAR_CATEGORIA';
 var CATEGORIAS = 'CATEGORIAS';
+var GUARDAR_FORMULARIO = 'GUARDAR_FORMULARIO';
+var GUARDAR_DOCUMENTOS = 'GUARDAR_DOCUMENTOS';
+var GUARDAR_PRODUCTOS = 'GUARDAR_PRODUCTOS';
+var GUARDAR_IMG = 'GUARDAR_IMG';
+var GUARDAR_DOC = 'GUARDAR_DOC';
+var CARGANDO = 'CARGANDO';
+var ADDDOCUMENTO = 'ADDDOCUMENTO';
+var BORRARDOCUMENTO = 'BORRARDOCUMENTO ';
 var store = new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
   state: {
-    categoria: null
+    categoria: [],
+    documentos: [],
+    cargando: false
   },
   getters: {
     bg: function bg(state) {
       return;
     }
   },
-  mutations: _defineProperty({}, CATEGORIAS, function (state, categorias) {
+  mutations: (_mutations = {}, _defineProperty(_mutations, CATEGORIAS, function (state, categorias) {
     state.categoria = categorias;
-  }),
+  }), _defineProperty(_mutations, CARGANDO, function (state, bool) {
+    state.cargando = bool;
+  }), _defineProperty(_mutations, ADDDOCUMENTO, function (state, datos) {
+    state.documentos.push({
+      urldocumento: datos
+    });
+  }), _defineProperty(_mutations, BORRARDOCUMENTO, function (state) {
+    state.documentos = [];
+  }), _mutations),
   actions: {
     CARGAR_CATEGORIA: function CARGAR_CATEGORIA(_ref) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
@@ -2754,18 +2850,224 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
 
               case 3:
                 resp = _context.sent;
-                console.log(resp);
 
+                // console.log(resp);
                 if (resp.ok) {
                   commit(CATEGORIAS, resp);
                 }
 
-              case 6:
+              case 5:
               case "end":
                 return _context.stop();
             }
           }
         }, _callee);
+      }))();
+    },
+    GUARDAR_IMG: function GUARDAR_IMG(_ref2, datos) {
+      var _this = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
+        var commit, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                commit = _ref2.commit;
+                commit(CARGANDO, true);
+                _context2.next = 4;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=uploadimg&format=json', datos.prop1);
+
+              case 4:
+                resp = _context2.sent;
+
+                if (!resp.ok) {
+                  _context2.next = 12;
+                  break;
+                }
+
+                if (!(datos.prop2 != null)) {
+                  _context2.next = 11;
+                  break;
+                }
+
+                datos.prop2.imagenlogo = resp.resp;
+
+                _this.dispatch('GUARDAR_FORMULARIO', datos);
+
+                _context2.next = 12;
+                break;
+
+              case 11:
+                return _context2.abrupt("return", resp);
+
+              case 12:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
+      }))();
+    },
+    GUARDAR_DOC: function GUARDAR_DOC(_ref3, datos) {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
+        var commit, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                commit = _ref3.commit;
+                _context3.next = 3;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=uploaddoc&format=json', datos);
+
+              case 3:
+                resp = _context3.sent;
+
+                if (!resp.ok) {
+                  _context3.next = 7;
+                  break;
+                }
+
+                commit(ADDDOCUMENTO, resp.resp);
+                return _context3.abrupt("return", resp);
+
+              case 7:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
+      }))();
+    },
+    GUARDAR_FORMULARIO: function GUARDAR_FORMULARIO(_ref4, datos) {
+      var _this2 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
+        var commit, datopost, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                commit = _ref4.commit;
+                commit(CARGANDO, true);
+                datopost = 'json=' + JSON.stringify(datos.prop2);
+                _context4.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
+
+              case 5:
+                resp = _context4.sent;
+
+                if (!resp.ok) {
+                  _context4.next = 16;
+                  break;
+                }
+
+                if (!(datos.prop3 != null)) {
+                  _context4.next = 13;
+                  break;
+                }
+
+                datos.prop3.forEach(function (element, key) {
+                  datos.prop3[key].idempresa = resp.resp;
+                });
+
+                _this2.dispatch('GUARDAR_PRODUCTOS', datos);
+
+                if (datos.prop4 != null) {
+                  datos.prop4.forEach(function (element, key) {
+                    datos.prop4[key].idempresa = resp.resp;
+                  });
+
+                  _this2.dispatch('GUARDAR_DOCUMENTOS', datos);
+                }
+
+                _context4.next = 15;
+                break;
+
+              case 13:
+                commit(CARGANDO, false);
+                return _context4.abrupt("return", resp);
+
+              case 15:
+                commit(CARGANDO, false);
+
+              case 16:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
+      }))();
+    },
+    GUARDAR_PRODUCTOS: function GUARDAR_PRODUCTOS(_ref5, datos) {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
+        var commit, datopost, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                commit = _ref5.commit;
+                commit(CARGANDO, true);
+                datopost = 'json=' + JSON.stringify(datos.prop3);
+                _context5.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=addproductos&format=json', datopost);
+
+              case 5:
+                resp = _context5.sent;
+
+                if (!resp.ok) {
+                  _context5.next = 9;
+                  break;
+                }
+
+                commit(CARGANDO, false);
+                return _context5.abrupt("return", resp);
+
+              case 9:
+                commit(CARGANDO, false);
+
+              case 10:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5);
+      }))();
+    },
+    GUARDAR_DOCUMENTOS: function GUARDAR_DOCUMENTOS(_ref6, datos) {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
+        var commit, datopost, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                commit = _ref6.commit;
+                commit(CARGANDO, true);
+                datopost = 'json=' + JSON.stringify(datos.prop4);
+                _context6.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=adddocumentos&format=json', datopost);
+
+              case 5:
+                resp = _context6.sent;
+
+                if (!resp.ok) {
+                  _context6.next = 10;
+                  break;
+                }
+
+                commit(CARGANDO, false);
+                commit(BORRARDOCUMENTO);
+                return _context6.abrupt("return", resp);
+
+              case 10:
+                commit(CARGANDO, false);
+
+              case 11:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6);
       }))();
     }
   },
@@ -52854,7 +53156,6 @@ var render = function() {
           "remove-button-color": "black",
           "show-loading": true,
           "loading-size": 50,
-          "prevent-white-space": "",
           "initial-image":
             "https://zhanziyang.github.io/vue-croppa/static/500.jpeg",
           accept: ".jpeg,.png"
@@ -52925,519 +53226,718 @@ var render = function() {
     { staticClass: "q-pa-md" },
     [
       _c(
-        "masonry",
-        { attrs: { cols: { default: 2, 1000: 2, 700: 1 }, gutter: 10 } },
+        "q-form",
+        {
+          staticClass: "q-gutter-md",
+          on: { submit: _vm.onSubmit, reset: _vm.onReset }
+        },
         [
           _c(
-            "q-card",
-            { staticClass: "my-card q-ma-md" },
+            "masonry",
+            { attrs: { cols: { default: 2, 1000: 2, 700: 1 }, gutter: 10 } },
             [
-              _c("q-card-section", [
-                _c("div", { staticClass: "text-h6" }, [
-                  _vm._v("Informacion Empresa")
-                ])
-              ]),
-              _vm._v(" "),
-              _c("q-separator"),
-              _vm._v(" "),
-              _c("q-card-section", [
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Nombre De la Empresa",
-                          type: "text",
-                          counter: "",
-                          maxlength: "200",
-                          rules: _vm.formulario.nombreempresa.rules
-                        },
-                        model: {
-                          value: _vm.formulario.nombreempresa.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.nombreempresa, "data", $$v)
-                          },
-                          expression: "formulario.nombreempresa.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Representante Legal",
-                          type: "text",
-                          counter: "",
-                          maxlength: "200",
-                          rules: _vm.formulario.representantelegal.rules
-                        },
-                        model: {
-                          value: _vm.formulario.representantelegal.data,
-                          callback: function($$v) {
-                            _vm.$set(
-                              _vm.formulario.representantelegal,
-                              "data",
-                              $$v
-                            )
-                          },
-                          expression: "formulario.representantelegal.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Descripcion",
-                          type: "textarea",
-                          counter: "",
-                          maxlength: "200",
-                          rules: _vm.formulario.descripcion.rules
-                        },
-                        model: {
-                          value: _vm.formulario.descripcion.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.descripcion, "data", $$v)
-                          },
-                          expression: "formulario.descripcion.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Telefono",
-                          counter: "",
-                          maxlength: "12",
-                          dense: _vm.dense,
-                          rules: _vm.formulario.telefono.rules
-                        },
-                        scopedSlots: _vm._u([
-                          {
-                            key: "prepend",
-                            fn: function() {
-                              return [_c("q-icon", { attrs: { name: "call" } })]
-                            },
-                            proxy: true
-                          }
-                        ]),
-                        model: {
-                          value: _vm.formulario.telefono.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.telefono, "data", $$v)
-                          },
-                          expression: "formulario.telefono.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Direccion",
-                          type: "text",
-                          counter: "",
-                          maxlength: "12",
-                          dense: _vm.dense,
-                          rules: _vm.formulario.direccion.rules
-                        },
-                        scopedSlots: _vm._u([
-                          {
-                            key: "prepend",
-                            fn: function() {
-                              return [
-                                _c("q-icon", { staticClass: "location_on" })
-                              ]
-                            },
-                            proxy: true
-                          }
-                        ]),
-                        model: {
-                          value: _vm.formulario.direccion.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.direccion, "data", $$v)
-                          },
-                          expression: "formulario.direccion.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Municipio",
-                          type: "text",
-                          counter: "",
-                          maxlength: "200",
-                          rules: _vm.formulario.municipio.rules
-                        },
-                        model: {
-                          value: _vm.formulario.municipio.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.municipio, "data", $$v)
-                          },
-                          expression: "formulario.municipio.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Email",
-                          dense: _vm.dense,
-                          rules: _vm.formulario.email.rules
-                        },
-                        scopedSlots: _vm._u([
-                          {
-                            key: "prepend",
-                            fn: function() {
-                              return [_c("q-icon", { attrs: { name: "mail" } })]
-                            },
-                            proxy: true
-                          }
-                        ]),
-                        model: {
-                          value: _vm.formulario.email.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.email, "data", $$v)
-                          },
-                          expression: "formulario.email.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Twitter",
-                          dense: _vm.dense,
-                          rules: _vm.formulario.twitter.rules
-                        },
-                        scopedSlots: _vm._u([
-                          {
-                            key: "prepend",
-                            fn: function() {
-                              return [
-                                _c("q-icon", {
-                                  attrs: {
-                                    name: "img:./../media/iconssvg/gorjeo.svg"
-                                  }
-                                })
-                              ]
-                            },
-                            proxy: true
-                          }
-                        ]),
-                        model: {
-                          value: _vm.formulario.twitter.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.twitter, "data", $$v)
-                          },
-                          expression: "formulario.twitter.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Facebook",
-                          dense: _vm.dense,
-                          rules: _vm.formulario.facebook.rules
-                        },
-                        scopedSlots: _vm._u([
-                          {
-                            key: "prepend",
-                            fn: function() {
-                              return [
-                                _c("q-icon", {
-                                  attrs: {
-                                    name: "img:./../media/iconssvg/facebook.svg"
-                                  }
-                                })
-                              ]
-                            },
-                            proxy: true
-                          }
-                        ]),
-                        model: {
-                          value: _vm.formulario.facebook.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.facebook, "data", $$v)
-                          },
-                          expression: "formulario.facebook.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Instagram",
-                          dense: _vm.dense,
-                          rules: _vm.formulario.instagram.rules
-                        },
-                        scopedSlots: _vm._u([
-                          {
-                            key: "prepend",
-                            fn: function() {
-                              return [
-                                _c("q-icon", {
-                                  attrs: {
-                                    name:
-                                      "img:./../media/iconssvg/instagram.svg"
-                                  }
-                                })
-                              ]
-                            },
-                            proxy: true
-                          }
-                        ]),
-                        model: {
-                          value: _vm.formulario.instagram.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.instagram, "data", $$v)
-                          },
-                          expression: "formulario.instagram.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-input", {
-                        attrs: {
-                          label: "Link Video YouTube",
-                          dense: _vm.dense,
-                          rules: _vm.formulario.twitter.rules
-                        },
-                        scopedSlots: _vm._u([
-                          {
-                            key: "prepend",
-                            fn: function() {
-                              return [
-                                _c("q-icon", {
-                                  attrs: {
-                                    name: "img:./../media/iconssvg/youtube.svg"
-                                  }
-                                })
-                              ]
-                            },
-                            proxy: true
-                          }
-                        ]),
-                        model: {
-                          value: _vm.formulario.linkvideo.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.linkvideo, "data", $$v)
-                          },
-                          expression: "formulario.linkvideo.data"
-                        }
-                      })
-                    ],
-                    1
-                  )
-                ])
-              ])
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "q-card",
-            { staticClass: "my-card q-ma-md" },
-            [
-              _c("q-card-section", [
-                _c("div", { staticClass: "text-h6" }, [
-                  _vm._v("Imagens de la Empresa")
-                ])
-              ]),
-              _vm._v(" "),
-              _c("q-separator"),
-              _vm._v(" "),
               _c(
-                "q-card-section",
-                { attrs: { cass: "justify-center items-center" } },
+                "q-card",
+                { staticClass: "my-card q-ma-md" },
                 [
-                  _c("div", { staticClass: "column items-center" }, [
+                  _c("q-card-section", [
+                    _c("div", { staticClass: "text-h6" }, [
+                      _vm._v("Informacion Empresa")
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("q-separator"),
+                  _vm._v(" "),
+                  _c("q-card-section", [
                     _c(
                       "div",
-                      { staticClass: "col" },
-                      [_c("EmpresaAvatar", { ref: "child" })],
-                      1
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Nombre De la Empresa",
+                                type: "text",
+                                counter: "",
+                                maxlength: "200",
+                                rules: _vm.formulario.nombreempresa.rules
+                              },
+                              model: {
+                                value: _vm.formulario.nombreempresa.data,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.formulario.nombreempresa,
+                                    "data",
+                                    $$v
+                                  )
+                                },
+                                expression: "formulario.nombreempresa.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Representante Legal",
+                                type: "text",
+                                counter: "",
+                                maxlength: "200",
+                                rules: _vm.formulario.representantelegal.rules
+                              },
+                              model: {
+                                value: _vm.formulario.representantelegal.data,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.formulario.representantelegal,
+                                    "data",
+                                    $$v
+                                  )
+                                },
+                                expression: "formulario.representantelegal.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Descripcion",
+                                type: "textarea",
+                                counter: "",
+                                maxlength: "200",
+                                rules: _vm.formulario.descripcion.rules
+                              },
+                              model: {
+                                value: _vm.formulario.descripcion.data,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.formulario.descripcion,
+                                    "data",
+                                    $$v
+                                  )
+                                },
+                                expression: "formulario.descripcion.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Telefono",
+                                counter: "",
+                                maxlength: "12",
+                                dense: _vm.dense,
+                                rules: _vm.formulario.telefono.rules
+                              },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "prepend",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", { attrs: { name: "call" } })
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              ]),
+                              model: {
+                                value: _vm.formulario.telefono.data,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.formulario.telefono, "data", $$v)
+                                },
+                                expression: "formulario.telefono.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Direccion",
+                                type: "text",
+                                counter: "",
+                                maxlength: "12",
+                                dense: _vm.dense,
+                                rules: _vm.formulario.direccion.rules
+                              },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "prepend",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", {
+                                        staticClass: "location_on"
+                                      })
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              ]),
+                              model: {
+                                value: _vm.formulario.direccion.data,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.formulario.direccion,
+                                    "data",
+                                    $$v
+                                  )
+                                },
+                                expression: "formulario.direccion.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Municipio",
+                                type: "text",
+                                counter: "",
+                                maxlength: "200",
+                                rules: _vm.formulario.municipio.rules
+                              },
+                              model: {
+                                value: _vm.formulario.municipio.data,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.formulario.municipio,
+                                    "data",
+                                    $$v
+                                  )
+                                },
+                                expression: "formulario.municipio.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Email",
+                                dense: _vm.dense,
+                                rules: _vm.formulario.email.rules
+                              },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "prepend",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", { attrs: { name: "mail" } })
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              ]),
+                              model: {
+                                value: _vm.formulario.email.data,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.formulario.email, "data", $$v)
+                                },
+                                expression: "formulario.email.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Twitter",
+                                dense: _vm.dense,
+                                rules: _vm.formulario.twitter.rules
+                              },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "prepend",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", {
+                                        attrs: {
+                                          name:
+                                            "img:./../media/iconssvg/gorjeo.svg"
+                                        }
+                                      })
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              ]),
+                              model: {
+                                value: _vm.formulario.twitter.data,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.formulario.twitter, "data", $$v)
+                                },
+                                expression: "formulario.twitter.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Facebook",
+                                dense: _vm.dense,
+                                rules: _vm.formulario.facebook.rules
+                              },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "prepend",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", {
+                                        attrs: {
+                                          name:
+                                            "img:./../media/iconssvg/facebook.svg"
+                                        }
+                                      })
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              ]),
+                              model: {
+                                value: _vm.formulario.facebook.data,
+                                callback: function($$v) {
+                                  _vm.$set(_vm.formulario.facebook, "data", $$v)
+                                },
+                                expression: "formulario.facebook.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Instagram",
+                                dense: _vm.dense,
+                                rules: _vm.formulario.instagram.rules
+                              },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "prepend",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", {
+                                        attrs: {
+                                          name:
+                                            "img:./../media/iconssvg/instagram.svg"
+                                        }
+                                      })
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              ]),
+                              model: {
+                                value: _vm.formulario.instagram.data,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.formulario.instagram,
+                                    "data",
+                                    $$v
+                                  )
+                                },
+                                expression: "formulario.instagram.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
+                          [
+                            _c("q-input", {
+                              attrs: {
+                                label: "Link Video YouTube",
+                                dense: _vm.dense,
+                                rules: _vm.formulario.twitter.rules
+                              },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "prepend",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", {
+                                        attrs: {
+                                          name:
+                                            "img:./../media/iconssvg/youtube.svg"
+                                        }
+                                      })
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              ]),
+                              model: {
+                                value: _vm.formulario.linkvideo.data,
+                                callback: function($$v) {
+                                  _vm.$set(
+                                    _vm.formulario.linkvideo,
+                                    "data",
+                                    $$v
+                                  )
+                                },
+                                expression: "formulario.linkvideo.data"
+                              }
+                            })
+                          ],
+                          1
+                        )
+                      ]
                     )
                   ])
-                ]
-              )
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c("q-card", { staticClass: "my-card q-ma-md" }),
-          _vm._v(" "),
-          _c(
-            "q-card",
-            { staticClass: "my-card q-ma-md" },
-            [
-              _c("q-card-section", [
-                _c("div", { staticClass: "text-h6" }, [_vm._v("Categoria")])
-              ]),
-              _vm._v(" "),
-              _c("q-separator"),
+                ],
+                1
+              ),
               _vm._v(" "),
               _c(
-                "q-card-section",
+                "q-card",
+                { staticClass: "my-card q-ma-md" },
                 [
-                  _c("q-select", {
-                    attrs: {
-                      name: _vm.formulario.categoria.nombre,
-                      label: _vm.formulario.categoria.label,
-                      "transition-show": "flip-up",
-                      "transition-hide": "flip-down",
-                      "option-label": "nombre",
-                      "option-value": "idcategoria",
-                      options: this.$store.state.categoria.resp.categorias,
-                      filled: ""
-                    },
-                    on: { input: _vm.onchange },
-                    scopedSlots: _vm._u(
-                      [
-                        _vm.formulario.categoria.data != null
-                          ? {
-                              key: "append",
-                              fn: function() {
-                                return [
-                                  _c("q-icon", {
-                                    staticClass: "cursor-pointer",
-                                    attrs: { name: "cancel" },
-                                    on: {
-                                      click: function($event) {
-                                        $event.stopPropagation()
-                                        return _vm.nullselect($event)
-                                      }
-                                    }
-                                  })
-                                ]
-                              },
-                              proxy: true
-                            }
-                          : null
-                      ],
-                      null,
-                      true
-                    ),
-                    model: {
-                      value: _vm.formulario.categoria.data,
-                      callback: function($$v) {
-                        _vm.$set(_vm.formulario.categoria, "data", $$v)
-                      },
-                      expression: "formulario.categoria.data"
-                    }
-                  }),
+                  _c("q-card-section", [
+                    _c("div", { staticClass: "text-h6" }, [
+                      _vm._v("Imagens de la Empresa")
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("q-separator"),
                   _vm._v(" "),
                   _c(
-                    "q-intersection",
-                    {
-                      attrs: {
-                        "transition-hide": "jump-up",
-                        transition: "scale",
-                        leave: "scale"
-                      }
-                    },
+                    "q-card-section",
+                    { attrs: { cass: "justify-center items-center" } },
                     [
-                      _vm.formulario.categoria.data != null
+                      _c("div", { staticClass: "column items-center" }, [
+                        _c(
+                          "div",
+                          { staticClass: "col" },
+                          [_c("EmpresaAvatar", { ref: "child" })],
+                          1
+                        )
+                      ])
+                    ]
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("q-card", { staticClass: "my-card q-ma-md" }),
+              _vm._v(" "),
+              _c(
+                "q-card",
+                { staticClass: "my-card q-ma-md" },
+                [
+                  _c("q-card-section", [
+                    _c("div", { staticClass: "text-h6" }, [_vm._v("Categoria")])
+                  ]),
+                  _vm._v(" "),
+                  _c("q-separator"),
+                  _vm._v(" "),
+                  _c(
+                    "q-card-section",
+                    [
+                      _c("q-select", {
+                        attrs: {
+                          name: _vm.formulario.categoria.nombre,
+                          label: _vm.formulario.categoria.label,
+                          "transition-show": "flip-up",
+                          "transition-hide": "flip-down",
+                          "option-label": "nombre",
+                          "option-value": "idcategoria",
+                          options:
+                            this.$store.state.categoria.resp != null
+                              ? this.$store.state.categoria.resp.categorias
+                              : [],
+                          filled: ""
+                        },
+                        on: { input: _vm.onchange },
+                        scopedSlots: _vm._u(
+                          [
+                            _vm.formulario.categoria.data != null
+                              ? {
+                                  key: "append",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", {
+                                        staticClass: "cursor-pointer",
+                                        attrs: { name: "cancel" },
+                                        on: {
+                                          click: function($event) {
+                                            $event.stopPropagation()
+                                            return _vm.nullselect($event)
+                                          }
+                                        }
+                                      })
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              : null
+                          ],
+                          null,
+                          true
+                        ),
+                        model: {
+                          value: _vm.formulario.categoria.data,
+                          callback: function($$v) {
+                            _vm.$set(_vm.formulario.categoria, "data", $$v)
+                          },
+                          expression: "formulario.categoria.data"
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c(
+                        "q-intersection",
+                        {
+                          attrs: {
+                            "transition-hide": "jump-up",
+                            transition: "scale",
+                            leave: "scale"
+                          }
+                        },
+                        [
+                          _vm.formulario.categoria.data != null
+                            ? _c("q-select", {
+                                attrs: {
+                                  name: _vm.formulario.subcategoria.nombre,
+                                  label: _vm.formulario.subcategoria.label,
+                                  "transition-show": "flip-up",
+                                  "transition-hide": "flip-down",
+                                  "option-label": "nombre",
+                                  "option-value": "idsubcategoria",
+                                  options:
+                                    this.$store.state.categoria.resp != null
+                                      ? this.$store.state.categoria.resp.subcategorias.filter(
+                                          function(post) {
+                                            return (
+                                              post.idcategoria ==
+                                              _vm.formulario.categoria.data
+                                                .idcategoria
+                                            )
+                                          }
+                                        )
+                                      : [],
+                                  filled: ""
+                                },
+                                on: { input: _vm.onchange },
+                                scopedSlots: _vm._u(
+                                  [
+                                    {
+                                      key: "option",
+                                      fn: function(scope) {
+                                        return [
+                                          _c(
+                                            "q-item",
+                                            _vm._g(
+                                              _vm._b(
+                                                {},
+                                                "q-item",
+                                                scope.itemProps,
+                                                false
+                                              ),
+                                              scope.itemEvents
+                                            ),
+                                            [
+                                              _c(
+                                                "q-item-section",
+                                                [
+                                                  _c("q-item-label", {
+                                                    domProps: {
+                                                      innerHTML: _vm._s(
+                                                        scope.opt.nombre
+                                                      )
+                                                    }
+                                                  }),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-label",
+                                                    { attrs: { caption: "" } },
+                                                    [
+                                                      _vm._v(
+                                                        _vm._s(
+                                                          _vm.formulario
+                                                            .categoria.data !=
+                                                            null
+                                                            ? _vm.formulario
+                                                                .categoria.data
+                                                                .nombre
+                                                            : ""
+                                                        )
+                                                      )
+                                                    ]
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  null,
+                                  false,
+                                  728066844
+                                ),
+                                model: {
+                                  value: _vm.formulario.subcategoria.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.subcategoria,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "formulario.subcategoria.data"
+                                }
+                              })
+                            : _vm._e()
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _vm.formulario.subcategoria.data != null &&
+                      this.$store.state.categoria.resp.tiposubcategorias.filter(
+                        function(post) {
+                          return (
+                            post.idsubcategoria ==
+                            _vm.formulario.subcategoria.data.idsubcategoria
+                          )
+                        }
+                      ).length > 0
                         ? _c("q-select", {
                             attrs: {
-                              name: _vm.formulario.subcategoria.nombre,
-                              label: _vm.formulario.subcategoria.label,
+                              name: _vm.formulario.tiposubcategoria.nombre,
+                              label: _vm.formulario.tiposubcategoria.label,
                               "transition-show": "flip-up",
                               "transition-hide": "flip-down",
                               "option-label": "nombre",
-                              "option-value": "idsubcategoria",
-                              options: this.$store.state.categoria.resp.subcategorias.filter(
-                                function(post) {
-                                  return (
-                                    post.idcategoria ==
-                                    _vm.formulario.categoria.data.idcategoria
-                                  )
-                                }
-                              ),
+                              "option-value": "idtiposubcategoria",
+                              options:
+                                this.$store.state.categoria.resp != null
+                                  ? this.$store.state.categoria.resp.tiposubcategorias.filter(
+                                      function(post) {
+                                        return (
+                                          post.idsubcategoria ==
+                                          _vm.formulario.subcategoria.data
+                                            .idsubcategoria
+                                        )
+                                      }
+                                    )
+                                  : [],
                               filled: ""
                             },
-                            on: { input: _vm.onchange },
                             scopedSlots: _vm._u(
                               [
                                 {
@@ -53474,11 +53974,11 @@ var render = function() {
                                                   _vm._v(
                                                     _vm._s(
                                                       _vm.formulario.categoria
-                                                        .data != null
-                                                        ? _vm.formulario
-                                                            .categoria.data
-                                                            .nombre
-                                                        : ""
+                                                        .data.nombre +
+                                                        " - " +
+                                                        _vm.formulario
+                                                          .subcategoria.data
+                                                          .nombre
                                                     )
                                                   )
                                                 ]
@@ -53495,232 +53995,171 @@ var render = function() {
                               ],
                               null,
                               false,
-                              728066844
+                              1344834240
                             ),
                             model: {
-                              value: _vm.formulario.subcategoria.data,
+                              value: _vm.formulario.tiposubcategoria.data,
                               callback: function($$v) {
                                 _vm.$set(
-                                  _vm.formulario.subcategoria,
+                                  _vm.formulario.tiposubcategoria,
                                   "data",
                                   $$v
                                 )
                               },
-                              expression: "formulario.subcategoria.data"
+                              expression: "formulario.tiposubcategoria.data"
                             }
                           })
                         : _vm._e()
                     ],
                     1
-                  ),
-                  _vm._v(" "),
-                  _vm.formulario.subcategoria.data != null &&
-                  this.$store.state.categoria.resp.tiposubcategorias.filter(
-                    function(post) {
-                      return (
-                        post.idsubcategoria ==
-                        _vm.formulario.subcategoria.data.idsubcategoria
-                      )
-                    }
-                  ).length > 0
-                    ? _c("q-select", {
-                        attrs: {
-                          name: _vm.formulario.tiposubcategoria.nombre,
-                          label: _vm.formulario.tiposubcategoria.label,
-                          "transition-show": "flip-up",
-                          "transition-hide": "flip-down",
-                          "option-label": "nombre",
-                          "option-value": "idtiposubcategoria",
-                          options: this.$store.state.categoria.resp.tiposubcategorias.filter(
-                            function(post) {
-                              return (
-                                post.idsubcategoria ==
-                                _vm.formulario.subcategoria.data.idsubcategoria
-                              )
-                            }
-                          ),
-                          filled: ""
-                        },
-                        scopedSlots: _vm._u(
+                  )
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("q-card", { staticClass: "my-card q-ma-md" }),
+              _vm._v(" "),
+              _c(
+                "q-card",
+                { staticClass: "my-card q-ma-md" },
+                [
+                  _c("q-card-section", [
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c("div", { staticClass: "col-12 col-md-3" }, [
+                          _c("div", { staticClass: "text-h6" }, [
+                            _vm._v("Productos")
+                          ])
+                        ]),
+                        _vm._v(" "),
+                        _c(
+                          "div",
+                          { staticClass: "col-12 col-md-9" },
                           [
-                            {
-                              key: "option",
-                              fn: function(scope) {
-                                return [
+                            _c("q-icon", {
+                              attrs: {
+                                size: "2rem",
+                                color: "primary",
+                                name: "add"
+                              },
+                              on: { click: _vm.addVisa }
+                            })
+                          ],
+                          1
+                        )
+                      ]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("q-separator"),
+                  _vm._v(" "),
+                  _c(
+                    "q-card-section",
+                    _vm._l(_vm.formulario.productos, function(
+                      applicant,
+                      counter
+                    ) {
+                      return _c(
+                        "q-intersection",
+                        {
+                          key: counter,
+                          attrs: {
+                            "transition-hide": "jump-up",
+                            transition: "scale",
+                            leave: "scale"
+                          }
+                        },
+                        [
+                          _c(
+                            "q-item",
+                            { staticClass: "row justify-center items-center" },
+                            [
+                              _c(
+                                "q-item-section",
+                                { attrs: { top: "" } },
+                                [
                                   _c(
-                                    "q-item",
-                                    _vm._g(
-                                      _vm._b(
-                                        {},
-                                        "q-item",
-                                        scope.itemProps,
-                                        false
-                                      ),
-                                      scope.itemEvents
-                                    ),
+                                    "q-item-label",
+                                    { attrs: { lines: "1" } },
                                     [
-                                      _c(
-                                        "q-item-section",
-                                        [
-                                          _c("q-item-label", {
-                                            domProps: {
-                                              innerHTML: _vm._s(
-                                                scope.opt.nombre
+                                      _c("q-input", {
+                                        attrs: {
+                                          label: "Nombrel del producto",
+                                          type: "text",
+                                          rules: [
+                                            function(val) {
+                                              return (
+                                                (val && val.length > 0) ||
+                                                "Campo vacio"
                                               )
                                             }
-                                          }),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-label",
-                                            { attrs: { caption: "" } },
-                                            [
-                                              _vm._v(
-                                                _vm._s(
-                                                  _vm.formulario.categoria.data
-                                                    .nombre +
-                                                    " - " +
-                                                    _vm.formulario.subcategoria
-                                                      .data.nombre
-                                                )
+                                          ]
+                                        },
+                                        model: {
+                                          value: applicant.nombre,
+                                          callback: function($$v) {
+                                            _vm.$set(applicant, "nombre", $$v)
+                                          },
+                                          expression: "applicant.nombre"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { lines: "1" } },
+                                    [
+                                      _c("q-input", {
+                                        attrs: {
+                                          label: "Descripcion",
+                                          type: "text",
+                                          rules: [
+                                            function(val) {
+                                              return (
+                                                (val && val.length > 0) ||
+                                                "Campo vacio"
                                               )
-                                            ]
-                                          )
-                                        ],
-                                        1
-                                      )
+                                            }
+                                          ]
+                                        },
+                                        model: {
+                                          value: applicant.descripcion,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              applicant,
+                                              "descripcion",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "applicant.descripcion"
+                                        }
+                                      })
                                     ],
                                     1
                                   )
-                                ]
-                              }
-                            }
-                          ],
-                          null,
-                          false,
-                          1344834240
-                        ),
-                        model: {
-                          value: _vm.formulario.tiposubcategoria.data,
-                          callback: function($$v) {
-                            _vm.$set(
-                              _vm.formulario.tiposubcategoria,
-                              "data",
-                              $$v
-                            )
-                          },
-                          expression: "formulario.tiposubcategoria.data"
-                        }
-                      })
-                    : _vm._e()
-                ],
-                1
-              )
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c("q-card", { staticClass: "my-card q-ma-md" }),
-          _vm._v(" "),
-          _c(
-            "q-card",
-            { staticClass: "my-card q-ma-md" },
-            [
-              _c("q-card-section", [
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c("div", { staticClass: "col-12 col-md-3" }, [
-                    _c("div", { staticClass: "text-h6" }, [_vm._v("Productos")])
-                  ]),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-9" },
-                    [
-                      _c("q-icon", {
-                        attrs: { size: "2rem", color: "primary", name: "add" },
-                        on: { click: _vm.addVisa }
-                      })
-                    ],
-                    1
-                  )
-                ])
-              ]),
-              _vm._v(" "),
-              _c("q-separator"),
-              _vm._v(" "),
-              _c(
-                "q-card-section",
-                _vm._l(_vm.formulario.productos, function(applicant, counter) {
-                  return _c(
-                    "q-intersection",
-                    {
-                      key: counter,
-                      attrs: {
-                        "transition-hide": "jump-up",
-                        transition: "scale",
-                        leave: "scale"
-                      }
-                    },
-                    [
-                      _c(
-                        "q-item",
-                        { staticClass: "row justify-center items-center" },
-                        [
-                          _c(
-                            "q-item-section",
-                            { attrs: { top: "" } },
-                            [
-                              _c(
-                                "q-item-label",
-                                { attrs: { lines: "1" } },
-                                [
-                                  _c("q-input", {
-                                    attrs: {
-                                      label: "Nombrel del producto",
-                                      type: "text",
-                                      rules: [
-                                        function(val) {
-                                          return (
-                                            (val && val.length > 0) ||
-                                            "Campo vacio"
-                                          )
-                                        }
-                                      ]
-                                    },
-                                    model: {
-                                      value: applicant.nombre,
-                                      callback: function($$v) {
-                                        _vm.$set(applicant, "nombre", $$v)
-                                      },
-                                      expression: "applicant.nombre"
-                                    }
-                                  })
                                 ],
                                 1
                               ),
                               _vm._v(" "),
                               _c(
-                                "q-item-label",
-                                { attrs: { lines: "1" } },
+                                "q-item-section",
+                                { attrs: { top: "", side: "" } },
                                 [
-                                  _c("q-input", {
+                                  _c("q-icon", {
+                                    staticStyle: { margin: "0px 5px 17px 5px" },
                                     attrs: {
-                                      label: "Descripcion",
-                                      type: "text",
-                                      rules: [
-                                        function(val) {
-                                          return (
-                                            (val && val.length > 0) ||
-                                            "Campo vacio"
-                                          )
-                                        }
-                                      ]
+                                      size: "2rem",
+                                      color: "red",
+                                      name: "delete"
                                     },
-                                    model: {
-                                      value: applicant.descripcion,
-                                      callback: function($$v) {
-                                        _vm.$set(applicant, "descripcion", $$v)
-                                      },
-                                      expression: "applicant.descripcion"
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.deleteVisa(counter)
+                                      }
                                     }
                                   })
                                 ],
@@ -53730,131 +54169,107 @@ var render = function() {
                             1
                           ),
                           _vm._v(" "),
-                          _c(
-                            "q-item-section",
-                            { attrs: { top: "", side: "" } },
-                            [
-                              _c("q-icon", {
-                                staticStyle: { margin: "0px 5px 17px 5px" },
-                                attrs: {
-                                  size: "2rem",
-                                  color: "red",
-                                  name: "delete"
-                                },
-                                on: {
-                                  click: function($event) {
-                                    return _vm.deleteVisa(counter)
-                                  }
-                                }
-                              })
-                            ],
-                            1
-                          )
+                          _c("q-separator", { attrs: { spaced: "" } })
                         ],
                         1
-                      ),
-                      _vm._v(" "),
-                      _c("q-separator", { attrs: { spaced: "" } })
-                    ],
+                      )
+                    }),
                     1
                   )
-                }),
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("q-card", { staticClass: "my-card q-ma-md" }),
+              _vm._v(" "),
+              _c(
+                "q-card",
+                { staticClass: "my-card q-ma-md" },
+                [
+                  _c("q-card-section", [
+                    _c("div", { staticClass: "text-h6" }, [
+                      _vm._v("Descargar Formularios")
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _c("q-separator"),
+                  _vm._v(" "),
+                  _c("q-card-section", [
+                    _c(
+                      "div",
+                      { staticClass: "row justify-center items-center" },
+                      [
+                        _c("q-uploader", {
+                          staticStyle: { "max-width": "600px" },
+                          attrs: {
+                            label: "Subir Documentos",
+                            "auto-upload": "",
+                            multiple: "",
+                            "max-files": "3",
+                            factory: _vm.factoryFn,
+                            accept: ".xls , .xlsx, .docx, .pdf"
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  ])
+                ],
                 1
               )
             ],
             1
           ),
           _vm._v(" "),
-          _c("q-card", { staticClass: "my-card q-ma-md" }),
+          _c("q-toggle", {
+            attrs: { label: "I accept the license and terms" },
+            model: {
+              value: _vm.accept,
+              callback: function($$v) {
+                _vm.accept = $$v
+              },
+              expression: "accept"
+            }
+          }),
           _vm._v(" "),
           _c(
-            "q-card",
-            { staticClass: "my-card q-ma-md" },
+            "div",
             [
-              _c("q-card-section", [
-                _c("div", { staticClass: "text-h6" }, [
-                  _vm._v("Descargar Formularios")
-                ])
-              ]),
+              _c("q-btn", {
+                attrs: { label: "Submit", type: "submit", color: "primary" }
+              }),
               _vm._v(" "),
-              _c("q-separator"),
-              _vm._v(" "),
-              _c("q-card-section", [
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-2" },
-                    [
-                      _c("q-icon", {
-                        attrs: {
-                          color: "primary",
-                          size: "2rem",
-                          name: "attach_file"
-                        }
-                      })
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-12 col-md-10" }, [
-                    _c("div", { staticClass: "text-subtitle2" }, [
-                      _vm._v("Formulario 1")
-                    ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-2" },
-                    [
-                      _c("q-icon", {
-                        attrs: {
-                          color: "primary",
-                          size: "2rem",
-                          name: "attach_file"
-                        }
-                      })
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-12 col-md-10" }, [
-                    _c("div", { staticClass: "text-subtitle2" }, [
-                      _vm._v("Formulario 2")
-                    ])
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row justify-center items-center" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md-2" },
-                    [
-                      _c("q-icon", {
-                        attrs: {
-                          color: "primary",
-                          size: "2rem",
-                          name: "attach_file"
-                        }
-                      })
-                    ],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "col-12 col-md-10" }, [
-                    _c("div", { staticClass: "text-subtitle2" }, [
-                      _vm._v("Formulario 3")
-                    ])
-                  ])
-                ])
-              ])
+              _c("q-btn", {
+                staticClass: "q-ml-sm",
+                attrs: {
+                  label: "Reset",
+                  type: "reset",
+                  color: "primary",
+                  flat: ""
+                }
+              })
             ],
             1
           )
         ],
         1
-      )
+      ),
+      _vm._v(" "),
+      _c(
+        "q-inner-loading",
+        { attrs: { showing: this.$store.state.cargando } },
+        [
+          _c("q-spinner-hourglass", {
+            attrs: { size: "5.5em", color: "green" }
+          })
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c("q-btn", {
+        attrs: { size: "35px", round: "", icon: "map" },
+        on: { click: _vm.uploadimg }
+      })
     ],
     1
   )

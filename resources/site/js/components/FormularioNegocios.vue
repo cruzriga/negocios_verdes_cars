@@ -1,6 +1,11 @@
 <template>
     <div class="q-pa-md" >
-        <masonry :cols="{default: 2, 1000: 2, 700: 1}" :gutter="10">
+      <q-form
+        @submit="onSubmit"
+        @reset="onReset"
+        class="q-gutter-md"
+      >
+      <masonry :cols="{default: 2, 1000: 2, 700: 1}" :gutter="10">
         <q-card class="my-card q-ma-md">
           <q-card-section>
               <div class="text-h6">Informacion Empresa</div>
@@ -174,7 +179,7 @@
               v-model="formulario.categoria.data"
               option-label="nombre"
               option-value="idcategoria"
-              :options="this.$store.state.categoria.resp.categorias"
+              :options="this.$store.state.categoria.resp!=null?this.$store.state.categoria.resp.categorias:[]"
               @input="onchange"
               filled
             >
@@ -195,7 +200,7 @@
                 v-model="formulario.subcategoria.data"
                 option-label="nombre"
                 option-value="idsubcategoria"
-                :options="this.$store.state.categoria.resp.subcategorias.filter(post => { return post.idcategoria == formulario.categoria.data.idcategoria})"               
+                :options="this.$store.state.categoria.resp!=null?this.$store.state.categoria.resp.subcategorias.filter(post => { return post.idcategoria == formulario.categoria.data.idcategoria}):[]"               
                 @input="onchange"
                 filled
               >
@@ -223,7 +228,7 @@
               v-model="formulario.tiposubcategoria.data"
               option-label="nombre"
               option-value="idtiposubcategoria"
-              :options="this.$store.state.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria})"
+              :options="this.$store.state.categoria.resp!=null?this.$store.state.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}):[]"
               filled
             >
             <template v-slot:option="scope">
@@ -302,44 +307,70 @@
                 <q-separator spaced />      
               </q-intersection>
             </q-card-section>
-        </q-card>
-        <q-card class="my-card q-ma-md">
-        </q-card>
-        <q-card class="my-card q-ma-md">
-          <q-card-section>
-              <div class="text-h6">Descargar Formularios</div>
-              <!-- <div class="text-subtitle2">by John Doe</div> -->
-          </q-card-section>
-          <q-separator />
-          <q-card-section>
+          </q-card>
+          <q-card class="my-card q-ma-md">
+          </q-card>
+          <q-card class="my-card q-ma-md">
+            <q-card-section>
+                <div class="text-h6">Descargar Formularios</div>
+                <!-- <div class="text-subtitle2">by John Doe</div> -->
+            </q-card-section>
+            <q-separator />
+            <q-card-section>
               <div class="row justify-center items-center">
-              <div class="col-12 col-md-2">
-                  <q-icon color="primary" size="2rem" name="attach_file" />
+                <q-uploader
+                    label="Subir Documentos"
+                    auto-upload
+                    multiple
+                    max-files="3"
+                    :factory="factoryFn"
+                    accept=".xls , .xlsx, .docx, .pdf"
+                    
+                    style="max-width: 600px"
+                  />
+                  <!-- <div class="col-12 col-md-2">
+                      <q-icon color="primary" size="2rem" name="attach_file" />
+                  </div>
+                  <div class="col-12 col-md-10">
+                      <div class="text-subtitle2">Formulario 1</div>
+                  </div>
+                  </div>
+                  <div class="row justify-center items-center">
+                  <div class="col-12 col-md-2">
+                      <q-icon color="primary" size="2rem" name="attach_file" />
+                  </div>
+                  <div class="col-12 col-md-10">
+                      <div class="text-subtitle2">Formulario 2</div>
+                  </div>
+                  </div>
+                  <div class="row justify-center items-center">
+                  <div class="col-12 col-md-2">
+                      <q-icon color="primary" size="2rem" name="attach_file" />
+                  </div>
+                  <div class="col-12 col-md-10">
+                      <div class="text-subtitle2">Formulario 3</div>
+                  </div> -->
               </div>
-              <div class="col-12 col-md-10">
-                  <div class="text-subtitle2">Formulario 1</div>
-              </div>
-              </div>
-              <div class="row justify-center items-center">
-              <div class="col-12 col-md-2">
-                  <q-icon color="primary" size="2rem" name="attach_file" />
-              </div>
-              <div class="col-12 col-md-10">
-                  <div class="text-subtitle2">Formulario 2</div>
-              </div>
-              </div>
-              <div class="row justify-center items-center">
-              <div class="col-12 col-md-2">
-                  <q-icon color="primary" size="2rem" name="attach_file" />
-              </div>
-              <div class="col-12 col-md-10">
-                  <div class="text-subtitle2">Formulario 3</div>
-              </div>
-              </div>
-          </q-card-section>
-        </q-card>
-        
+            </q-card-section>
+          </q-card>        
         </masonry>
+            <q-toggle v-model="accept" label="I accept the license and terms" />
+
+          <div>
+            <q-btn label="Submit" type="submit" color="primary"/>
+            <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
+          </div>
+        </q-form>
+        <!-- {{this.$store.state.cargando}} -->
+        <q-inner-loading :showing="this.$store.state.cargando">
+          <q-spinner-hourglass size="5.5em" color="green" />
+        </q-inner-loading>
+        <q-btn
+          size="35px"
+          round
+          icon="map"
+          @click="uploadimg" 
+        />
     </div>
 </template>
 
@@ -369,6 +400,7 @@ export default {
   },
   data () {
     return {
+      documentos: [],
       selected: [],
       ticked: [],
       expanded: [],
@@ -431,28 +463,28 @@ export default {
           type: 'text',
           data: null,
           label: 'Twitter',
-          rules: [ val => val && val.length > 0 || 'Campo vacio']
+          rules: null
         },
         facebook: {
           nombre: 'facebook',
           type: 'text',
           data: null,
           label: 'Facebook',
-          rules: [ val => val && val.length > 0 || 'Campo vacio']
+          rules: null
         },
         instagram: {
           nombre: 'instagram',
           type: 'text',
           data: null,
           label: 'Instagram',
-          rules: [ val => val && val.length > 0 || 'Campo vacio']
+          rules: null
         },
         linkvideo: {
           nombre: 'linkvideo',
           type: 'text',
           data: null,
           label: 'Link Video YouTube',
-          rules: [ val => val && val.length > 0 || 'Campo vacio']
+          rules: null
         },
         imagenlogo: {
           nombre: 'imagenlogo',
@@ -467,13 +499,15 @@ export default {
           nombre: 'categoria',
           type: null,
           data: null,
-          label: 'Categoria'
+          label: 'Categoria',
+          rules: [ val => val && val.length > 0 || 'Campo vacio']
         },
         subcategoria: {
           nombre: 'subcategoria',
           type: null,
           data: null,
-          label: 'Sub Categoria'
+          label: 'Sub Categoria',
+          rules: [ val => val && val.length > 0 || 'Campo vacio']
         },
         tiposubcategoria: {
           nombre: 'tipesubcategoria',
@@ -483,19 +517,30 @@ export default {
         },
         productos: [
           {
-            nombre: '',
-            descripcion: '',
-            tipo: ''
+            nombre: null,
+            descripcion: null,
+            urlimagen: null
           }
         ]
       },
       submitResult: null,
       dense: false,
-      propstree: [],
-      tickStrategy: 'leaf-filtered'
+      accept: false
     }
   },
   methods: {
+    factoryFn (files) {
+      let formData = new FormData();
+      formData.append('file', files[0]);
+      // this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
+      //     console.log(resp)
+      // })
+      return new Promise((resolve) => {
+        this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
+          resolve(resp.resp)
+        })  
+      })
+    },
     AXIO_GET_CATEGORIAS() {
       this.$store.dispatch('CARGAR_CATEGORIA');
     },
@@ -513,63 +558,67 @@ export default {
       this.formulario.subcategoria.data = null
       this.formulario.tiposubcategoria.data = null
     },
-    resetFilter () {
-      this.filter = ''
-      this.$refs.filter.focus()
-    },
-    myFilterMethod (node, filter) {
-      const filt = filter.toLowerCase()
-      return node.label && node.label.toLowerCase().indexOf(filt) > -1
-    },
     onclick(node) {
       console.log(node)
     },
-    onLazyLoad ({ node, key, done, fail }) {
-    //  var params = { parentId: node.id, userId: this.UserInfo.userId, type: 1 }
-     console.log(node)
-   },
-    agregarCategorias() {
-      this.categoria.forEach((value, key) => {
-        var filtrosubcategoria = this.subcategoria.filter(subcategoria => subcategoria.idcategoria === value.value)
-        var addtree = []
-        filtrosubcategoria.forEach((valuesub, key) => {
-          var filtrotiposubcategoria = this.tiposubcategoria.filter(tiposubcategoria => tiposubcategoria.idsubcategoria === valuesub.value && tiposubcategoria.idcategoria === value.value)
-          addtree.push({
-              label: valuesub.label,
-              value: valuesub.value,
-              handler: (node) => this.onclick(node),
-              idcategoria: valuesub.idcategoria,
-              children: filtrotiposubcategoria
-            })
-        })
-        this.propstree.push({
-          label: value.label,
-          value: value.value,
-          handler: (node) => this.onclick(node),
-          children: addtree
-        })
-      })
-    },
     verificarProps() {
       if (this.propformulario != null) {
-        // Object.entries(this.formulario).forEach(([key, value]) => {
-        //     console.log(key + ' ' + value); // "a 5", "b 7", "c 9"
-        // })
         Object.entries(this.propformulario).forEach(([key, value]) => {
-            // console.log(key + ' ' + value) // "a 5", "b 7", "c 9"
             this.formulario[key].data = value
         })
       }
     },
     uploadimg () {
-      console.log(this.$refs.child.croppa.hasImage())
-      console.log(this.$refs.child.croppa)
+      if (!this.$refs.child.croppa.hasImage()) {
+        console.log('no image to upload')
+        return
+      }
+      var submitResult = {}    
+      Object.entries(this.formulario).forEach(([key, value]) => {
+        if (value.data!='' && value.data!=null) {
+          if(key=='categoria' || key=='subcategoria' || key=='tiposubcategoria'){
+              submitResult['id'+key] = value.data['id'+key]==''?null:value.data['id'+key]
+          }if(key=='municipio'){
+              submitResult['id'+key] = value.data==''?null:value.data
+          }else{
+            submitResult[key] = value.data==''?null:value.data
+          }
+        }if(key=='productos'){
+          submitResult[key]=value
+        }
+      })
+      console.log(this.formulario.productos);
+      console.log(submitResult);
+      // let obj = {
+      //   prop1: null,
+      //   prop2: null,
+      //   prop3: this.formulario.productos
+      // }
+      // return new Promise((resolve) => {
+      //   this.$store.dispatch('GUARDAR_PRODUCTOS',obj).then(function(resp) {
+      //     resolve(resp)
+      //   })  
+      // })
+      this.$refs.child.croppa.generateBlob((blob) => {
+        var fd = new FormData()
+        fd.append('file', blob, 'filename.jpg')
+        let obj = {
+          prop1: fd,
+          prop2: submitResult,
+          prop2: submitResult,
+        }
+        return new Promise((resolve) => {
+          this.$store.dispatch('GUARDAR_IMG',obj).then(function(resp) {
+            resolve(resp)
+          })  
+        })
+      })      
     },
     addVisa () {
       this.formulario.productos.push({
-        nombre: '',
-        descripcion: '',
-        tipo: ''
+        nombre: null,
+        descripcion: null,
+        urlimagen: null
       })
     },
     deleteVisa (counter) {
@@ -577,7 +626,6 @@ export default {
     },
     onSubmit (evt) {
       console.log('@submit - do something here', evt)
-      evt.target.submit()
       if (this.accept !== true) {
         this.$q.notify({
           color: 'red-5',
@@ -586,31 +634,56 @@ export default {
           message: 'You need to accept the license and terms first'
         })
       } else {
+      if (!this.$refs.child.croppa.hasImage()) {
+        console.log('no image to upload')
+        return
+      }
+      var submitResult = {}    
+      Object.entries(this.formulario).forEach(([key, value]) => {
+        if (value.data!='' && value.data!=null) {        
+          if(key=='categoria' || key=='subcategoria' || key=='tiposubcategoria'){
+              submitResult['id'+key] = value.data['id'+key]==''?null:value.data['id'+key]
+          }if(key=='municipio'){
+              submitResult['id'+key] = value.data==''?null:value.data
+          }else{
+            submitResult[key] = value.data==''?null:value.data
+          }
+        }
+      })
+      // console.log(submitResult)
+      this.$refs.child.croppa.generateBlob((blob) => {
+        var fd = new FormData()
+        fd.append('file', blob, 'filename.jpg')
+        let obj = {
+          prop1: fd,
+          prop2: submitResult,
+          prop3: this.formulario.productos,
+          prop4: this.$store.state.documentos
+        }
+        return new Promise((resolve) => {
+          this.$store.dispatch('GUARDAR_IMG',obj).then(function(resp) {
+            this.onReset()
+            resolve(resp)
+          })  
+        })
+      })           
+      console.log(submitResult);
         this.$q.notify({
           color: 'green-4',
           textColor: 'white',
           icon: 'cloud_done',
           message: 'Submitted'
         })
-        const formData = new FormData(evt.target)
-        const submitResult = []
-
-        for (const [name, value] of formData.entries()) {
-          submitResult.push({
-            name,
-            value
-          })
-        }
-        console.log(submitResult)
-        this.submitResult = submitResult
       }
     },
     onReset () {
-      // this.name = null
-      // this.age = null
-      // this.accept = false
-      // this.$refs.name.resetValidation()
-      // this.$refs.age.resetValidation()
+      Object.entries(this.formulario).forEach(([key, value]) => {
+        if (value.data!='' && value.data!=null) {
+            this.formulario[key].data = null
+        }
+      })
+      this.formulario.productos = [];
+      this.$store.commit('BORRARDOCUMENTO');
     }
   }
 }

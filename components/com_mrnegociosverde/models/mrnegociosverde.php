@@ -63,7 +63,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         $query = $db->getQuery(true);
 		$query
             ->select('*')
-            ->from($db->quoteName('#__categorias','a'))
+            ->from($db->quoteName('#__negocios_v_categorias','a'))
             ->group($db->quoteName('a.idcategoria'))
             ->order('a.nombre DESC')
         ;
@@ -85,7 +85,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         $query = $db->getQuery(true);
 		$query
             ->select('*')
-            ->from($db->quoteName('#__sub_categorias','a'))
+            ->from($db->quoteName('#__negocios_v_sub_categorias','a'))
             ->group($db->quoteName('a.idsubcategoria'))
             ->order('a.nombre DESC')
         ;
@@ -104,7 +104,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         $query = $db->getQuery(true);
 		$query
             ->select('*')
-            ->from($db->quoteName('#__tipo_sub_categorias','a'))
+            ->from($db->quoteName('#__negocios_v_tipo_sub_categorias','a'))
             ->group($db->quoteName('a.idtiposubcategoria'))
             ->order('a.nombre DESC')
         ;
@@ -122,7 +122,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         $query = $db->getQuery(true);
         $query
             ->select('*')
-            ->from($db->quoteName('#__empresa','a'))
+            ->from($db->quoteName('#__negocios_v_empresas','a'))
             ->group($db->quoteName('a.idempresa'))
             ->order('a.idempresa DESC')
         ;

@@ -10,11 +10,11 @@
                 remove-button-color="black"
                 :show-loading="true"
                 :loading-size="50"
-                @new-image-drawn="onNewImage"
-                prevent-white-space
+                @new-image-drawn="onNewImage"                
                 initial-image="https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
                 accept=".jpeg,.png">
         </croppa>
+        <!-- prevent-white-space -->
         <input color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal">
         <!-- <q-slider @input ="onSliderChange" v-model="sliderVal" :min="sliderMin" :max="sliderMax" step="0.001"/> -->
         <!-- <button @click="croppa.zoomIn()">zoom in</button>
