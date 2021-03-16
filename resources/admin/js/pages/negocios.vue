@@ -1,5 +1,6 @@
 <template>
   <q-page >
+    <!-- <div> {{this.$store.state.empresas.resp.data}}</div> -->
     <q-list bordered class="rounded-borders fit"  >
       <q-item-label  header>
         <q-toolbar class="text-primary" style="height: 50px">
@@ -116,6 +117,7 @@
 
 <script>
 export default {
+  name: 'Negocios',
   data(){
     return {
       search:'',
@@ -124,6 +126,11 @@ export default {
       adic: 60,
       cump : 80,
     }
+  },
+  beforeMount () {
+    this.$store.dispatch('CARGAR_EMPRESAS');
+  },
+  methods: {
   }
 }
 </script>

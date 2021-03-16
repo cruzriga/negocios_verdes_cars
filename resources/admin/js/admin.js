@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import store from './store';
+import store from './store/store';
 import router from './router';
 import index from './index'
 import Quasar from "quasar";

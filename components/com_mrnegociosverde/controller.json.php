@@ -89,8 +89,8 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $valid_extensions = array('jpeg', 'jpg', 'png', 'gif', 'bmp' , 'pdf' , 'doc' ,'docx' , 'ppt','xlsx'); // valid extensions
         $path = 'media/uploads/doc/'; // upload directory
         if(true){
-        $img = $_FILES['file']['name'];
-        $tmp = $_FILES['file']['tmp_name'];
+        $img = $_FILES['documentos']['name'];
+        $tmp = $_FILES['documentos']['tmp_name'];
         // get uploaded file's extension
         $ext = strtolower(pathinfo($img, PATHINFO_EXTENSION));
         // can upload same image using rand function
@@ -98,9 +98,11 @@ class MrNegociosVerdeController extends JControllerLegacy {
         // check's valid format
             if(in_array($ext, $valid_extensions)){ 
                 $path = $path.strtolower($final_image);
-                if(move_uploaded_file($tmp,$path)){
-                    echo $path;
-                }
+                $item = new stdClass();
+                $item->url = $path;
+                $item->imgnombre = $img;
+                $item->tmpnombre = $tmp;
+                echo json_encode($item);
             }else{
                 echo 'invalid';
             }
@@ -125,7 +127,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
         foreach ($Itemid as $key => $value) {
             $result = $db->insertObject('#__negocios_v_productos', $value);            
         }
-        echo ($ultimoid);
+        // echo ($ultimoid);
     }
     public function adddocumentos(Type $var = null)
     {
@@ -134,8 +136,22 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $Itemid = json_decode($rawDataPost['json']);
         $db = JFactory::getDBO();
         foreach ($Itemid as $key => $value) {
-            $result = $db->insertObject('#__negocios_v_documentos', $value);            
+            print_r($value);
+            $tmp = $value->tmpnombre;
+            $path = $value->urldocumento;
+            if(rename($tmp,$path)){
+                unset($value->tmpnombre);
+                unset($value->imgnombre);
+                print_r($value);
+                // $result = $db->insertObject('#__negocios_v_documentos', $value); 
+            }else{
+                echo 'invalid';
+            }
+            // unset($value->tmpnombre);
+            // unset($value->imgnombre);
+            // print_r($value);
+            // $result = $db->insertObject('#__negocios_v_documentos', $value);
         }
-        echo ($ultimoid);
+        // echo ($ultimoid);
     }
 }

@@ -38,7 +38,7 @@
                   <div class="text-subtitle2">Descripcion</div>
               </div> -->
               <div class="col-12 col-md-9">
-                  <q-input v-model="formulario.descripcion.data" label="Descripcion" type="textarea" counter maxlength="200" :rules="formulario.descripcion.rules">
+                  <q-input v-model="formulario.descripcion.data" label="Descripcion" type="textarea" counter maxlength="500" :rules="formulario.descripcion.rules">
                   </q-input>
               </div>
             </div>
@@ -74,6 +74,7 @@
                       :name="formulario.municipio.nombre"
                       :label="formulario.municipio.label"
                       :options="options"
+                      emit-value
                       clearable
                     >
                     <template v-slot:no-option>
@@ -105,7 +106,7 @@
                   <div class="text-subtitle2">Direccion</div>
               </div> -->
               <div class="col-12 col-md-9">
-                  <q-input v-model="formulario.direccion.data" label="Direccion" type="text" counter maxlength="12" :dense="dense" :rules="formulario.direccion.rules">
+                  <q-input v-model="formulario.direccion.data" label="Direccion" type="text" counter maxlength="200" :dense="dense" :rules="formulario.direccion.rules">
                   <!-- <template v-slot:prepend>
                       <q-icon class="room" />
                   </template> -->
@@ -387,12 +388,9 @@
                 <q-uploader class="divuploader"
                     label="Formato - Ficha de inscripción"
                     auto-upload
-                    flat
-                    bordered
                     max-files="1"
                     :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"
-                    
+                    accept=".xls , .xlsx, .docx, .pdf"                    
                     style="max-width: 600px"
                   />
               </div>
@@ -400,8 +398,6 @@
                 <q-uploader class="divuploader"
                     label="Anexo - Listado de asociados"
                     auto-upload
-                    flat
-                    bordered
                     max-files="1"
                     :factory="factoryFn"
                     accept=".xls , .xlsx, .docx, .pdf"                    
@@ -412,8 +408,6 @@
                 <q-uploader class="divuploader"
                     label="Anexo - Carta de consentimiento"
                     auto-upload
-                    flat
-                    bordered
                     max-files="1"
                     :factory="factoryFn"
                     accept=".xls , .xlsx, .docx, .pdf"                    
@@ -424,8 +418,6 @@
                 <q-uploader class="divuploader"
                     label="Anexo - Carta de intención"
                     auto-upload
-                    flat
-                    bordered
                     max-files="1"
                     :factory="factoryFn"
                     accept=".xls , .xlsx, .docx, .pdf"                    
@@ -529,6 +521,7 @@
                 color="primary"
                 label="Enviar Formulario"
               />
+              <!-- {{formulario.municipio}} -->
             <!-- <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" /> -->
           </div>
         </masonry>
@@ -546,6 +539,7 @@
           icon="map"
           @click="uploadimg" 
         /> -->
+
     </div>
 </template>
 
@@ -635,8 +629,8 @@ export default {
   components: { EmpresaAvatar},
   props: {
     propformulario: {
-      type: Object,
-      default: () => {}
+      type: Object
+      // default: () => {}
     }
   },
   // computed: {
@@ -646,7 +640,7 @@ export default {
   // },
   beforeMount() {
     this.AXIO_GET_CATEGORIAS()
-    // this.verificarProps();
+    this.verificarProps();
     // this.agregarCategorias();
   },
   data () {
@@ -775,7 +769,6 @@ export default {
         ]
       },
       options: optionsmunicipios,
-      documentos: [],
       submitResult: null,
       dense: false,
       accept: false
@@ -784,7 +777,7 @@ export default {
   methods: {
     factoryFn (files) {
       let formData = new FormData();
-      formData.append('file', files[0]);
+      formData.append('documentos', files[0]);
       // this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
       //     console.log(resp)
       // })
@@ -792,9 +785,11 @@ export default {
       return new Promise((resolve) => {
         app.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
           app.documentos.push({
-            urldocumento:resp.resp
+            urldocumento:resp.resp.url,
+            imgnombre:resp.resp.imgnombre,
+            tmpnombre:resp.resp.tmpnombre
           });
-          resolve(resp.resp)
+          resolve(resp)
         })  
       })
     },
@@ -821,7 +816,12 @@ export default {
     verificarProps() {
       if (this.propformulario != null) {
         Object.entries(this.propformulario).forEach(([key, value]) => {
-            this.formulario[key].data = value
+            console.log(value);
+            if (key=='productos') {
+              this.formulario[key]=value
+            }else{
+              this.formulario[key].data = value
+            }
         })
       }
     },
@@ -842,8 +842,8 @@ export default {
           submitResult[key]=value
         }
       })
-      console.log(this.formulario.productos);
-      console.log(submitResult);
+      // console.log(this.formulario.productos);
+      // console.log(submitResult);
       // let obj = {
       //   prop1: null,
       //   prop2: null,
@@ -897,6 +897,8 @@ export default {
         }
       })
       // console.log(submitResult)
+      // console.log(this.documentos)
+      // return
       this.$refs.child.croppa.generateBlob((blob) => {
         var fd = new FormData()
         fd.append('file', blob, 'filename.jpg')
@@ -908,7 +910,7 @@ export default {
         }
         return new Promise((resolve) => {
           app.$store.dispatch('GUARDAR_IMG',obj).then(function(resp) {
-            app.onReset()
+            // app.onReset()
             resolve(resp)
           })  
         })

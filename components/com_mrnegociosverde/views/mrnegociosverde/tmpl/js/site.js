@@ -1963,14 +1963,6 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -2586,8 +2578,8 @@ var optionsmunicipios = [{
   },
   props: {
     propformulario: {
-      type: Object,
-      "default": function _default() {}
+      type: Object // default: () => {}
+
     }
   },
   // computed: {
@@ -2596,13 +2588,11 @@ var optionsmunicipios = [{
   //   })
   // },
   beforeMount: function beforeMount() {
-    this.AXIO_GET_CATEGORIAS(); // this.verificarProps();
-    // this.agregarCategorias();
+    this.AXIO_GET_CATEGORIAS();
+    this.verificarProps(); // this.agregarCategorias();
   },
   data: function data() {
-    var _ref;
-
-    return _ref = {
+    return {
       documentos: [],
       selected: [],
       ticked: [],
@@ -2746,13 +2736,16 @@ var optionsmunicipios = [{
           urlimagen: null
         }]
       },
-      options: optionsmunicipios
-    }, _defineProperty(_ref, "documentos", []), _defineProperty(_ref, "submitResult", null), _defineProperty(_ref, "dense", false), _defineProperty(_ref, "accept", false), _ref;
+      options: optionsmunicipios,
+      submitResult: null,
+      dense: false,
+      accept: false
+    };
   },
   methods: {
     factoryFn: function factoryFn(files) {
       var formData = new FormData();
-      formData.append('file', files[0]); // this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
+      formData.append('documentos', files[0]); // this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
       //     console.log(resp)
       // })
 
@@ -2760,9 +2753,11 @@ var optionsmunicipios = [{
       return new Promise(function (resolve) {
         app.$store.dispatch('GUARDAR_DOC', formData).then(function (resp) {
           app.documentos.push({
-            urldocumento: resp.resp
+            urldocumento: resp.resp.url,
+            imgnombre: resp.resp.imgnombre,
+            tmpnombre: resp.resp.tmpnombre
           });
-          resolve(resp.resp);
+          resolve(resp);
         });
       });
     },
@@ -2791,12 +2786,18 @@ var optionsmunicipios = [{
       var _this = this;
 
       if (this.propformulario != null) {
-        Object.entries(this.propformulario).forEach(function (_ref2) {
-          var _ref3 = _slicedToArray(_ref2, 2),
-              key = _ref3[0],
-              value = _ref3[1];
+        Object.entries(this.propformulario).forEach(function (_ref) {
+          var _ref2 = _slicedToArray(_ref, 2),
+              key = _ref2[0],
+              value = _ref2[1];
 
-          _this.formulario[key].data = value;
+          console.log(value);
+
+          if (key == 'productos') {
+            _this.formulario[key] = value;
+          } else {
+            _this.formulario[key].data = value;
+          }
         });
       }
     },
@@ -2809,10 +2810,10 @@ var optionsmunicipios = [{
       }
 
       var submitResult = {};
-      Object.entries(this.formulario).forEach(function (_ref4) {
-        var _ref5 = _slicedToArray(_ref4, 2),
-            key = _ref5[0],
-            value = _ref5[1];
+      Object.entries(this.formulario).forEach(function (_ref3) {
+        var _ref4 = _slicedToArray(_ref3, 2),
+            key = _ref4[0],
+            value = _ref4[1];
 
         if (value.data != '' && value.data != null) {
           if (key == 'categoria' || key == 'subcategoria' || key == 'tiposubcategoria') {
@@ -2825,9 +2826,9 @@ var optionsmunicipios = [{
         if (key == 'productos') {
           submitResult[key] = value;
         }
-      });
-      console.log(this.formulario.productos);
-      console.log(submitResult); // let obj = {
+      }); // console.log(this.formulario.productos);
+      // console.log(submitResult);
+      // let obj = {
       //   prop1: null,
       //   prop2: null,
       //   prop3: this.formulario.productos
@@ -2875,10 +2876,10 @@ var optionsmunicipios = [{
       }
 
       var submitResult = {};
-      Object.entries(this.formulario).forEach(function (_ref6) {
-        var _ref7 = _slicedToArray(_ref6, 2),
-            key = _ref7[0],
-            value = _ref7[1];
+      Object.entries(this.formulario).forEach(function (_ref5) {
+        var _ref6 = _slicedToArray(_ref5, 2),
+            key = _ref6[0],
+            value = _ref6[1];
 
         if (value.data != '' && value.data != null) {
           if (key == 'categoria' || key == 'subcategoria' || key == 'tiposubcategoria') {
@@ -2888,6 +2889,8 @@ var optionsmunicipios = [{
           }
         }
       }); // console.log(submitResult)
+      // console.log(this.documentos)
+      // return
 
       this.$refs.child.croppa.generateBlob(function (blob) {
         var fd = new FormData();
@@ -2900,7 +2903,7 @@ var optionsmunicipios = [{
         };
         return new Promise(function (resolve) {
           app.$store.dispatch('GUARDAR_IMG', obj).then(function (resp) {
-            app.onReset();
+            // app.onReset()
             resolve(resp);
           });
         });
@@ -2916,10 +2919,10 @@ var optionsmunicipios = [{
     onReset: function onReset() {
       var _this4 = this;
 
-      Object.entries(this.formulario).forEach(function (_ref8) {
-        var _ref9 = _slicedToArray(_ref8, 2),
-            key = _ref9[0],
-            value = _ref9[1];
+      Object.entries(this.formulario).forEach(function (_ref7) {
+        var _ref8 = _slicedToArray(_ref7, 2),
+            key = _ref8[0],
+            value = _ref8[1];
 
         if (value.data != '' && value.data != null) {
           _this4.formulario[key].data = null;
@@ -2965,12 +2968,13 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       datos: {
-        nombreempresa: 'test',
-        descripcion: 'test',
-        email: 'test',
-        telefono: 'test',
-        linkvideo: 'test',
-        imagenlogo: 'test',
+        nombreempresa: 'Negocios Verdes',
+        representantelegal: 'Negocios Verdes',
+        descripcion: 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type a',
+        telefono: '1234567',
+        municipio: 'Hatonuevo',
+        direccion: 'Algún Lugar',
+        email: 'negociosverdes@negocios.com',
         categoria: {
           idcategoria: "2",
           nombre: "ECOPRODUCTOS INDUSTRIALES"
@@ -2984,7 +2988,16 @@ __webpack_require__.r(__webpack_exports__);
           idtiposubcategoria: "6",
           nombre: "Geotérmica",
           idsubcategoria: "1"
-        }
+        },
+        productos: [{
+          nombre: 'Vasos',
+          descripcion: 'Buenos',
+          urlimagen: null
+        }, {
+          nombre: 'Gorras',
+          descripcion: 'A mano',
+          urlimagen: null
+        }]
       }
     };
   }
@@ -53546,7 +53559,7 @@ var render = function() {
                                 label: "Descripcion",
                                 type: "textarea",
                                 counter: "",
-                                maxlength: "200",
+                                maxlength: "500",
                                 rules: _vm.formulario.descripcion.rules
                               },
                               model: {
@@ -53621,6 +53634,7 @@ var render = function() {
                                 name: _vm.formulario.municipio.nombre,
                                 label: _vm.formulario.municipio.label,
                                 options: _vm.options,
+                                "emit-value": "",
                                 clearable: ""
                               },
                               scopedSlots: _vm._u([
@@ -53725,7 +53739,7 @@ var render = function() {
                                 label: "Direccion",
                                 type: "text",
                                 counter: "",
-                                maxlength: "12",
+                                maxlength: "200",
                                 dense: _vm.dense,
                                 rules: _vm.formulario.direccion.rules
                               },
@@ -54574,8 +54588,6 @@ var render = function() {
                           attrs: {
                             label: "Formato - Ficha de inscripción",
                             "auto-upload": "",
-                            flat: "",
-                            bordered: "",
                             "max-files": "1",
                             factory: _vm.factoryFn,
                             accept: ".xls , .xlsx, .docx, .pdf"
@@ -54595,8 +54607,6 @@ var render = function() {
                           attrs: {
                             label: "Anexo - Listado de asociados",
                             "auto-upload": "",
-                            flat: "",
-                            bordered: "",
                             "max-files": "1",
                             factory: _vm.factoryFn,
                             accept: ".xls , .xlsx, .docx, .pdf"
@@ -54616,8 +54626,6 @@ var render = function() {
                           attrs: {
                             label: "Anexo - Carta de consentimiento",
                             "auto-upload": "",
-                            flat: "",
-                            bordered: "",
                             "max-files": "1",
                             factory: _vm.factoryFn,
                             accept: ".xls , .xlsx, .docx, .pdf"
@@ -54637,8 +54645,6 @@ var render = function() {
                           attrs: {
                             label: "Anexo - Carta de intención",
                             "auto-upload": "",
-                            flat: "",
-                            bordered: "",
                             "max-files": "1",
                             factory: _vm.factoryFn,
                             accept: ".xls , .xlsx, .docx, .pdf"

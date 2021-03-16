@@ -36,7 +36,8 @@
 			<!-- Admin Main File Copy Section -->
 			<filename>index.html</filename>
 			<filename>mrnegociosverde.php</filename>
-			<!-- SQL files section -->			
+			<!-- SQL files section -->
+			<folder>models</folder>	
 			<folder>css</folder>
 			<folder>js</folder>
 		</files>
