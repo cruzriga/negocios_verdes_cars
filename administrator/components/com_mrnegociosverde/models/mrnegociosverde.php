@@ -162,7 +162,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         // $query->select('e.idempresa, e.nombreempresa, e.representantelegal, e.descripcion, e.telefono, e.direccion, e.municipio, e.email, e.twitter, e.facebook, e.instagram, e.linkvideo, e.imagenlogo')
         $query->select('*')
             ->from($db->quoteName('#__negocios_v_empresas','e'))
-            ->where($db->quoteName('e.activo') . ' = ' . $db->quote('1'))
+            // ->where($db->quoteName('e.activo') . ' = ' . $db->quote('1'))
             // ->group($db->quoteName('a.idempresa'))
             ->order('e.nombreempresa DESC')
         ;

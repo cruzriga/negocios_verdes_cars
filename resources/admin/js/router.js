@@ -4,6 +4,8 @@ import negocios from "./pages/negocios";
 import categorias from "./pages/categorias";
 import archivos from "./pages/archivos";
 
+import formulario from "./pages/formulario";
+
 Vue.use(VueRouter);
 
 
@@ -36,6 +38,16 @@ const router = new VueRouter(
             },
             {
                 path: '/archivos', component: archivos, props:true,
+                children: [
+                    /* {
+                     path: '/',
+                     component: Business,
+                     name: 'main'
+                     },*/
+                ]
+            },
+            {
+                path: '/formulario', name: 'formulario', component: formulario, props:true,
                 children: [
                     /* {
                      path: '/',

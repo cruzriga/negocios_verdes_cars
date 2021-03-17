@@ -12,7 +12,7 @@
                 :loading-size="50"
                 :disable-drag-and-drop="true"
                 @new-image-drawn="onNewImage"                
-                initial-image="https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
+                :initial-image="urlImg!=null?urlImg:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'"
                 accept=".jpeg,.png">
         </croppa>
         <!-- prevent-white-space -->
@@ -27,6 +27,9 @@
 export default {
     name: 'EmpresaAvatar',
     props: {
+        urlImg: {
+            type: String
+        },
         width: {
             type: String
         },

@@ -192,7 +192,7 @@
                   <div class="text-h6">Logo</div>
                 </div> -->
                 <div class="col">
-                <EmpresaAvatar ref="child"/>
+                  <EmpresaAvatar ref="child" v-bind:urlImg="formulario.imagenlogo.data"/>
                 </div>
                 <!-- <div class="col">
                 One of three rows
@@ -217,7 +217,7 @@
               v-model="formulario.categoria.data"
               option-label="nombre"
               option-value="idcategoria"
-              :options="this.$store.state.categoria.resp!=null?this.$store.state.categoria.resp.categorias:[]"
+              :options="this.$store.state.formulario.categoria.resp!=null?this.$store.state.formulario.categoria.resp.categorias:[]"
               @input="onchange"
               filled
               :rules="formulario.categoria.rules"
@@ -239,7 +239,7 @@
                 v-model="formulario.subcategoria.data"
                 option-label="nombre"
                 option-value="idsubcategoria"
-                :options="this.$store.state.categoria.resp!=null?this.$store.state.categoria.resp.subcategorias.filter(post => { return post.idcategoria == formulario.categoria.data.idcategoria}):[]"               
+                :options="this.$store.state.formulario.categoria.resp!=null?this.$store.state.formulario.categoria.resp.subcategorias.filter(post => { return post.idcategoria == formulario.categoria.data.idcategoria}):[]"               
                 @input="onchange"
                 filled
               >
@@ -259,7 +259,7 @@
                 </template>
               </q-select>
             </q-intersection>
-            <q-select v-if="formulario.subcategoria.data!=null && this.$store.state.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}).length>0"
+            <q-select v-if="formulario.subcategoria.data!=null && this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}).length>0"
               :name="formulario.tiposubcategoria.nombre"
               :label="formulario.tiposubcategoria.label"
               transition-show="flip-up"
@@ -267,7 +267,7 @@
               v-model="formulario.tiposubcategoria.data"
               option-label="nombre"
               option-value="idtiposubcategoria"
-              :options="this.$store.state.categoria.resp!=null?this.$store.state.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}):[]"
+              :options="this.$store.state.formulario.categoria.resp!=null?this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}):[]"
               filled
             >
             <template v-slot:option="scope">
@@ -285,8 +285,8 @@
                 </q-item>
               </template>
             </q-select>
-          <!-- {{this.$store.state.categoria.resp.tiposubcategorias}}
-          {{this.$store.state.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria})}} -->
+          <!-- {{this.$store.state.formulario.categoria.resp.tiposubcategorias}}
+          {{this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria})}} -->
           </q-card-section>
         </q-card>        
         <q-card class="my-card q-ma-md">
@@ -529,8 +529,8 @@
 
           
         </q-form>
-        <!-- {{this.$store.state.cargando}} -->
-        <q-inner-loading :showing="this.$store.state.cargando">
+        <!-- {{this.$store.state.formulario.cargando}} -->
+        <q-inner-loading :showing="this.$store.state.formulario.cargando">
           <q-spinner-hourglass size="5.5em" color="green" />
         </q-inner-loading>
         <!-- <q-btn
@@ -623,7 +623,7 @@ const optionsmunicipios = [
               value: 'Villanueva',
               icon: 'img:./../media/iconospng/Flag_of_Villanueva.png'
           }
-      ];
+];
 export default {
   name: 'FormularioNegocios',
   components: { EmpresaAvatar},
@@ -778,12 +778,12 @@ export default {
     factoryFn (files) {
       let formData = new FormData();
       formData.append('documentos', files[0]);
-      // this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
+      // this.$store.dispatch('formulario/GUARDAR_DOC',formData).then(function(resp) {
       //     console.log(resp)
       // })
       const app = this;
       return new Promise((resolve) => {
-        app.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
+        app.$store.dispatch('formulario/GUARDAR_DOC',formData).then(function(resp) {
           app.documentos.push({
             urldocumento:resp.resp.url,
             imgnombre:resp.resp.imgnombre,
@@ -794,7 +794,7 @@ export default {
       })
     },
     AXIO_GET_CATEGORIAS() {
-      this.$store.dispatch('CARGAR_CATEGORIA');
+      this.$store.dispatch('formulario/CARGAR_CATEGORIA');
     },
     onchange(value){
       if(value.idsubcategoria!=null){
@@ -814,14 +814,22 @@ export default {
       console.log(node)
     },
     verificarProps() {
+      console.log('propformulario');
+      console.log(this.propformulario);
+      console.log(this.formulario.nombreempresa.data);
+      console.log('propformulario');
       if (this.propformulario != null) {
         Object.entries(this.propformulario).forEach(([key, value]) => {
-            console.log(value);
-            if (key=='productos') {
-              this.formulario[key]=value
-            }else{
-              this.formulario[key].data = value
+            console.log(key+' : '+value);
+            if(this.formulario[key]!=null){
+              console.log( this.formulario[key].data);
+              if (key=='productos') {
+                this.formulario[key]=value
+              }else{
+                this.formulario[key].data = value
+              }
             }
+            
         })
       }
     },
@@ -850,13 +858,13 @@ export default {
       //   prop3: this.formulario.productos
       // }
       // return new Promise((resolve) => {
-      //   this.$store.dispatch('GUARDAR_PRODUCTOS',obj).then(function(resp) {
+      //   this.$store.dispatch('formulario/GUARDAR_PRODUCTOS',obj).then(function(resp) {
       //     resolve(resp)
       //   })  
       // })
       this.$refs.child.croppa.generateBlob((blob) => {
         var fd = new FormData()
-        fd.append('file', blob, 'filename.jpg')
+        fd.append('file', blob, 'logoEmpresa.jpg')
         let obj = {
           prop1: fd,
           prop2: submitResult,
@@ -864,7 +872,7 @@ export default {
           prop4: this.documentos
         }
         return new Promise((resolve) => {
-          this.$store.dispatch('GUARDAR_IMG',obj).then(function(resp) {
+          this.$store.dispatch('formulario/GUARDAR_IMG',obj).then(function(resp) {
             resolve(resp)
           })  
         })
@@ -883,7 +891,7 @@ export default {
     onSubmit (evt) {
       const app = this;
       if (!this.$refs.child.croppa.hasImage()) {
-        console.log('no image to upload')
+        console.log('No')
         return
       }
       var submitResult = {}    
@@ -909,7 +917,7 @@ export default {
           prop4: this.documentos
         }
         return new Promise((resolve) => {
-          app.$store.dispatch('GUARDAR_IMG',obj).then(function(resp) {
+          app.$store.dispatch('formulario/GUARDAR_IMG',obj).then(function(resp) {
             // app.onReset()
             resolve(resp)
           })  

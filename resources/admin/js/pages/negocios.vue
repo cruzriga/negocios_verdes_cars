@@ -1,6 +1,12 @@
 <template>
   <q-page >
-    <!-- <div> {{this.$store.state.empresas.resp.data}}</div> -->
+    <!-- <div> {{this.$store.state.admin.empresas.resp.data[0]}}</div> -->
+    <!-- <div v-for="(empresa, count) in this.$store.state.admin.empresas.resp.data" v-bind:key="count">
+      <div>{{counter}} : {{applicant}}</div>
+    </div>     -->
+    <!-- <div class="hello">
+        <button @click="openFormulario">F</button>
+    </div> -->
     <q-list bordered class="rounded-borders fit"  >
       <q-item-label  header>
         <q-toolbar class="text-primary" style="height: 50px">
@@ -16,9 +22,100 @@
           </div>
         </q-toolbar>
       </q-item-label>
-
       <template v-if = "items.length > 0">
-        <template v-for = "n in 20">
+      <div v-for="(empresa, count) in this.$store.state.admin.empresas.resp.data" v-bind:key="count">
+        <!-- {{empresa}} -->
+        <q-separator spaced/>
+        <q-item>
+          <q-item-section avatar top>
+            <div>
+              <q-toggle
+                :false-value="0"
+                :true-value="1"
+                v-model="empresa.activo"
+                name="activo"
+                color="green"
+                icon="check"
+              />
+            </div>
+
+          </q-item-section>
+
+          <q-item-section top>
+            <q-item-label lines = "1">
+              <span class = "q-mt-xs text-body2 text-weight-bold text-uppercase">{{empresa.nombreempresa}}</span>
+              <span class = "text-grey-8"> <q-icon name="date_range"/> 00 / 00 / 0000 00:00 MM</span>
+            </q-item-label>
+            <q-item-label caption lines = "1">
+              {{empresa.descripcion}}             
+            </q-item-label>
+            <q-item-label caption lines = "1" class="row">
+              <div><q-icon name="face" /> {{empresa.representantelegal}} </div> <div>| <q-icon name="gps_fixed" /> {{empresa.municipio}}</div> <div>| <q-icon name="phone" /> {{empresa.telefono}}</div>   <div>| <q-icon name="mail" /> {{empresa.email}}</div>
+            </q-item-label>
+            <q-item-label lines = "1" class = "q-mt-xs text-body2 text-weight-bold text-uppercase">
+              {{empresa.categoria.nombre}} > {{empresa.subcategoria.nombre}} > {{empresa.tiposubcategoria.nombre}}
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side style="align-items: center;" top>
+            <q-item-label lines = "1" >
+              <span class = "q-mt-xs text-weight-bold ">Cump</span>
+            </q-item-label >
+            <q-item-label lines = "1" >
+              <q-knob
+                  v-model="cump"
+                  show-value
+                  size="50px"
+                  color="teal"
+                  track-color="grey-3"
+                  readonly
+
+              />
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side style="align-items: center;" top>
+            <q-item-label lines = "1" >
+              <span class = "q-mt-xs text-weight-bold ">Adic</span>
+            </q-item-label >
+            <q-item-label lines = "1" >
+              <q-knob
+                  v-model="adic"
+                  show-value
+                  size="50px"
+                  color="teal"
+                  track-color="grey-3"
+                  readonly
+              />
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side style="align-items: center;" top>
+            <q-item-label lines = "1" >
+              <span class = "q-mt-xs text-weight-bold ">Interpretación</span>
+            </q-item-label >
+            <q-item-label lines = "1" >
+              <q-chip class = "text-uppercase">
+                AVANZADO
+              </q-chip>
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section side style="align-items: center;">
+            <q-item-label lines = "1" >            
+                <q-icon  @click="openFormulario(empresa)" name="edit" class="text-primary" style="font-size: 32px;" />
+            </q-item-label>
+          </q-item-section>
+
+          <q-item-section top side>
+            <div class = "text-grey-8 q-gutter-xs">
+              <q-btn v-if="false" class = "gt-xs" size = "12px" flat dense round icon = "delete"/>
+              <q-btn v-if="false" class = "gt-xs" size = "12px" flat dense round icon = "mode"/>
+              <q-btn size = "12px" flat dense round icon = "more_vert"/>
+            </div>
+          </q-item-section>
+        </q-item>
+      </div>
+        <!-- <template v-for = "n in 20">
           <q-separator spaced/>
           <q-item>
             <q-item-section avatar top>
@@ -99,7 +196,7 @@
               </div>
             </q-item-section>
           </q-item>
-        </template>
+        </template> -->
       </template>
       <q-item v-else>
           <q-item-section avatar top class="full-width">
@@ -120,6 +217,9 @@ export default {
   name: 'Negocios',
   data(){
     return {
+      debug: false,
+      id: 0,
+      msg: 'Hey Nic Raboy',
       search:'',
       online: false,
       items : [1],
@@ -128,9 +228,12 @@ export default {
     }
   },
   beforeMount () {
-    this.$store.dispatch('CARGAR_EMPRESAS');
+    this.$store.dispatch('admin/CARGAR_EMPRESAS');
   },
   methods: {
+    openFormulario (empresa){
+      this.$router.push({name: 'formulario', params: {prop:empresa}});
+    }
   }
 }
 </script>

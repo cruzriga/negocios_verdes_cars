@@ -1884,6 +1884,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'EmpresaAvatar',
   props: {
+    urlImg: {
+      type: String
+    },
     width: {
       type: String
     },
@@ -2745,13 +2748,13 @@ var optionsmunicipios = [{
   methods: {
     factoryFn: function factoryFn(files) {
       var formData = new FormData();
-      formData.append('documentos', files[0]); // this.$store.dispatch('GUARDAR_DOC',formData).then(function(resp) {
+      formData.append('documentos', files[0]); // this.$store.dispatch('formulario/GUARDAR_DOC',formData).then(function(resp) {
       //     console.log(resp)
       // })
 
       var app = this;
       return new Promise(function (resolve) {
-        app.$store.dispatch('GUARDAR_DOC', formData).then(function (resp) {
+        app.$store.dispatch('formulario/GUARDAR_DOC', formData).then(function (resp) {
           app.documentos.push({
             urldocumento: resp.resp.url,
             imgnombre: resp.resp.imgnombre,
@@ -2762,7 +2765,7 @@ var optionsmunicipios = [{
       });
     },
     AXIO_GET_CATEGORIAS: function AXIO_GET_CATEGORIAS() {
-      this.$store.dispatch('CARGAR_CATEGORIA');
+      this.$store.dispatch('formulario/CARGAR_CATEGORIA');
     },
     onchange: function onchange(value) {
       if (value.idsubcategoria != null) {
@@ -2785,18 +2788,27 @@ var optionsmunicipios = [{
     verificarProps: function verificarProps() {
       var _this = this;
 
+      console.log('propformulario');
+      console.log(this.propformulario);
+      console.log(this.formulario.nombreempresa.data);
+      console.log('propformulario');
+
       if (this.propformulario != null) {
         Object.entries(this.propformulario).forEach(function (_ref) {
           var _ref2 = _slicedToArray(_ref, 2),
               key = _ref2[0],
               value = _ref2[1];
 
-          console.log(value);
+          console.log(key + ' : ' + value);
 
-          if (key == 'productos') {
-            _this.formulario[key] = value;
-          } else {
-            _this.formulario[key].data = value;
+          if (_this.formulario[key] != null) {
+            console.log(_this.formulario[key].data);
+
+            if (key == 'productos') {
+              _this.formulario[key] = value;
+            } else {
+              _this.formulario[key].data = value;
+            }
           }
         });
       }
@@ -2834,14 +2846,14 @@ var optionsmunicipios = [{
       //   prop3: this.formulario.productos
       // }
       // return new Promise((resolve) => {
-      //   this.$store.dispatch('GUARDAR_PRODUCTOS',obj).then(function(resp) {
+      //   this.$store.dispatch('formulario/GUARDAR_PRODUCTOS',obj).then(function(resp) {
       //     resolve(resp)
       //   })  
       // })
 
       this.$refs.child.croppa.generateBlob(function (blob) {
         var fd = new FormData();
-        fd.append('file', blob, 'filename.jpg');
+        fd.append('file', blob, 'logoEmpresa.jpg');
         var obj = {
           prop1: fd,
           prop2: submitResult,
@@ -2849,7 +2861,7 @@ var optionsmunicipios = [{
           prop4: _this2.documentos
         };
         return new Promise(function (resolve) {
-          _this2.$store.dispatch('GUARDAR_IMG', obj).then(function (resp) {
+          _this2.$store.dispatch('formulario/GUARDAR_IMG', obj).then(function (resp) {
             resolve(resp);
           });
         });
@@ -2871,7 +2883,7 @@ var optionsmunicipios = [{
       var app = this;
 
       if (!this.$refs.child.croppa.hasImage()) {
-        console.log('no image to upload');
+        console.log('No');
         return;
       }
 
@@ -2902,7 +2914,7 @@ var optionsmunicipios = [{
           prop4: _this3.documentos
         };
         return new Promise(function (resolve) {
-          app.$store.dispatch('GUARDAR_IMG', obj).then(function (resp) {
+          app.$store.dispatch('formulario/GUARDAR_IMG', obj).then(function (resp) {
             // app.onReset()
             resolve(resp);
           });
@@ -3005,10 +3017,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/site/js/store/store.js":
-/*!******************************************!*\
-  !*** ./resources/site/js/store/store.js ***!
-  \******************************************/
+/***/ "./resources/site/js/store/modules/formulario.js":
+/*!*******************************************************!*\
+  !*** ./resources/site/js/store/modules/formulario.js ***!
+  \*******************************************************/
 /***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
 
 "use strict";
@@ -3028,7 +3040,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util */ "./resources/site/js/store/util.js");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../util */ "./resources/site/js/store/util.js");
 var _mutations;
 
 
@@ -3051,7 +3063,8 @@ var GUARDAR_PRODUCTOS = 'GUARDAR_PRODUCTOS';
 var GUARDAR_IMG = 'GUARDAR_IMG';
 var GUARDAR_DOC = 'GUARDAR_DOC';
 var CARGANDO = 'CARGANDO';
-var store = new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
+var store = {
+  namespaced: true,
   state: {
     categoria: [],
     cargando: false
@@ -3123,7 +3136,7 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
 
                 datos.prop2.imagenlogo = resp.resp;
 
-                _this.dispatch('GUARDAR_FORMULARIO', datos);
+                _this.dispatch('formulario/GUARDAR_FORMULARIO', datos);
 
                 _context2.next = 12;
                 break;
@@ -3200,14 +3213,14 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
                   datos.prop3[key].idempresa = resp.resp;
                 });
 
-                _this2.dispatch('GUARDAR_PRODUCTOS', datos);
+                _this2.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
 
                 if (datos.prop4 != null) {
                   datos.prop4.forEach(function (element, key) {
                     datos.prop4[key].idempresa = resp.resp;
                   });
 
-                  _this2.dispatch('GUARDAR_DOCUMENTOS', datos);
+                  _this2.dispatch('formulario/GUARDAR_DOCUMENTOS', datos);
                 }
 
                 _context4.next = 15;
@@ -3298,10 +3311,42 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_3__.default.Store({
         }, _callee6);
       }))();
     }
-  },
-  modules: {}
-});
+  }
+};
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (store);
+
+/***/ }),
+
+/***/ "./resources/site/js/store/store.js":
+/*!******************************************!*\
+  !*** ./resources/site/js/store/store.js ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
+/* harmony import */ var _modules_formulario__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./modules/formulario */ "./resources/site/js/store/modules/formulario.js");
+/* provided dependency */ var process = __webpack_require__(/*! process/browser */ "./node_modules/process/browser.js");
+
+
+vue__WEBPACK_IMPORTED_MODULE_0__.default.use(vuex__WEBPACK_IMPORTED_MODULE_1__.default);
+
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
+  var Store = new vuex__WEBPACK_IMPORTED_MODULE_1__.default.Store({
+    modules: {
+      formulario: _modules_formulario__WEBPACK_IMPORTED_MODULE_2__.default
+    },
+    // enable strict mode (adds overhead!)
+    // for dev mode only
+    strict: process.env.DEBUGGING
+  });
+  return Store;
+}
 
 /***/ }),
 
@@ -3324,7 +3369,7 @@ var request = function request(url, data, method) {
 
   method = (_method = method) !== null && _method !== void 0 ? _method : 'post';
   return new Promise(function (resolve, reject) {
-    (axios__WEBPACK_IMPORTED_MODULE_0___default())[method](url, data).then(function (resp) {
+    (axios__WEBPACK_IMPORTED_MODULE_0___default())[method](url.replace('/administrator', ''), data).then(function (resp) {
       resolve({
         ok: true,
         resp: resp.data
@@ -53386,7 +53431,9 @@ var render = function() {
           "loading-size": 50,
           "disable-drag-and-drop": true,
           "initial-image":
-            "https://zhanziyang.github.io/vue-croppa/static/500.jpeg",
+            _vm.urlImg != null
+              ? _vm.urlImg
+              : "https://zhanziyang.github.io/vue-croppa/static/500.jpeg",
           accept: ".jpeg,.png"
         },
         on: { "new-image-drawn": _vm.onNewImage },
@@ -54008,7 +54055,12 @@ var render = function() {
                         _c(
                           "div",
                           { staticClass: "col" },
-                          [_c("EmpresaAvatar", { ref: "child" })],
+                          [
+                            _c("EmpresaAvatar", {
+                              ref: "child",
+                              attrs: { urlImg: _vm.formulario.imagenlogo.data }
+                            })
+                          ],
                           1
                         )
                       ])
@@ -54042,8 +54094,9 @@ var render = function() {
                           "option-label": "nombre",
                           "option-value": "idcategoria",
                           options:
-                            this.$store.state.categoria.resp != null
-                              ? this.$store.state.categoria.resp.categorias
+                            this.$store.state.formulario.categoria.resp != null
+                              ? this.$store.state.formulario.categoria.resp
+                                  .categorias
                               : [],
                           filled: "",
                           rules: _vm.formulario.categoria.rules
@@ -54104,8 +54157,9 @@ var render = function() {
                                   "option-label": "nombre",
                                   "option-value": "idsubcategoria",
                                   options:
-                                    this.$store.state.categoria.resp != null
-                                      ? this.$store.state.categoria.resp.subcategorias.filter(
+                                    this.$store.state.formulario.categoria
+                                      .resp != null
+                                      ? this.$store.state.formulario.categoria.resp.subcategorias.filter(
                                           function(post) {
                                             return (
                                               post.idcategoria ==
@@ -54196,7 +54250,7 @@ var render = function() {
                       ),
                       _vm._v(" "),
                       _vm.formulario.subcategoria.data != null &&
-                      this.$store.state.categoria.resp.tiposubcategorias.filter(
+                      this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(
                         function(post) {
                           return (
                             post.idsubcategoria ==
@@ -54213,8 +54267,9 @@ var render = function() {
                               "option-label": "nombre",
                               "option-value": "idtiposubcategoria",
                               options:
-                                this.$store.state.categoria.resp != null
-                                  ? this.$store.state.categoria.resp.tiposubcategorias.filter(
+                                this.$store.state.formulario.categoria.resp !=
+                                null
+                                  ? this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(
                                       function(post) {
                                         return (
                                           post.idsubcategoria ==
@@ -54837,7 +54892,7 @@ var render = function() {
       _vm._v(" "),
       _c(
         "q-inner-loading",
-        { attrs: { showing: this.$store.state.cargando } },
+        { attrs: { showing: this.$store.state.formulario.cargando } },
         [
           _c("q-spinner-hourglass", {
             attrs: { size: "5.5em", color: "green" }

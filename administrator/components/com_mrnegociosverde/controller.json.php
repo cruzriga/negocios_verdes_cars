@@ -42,6 +42,23 @@ class MrNegociosVerdeController extends JControllerLegacy {
             echo new JResponseJson($e);
         }
     }
+    public function categorias(Type $var = null)
+    {
+        $model= $this->getModel('mrnegociosverde');//on echo-prints class name of model
+        $categorias= $model->getCategorias();
+        $subcategorias= $model->getSubCategorias();
+        $tiposubcategorias= $model->getTipoSubCategorias();
+
+        $item = new stdClass();
+        $item->categorias = $categorias;
+        $item->subcategorias = $subcategorias;
+        $item->tiposubcategorias = $tiposubcategorias;
+        
+        $app = JFactory::getApplication();
+        $app->setHeader('Content-Type', 'application/json; charset=utf-8');
+        $data = new stdClass();
+        echo json_encode($item);
+    }
     public function getEmpresas()
     {
         $app = JFactory::getApplication();  
@@ -57,16 +74,16 @@ class MrNegociosVerdeController extends JControllerLegacy {
             unset($value->idsubcategoria);
             unset($value->idtiposubcategoria);
 
-            $empresas[$key]->categoria = $categoria;
-            $empresas[$key]->subcategoria = $subcategoria;
-            $empresas[$key]->tiposubcategoria = $tiposubcategoria;
+            $empresas[$key]->categoria = $categoria[0];
+            $empresas[$key]->subcategoria = $subcategoria[0];
+            $empresas[$key]->tiposubcategoria = $tiposubcategoria[0];
             $empresas[$key]->productos = $productos;
         }
         $app->enqueueMessage("Enqueued notice", "notice");
         $app->enqueueMessage("Enqueued warning", "warning");
         try 
         {   
-            echo new JResponseJson($empresas);
+            echo new JResponseJson($empresas, "It worked!");
         }
         catch (Exception $e)
         {
