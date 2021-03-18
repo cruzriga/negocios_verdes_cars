@@ -2839,8 +2839,8 @@ var anexarfile = [{
     };
   },
   beforeMount: function beforeMount() {
-    this.AXIO_GET_CATEGORIAS();
-    this.verificarProps(); // this.agregarCategorias();
+    this.AXIO_GET_CATEGORIAS(); // this.verificarProps();
+    // this.agregarCategorias();
   },
   // created () {
   //   console.log(this.$refs.a_listado_asociados)
@@ -2850,7 +2850,8 @@ var anexarfile = [{
 
     var interval = setInterval(function () {
       if (_this.$refs.qUploader) {
-        _this.loaddoc();
+        // this.loaddoc();        
+        _this.verificarProps();
 
         clearInterval(interval);
       }
@@ -2875,46 +2876,24 @@ var anexarfile = [{
 
       this.documentos.splice(removeIndex, 1); // console.log(this.documentos);
     },
-    loaddoc: function loaddoc() {
-      var url = 'media/uploads/doc/176023ficha_inscripcion_nv_v2020.xlsx';
-      var fileName = 'ficha_inscripcion_nv_v2020.xlsx';
-      var size = 87331; // let type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';      
+    loaddoc: function loaddoc(documentos) {
+      var files = [];
+      var file = Object; // let type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';      
 
-      var file = [{
-        id: '176023',
-        size: size,
-        type: fileName.split('.').pop(),
-        ref: 'fFichaInscripcion',
-        // type:type,
-        name: fileName,
-        // __proto__:File
-        __proto__: {
-          src: url
-        }
-      }, {
-        id: '176023',
-        size: size,
-        type: fileName.split('.').pop(),
-        ref: 'aListadoAsociados',
-        // type:type,
-        name: fileName,
-        // __proto__:File
-        __proto__: {
-          src: url
-        }
-      }, {
-        id: '176023',
-        size: size,
-        type: fileName.split('.').pop(),
-        ref: 'aCartaConsentimiento',
-        // type:type,
-        name: fileName,
-        // __proto__:File
-        __proto__: {
-          src: url
-        }
-      }];
-      this.addfile(file);
+      documentos.forEach(function (element) {
+        file = {
+          id: element.iddocumentos,
+          size: element.size,
+          type: element.name.split('.').pop(),
+          ref: element.ref,
+          name: element.name,
+          __proto__: {
+            src: element.urldocumento
+          }
+        };
+        files.push(file);
+      });
+      this.addfile(files);
     },
     addfile: function addfile(file) {
       console.log(this.$refs);
@@ -2973,6 +2952,10 @@ var anexarfile = [{
             }
           }
         });
+
+        if (this.propformulario.documentos) {
+          this.loaddoc(this.propformulario.documentos);
+        }
       }
     },
     uploadimg: function uploadimg() {

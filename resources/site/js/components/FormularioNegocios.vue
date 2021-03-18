@@ -881,7 +881,7 @@ export default {
   },
   beforeMount() {
     this.AXIO_GET_CATEGORIAS()
-    this.verificarProps();
+    // this.verificarProps();
     // this.agregarCategorias();
   },
   // created () {
@@ -890,7 +890,8 @@ export default {
   mounted(){
     const interval = setInterval(() => {
       if (this.$refs.qUploader) {
-        this.loaddoc();
+        // this.loaddoc();        
+        this.verificarProps();
         clearInterval(interval)
       }
     }, 1000)
@@ -915,47 +916,24 @@ export default {
       this.documentos.splice(removeIndex, 1);
       // console.log(this.documentos);
     },
-    loaddoc(){
-      let url = 'media/uploads/doc/176023ficha_inscripcion_nv_v2020.xlsx';
-      let fileName = 'ficha_inscripcion_nv_v2020.xlsx';
-      let size = 87331;
+    loaddoc(documentos){
+      let files = [];
+      let file = Object;
       // let type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';      
-
-      let file = [{
-          id:'176023',
-          size: size,
-          type: fileName.split('.').pop(),
-          ref:'fFichaInscripcion',
-          // type:type,
-          name: fileName,
-          // __proto__:File
+      documentos.forEach(element => {
+         file = {
+          id:element.iddocumentos,
+          size: element.size,
+          type: element.name.split('.').pop(),
+          ref:element.ref,
+          name: element.name,
           __proto__:{
-            src: url
+            src: element.urldocumento
           }
-        },{
-          id:'176023',
-          size: size,
-          type: fileName.split('.').pop(),
-          ref:'aListadoAsociados',
-          // type:type,
-          name: fileName,
-          // __proto__:File
-          __proto__:{
-            src: url
-          }
-        },{
-          id:'176023',
-          size: size,
-          type: fileName.split('.').pop(),
-          ref:'aCartaConsentimiento',
-          // type:type,
-          name: fileName,
-          // __proto__:File
-          __proto__:{
-            src: url
-          }
-        }]
-      this.addfile(file)
+        };
+        files.push(file);
+      });
+      this.addfile(files)
     },
     addfile(file){
       console.log(this.$refs)
@@ -1002,9 +980,11 @@ export default {
               }else{
                 this.formulario[key].data = value
               }
-            }
-            
+            }            
         })
+        if (this.propformulario.documentos) {          
+          this.loaddoc(this.propformulario.documentos);
+        }
       }      
     },
     uploadimg () {

@@ -69,6 +69,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
             $subcategoria       = $model->getSubCategorias($value->idcategoria,$value->idsubcategoria);
             $tiposubcategoria   = $model->getTipoSubCategorias($value->idsubcategoria,$value->idtiposubcategoria);
             $productos          = $model->getProductos($value->idempresa);
+            $documentos          = $model->getDocumentos($value->idempresa);
 
             unset($value->idcategoria);
             unset($value->idsubcategoria);
@@ -78,6 +79,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
             $empresas[$key]->subcategoria = $subcategoria[0];
             $empresas[$key]->tiposubcategoria = $tiposubcategoria[0];
             $empresas[$key]->productos = $productos;
+            $empresas[$key]->documentos = $documentos;
         }
         $app->enqueueMessage("Enqueued notice", "notice");
         $app->enqueueMessage("Enqueued warning", "warning");
