@@ -5,6 +5,7 @@
         @reset="onReset"
         class="q-gutter-md"
       >
+                <!-- <a @click.prevent="addfiletest">Trigger A's method</a> -->
       <masonry :cols="{default: 2, 1000: 2, 700: 1}" :gutter="10">
         <q-card class="my-card q-ma-md">
           <q-card-section>
@@ -384,45 +385,92 @@
             </q-card-section>
             <q-separator />
             <q-card-section>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="Formato - Ficha de inscripción"
-                    auto-upload
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"                    
-                    style="max-width: 600px"
-                  />
-              </div>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="Anexo - Listado de asociados"
-                    auto-upload
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"                    
-                    style="max-width: 600px"
-                  />
-              </div>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="Anexo - Carta de consentimiento"
-                    auto-upload
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"                    
-                    style="max-width: 600px"
-                  />
-              </div>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="Anexo - Carta de intención"
-                    auto-upload
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"                    
-                    style="max-width: 600px"
-                  />
+              <div v-for="(item, count) in anexofile" v-bind:key="count" class="row justify-center items-center">
+                <q-uploader
+                  ref="qUploader"
+                  class="divuploader"
+                  :label="item.label"                      
+                  :name="item.name"
+                  max-files="1"
+                  accept=".xls , .xlsx, .docx, .doc, .pdf"                    
+                  style="max-width: 700px"
+                  @removed="removeFiele"
+                  @uploaded="uploadedFile"
+                  @start="startFile"
+                  @added="addedFile"                     
+                  >
+                   <template v-slot:header="scope">
+                    <div class="row no-wrap items-center q-pa-sm q-gutter-xs">
+                      <!-- <q-btn v-if="scope.queuedFiles.length > 0" icon="clear_all" @click="scope.removeQueuedFiles" round dense flat >
+                        <q-tooltip>Clear All</q-tooltip>
+                      </q-btn> -->
+                      <!-- <q-btn v-if="scope.uploadedFiles.length > 0" icon="done_all" @click="scope.removeUploadedFiles" round dense flat >
+                        <q-tooltip>Remove Uploaded Files</q-tooltip>
+                      </q-btn> -->
+                      <q-spinner v-if="scope.isUploading" class="q-uploader__spinner" />
+                      <div class="col">
+                        <div class="q-uploader__title">{{item.label}}</div>
+                        <div class="q-uploader__subtitle">{{ scope.uploadSizeLabel }} 
+                          <!-- / {{ scope.uploadProgressLabel }} -->
+                          </div>
+                      </div>
+                      <q-btn v-if="scope.canAddFiles" type="a" icon="add_box" round dense flat>
+                        <q-uploader-add-trigger />
+                        <q-tooltip>Pick Files</q-tooltip>
+                      </q-btn>
+                      <!-- <q-btn v-if="scope.canUpload" icon="cloud_upload" @click="scope.upload" round dense flat >
+                        <q-tooltip>Upload Files</q-tooltip>
+                      </q-btn> -->
+
+                      <q-btn v-if="scope.isUploading" icon="clear" @click="scope.abort" round dense flat >
+                        <q-tooltip>Abort Upload</q-tooltip>
+                      </q-btn>
+                    </div>
+                  </template>
+                  <template v-slot:list="scope">
+                    <q-list separator>
+
+                      <q-item v-for="file in scope.files" :key="file.name">
+                        <q-item-section>
+                          <q-item-label class="full-width ellipsis">
+                            {{ file.name }}
+                          </q-item-label>
+
+                          <!-- <q-item-label caption>
+                            Status: {{ file.__status }}
+                          </q-item-label> -->
+
+                          <q-item-label caption>
+                            {{ file.__sizeLabel }}
+                             <!-- / {{ file.__progressLabel }} -->
+                          </q-item-label>
+                        </q-item-section>
+
+                        <q-item-section
+                          v-if="file.__img"
+                          thumbnail
+                          class="gt-xs"
+                        >
+                          <img :src="file.__img.src">
+                        </q-item-section>
+
+                        <q-item-section top side>
+                          <q-btn
+                            class="gt-xs"
+                            size="12px"
+                            flat
+                            dense
+                            round
+                            color="red"
+                            icon="delete"
+                            @click="scope.removeFile(file)"
+                          />
+                        </q-item-section>
+                      </q-item>
+
+                    </q-list>
+                  </template>
+                </q-uploader>
               </div>
             </q-card-section>
           </q-card>
@@ -433,78 +481,92 @@
             </q-card-section>
             <q-separator />
             <q-card-section>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="Certificado de existencia y representación legal vigente"
-                    auto-upload
-                    flat
-                    bordered
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"
-                    
-                    style="max-width: 600px"
-                  />
-              </div>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="Certificaciones con las que dispone actualmente la empresa"
-                    auto-upload
-                    flat
-                    bordered
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"                    
-                    style="max-width: 600px"
-                  />
-              </div>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="Permisos o registros con los que cuenta actualmente la empresa"
-                    auto-upload
-                    flat
-                    bordered
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"                    
-                    style="max-width: 600px"
-                  />
-              </div>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="RUT o resolución de facturación DIAN"
-                    auto-upload
-                    flat
-                    bordered
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"                    
-                    style="max-width: 600px"
-                  />
-              </div>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="Listado de asociados diligenciado"
-                    auto-upload
-                    flat
-                    bordered
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"                    
-                    style="max-width: 600px"
-                  />
-              </div>
-              <div class="row justify-center items-center">
-                <q-uploader class="divuploader"
-                    label="Carta de consentimiento informado diligenciada y firmada - Anexo 2"
-                    auto-upload
-                    flat
-                    bordered
-                    max-files="1"
-                    :factory="factoryFn"
-                    accept=".xls , .xlsx, .docx, .pdf"                    
-                    style="max-width: 600px"
-                  />
+              <div v-for="(item, count) in anexarfile" v-bind:key="count" class="row justify-center items-center">
+                <q-uploader
+                  ref="qUploader"
+                  class="divuploader"
+                  :label="item.label"                      
+                  :name="item.name"
+                  max-files="1"
+                  accept=".xls , .xlsx, .docx, .doc, .pdf"                    
+                  style="max-width: 700px"
+                  @removed="removeFiele"
+                  @uploaded="uploadedFile"
+                  @start="startFile"
+                  @added="addedFile"                     
+                  >
+                  <template v-slot:header="scope">
+                    <div class="row no-wrap items-center q-pa-sm q-gutter-xs">
+                      <!-- <q-btn v-if="scope.queuedFiles.length > 0" icon="clear_all" @click="scope.removeQueuedFiles" round dense flat >
+                        <q-tooltip>Clear All</q-tooltip>
+                      </q-btn> -->
+                      <!-- <q-btn v-if="scope.uploadedFiles.length > 0" icon="done_all" @click="scope.removeUploadedFiles" round dense flat >
+                        <q-tooltip>Remove Uploaded Files</q-tooltip>
+                      </q-btn> -->
+                      <q-spinner v-if="scope.isUploading" class="q-uploader__spinner" />
+                      <div class="col">
+                        <div class="q-uploader__title">{{item.label}}</div>
+                        <div class="q-uploader__subtitle">{{ scope.uploadSizeLabel }} 
+                          <!-- / {{ scope.uploadProgressLabel }} -->
+                          </div>
+                      </div>
+                      <q-btn v-if="scope.canAddFiles" type="a" icon="add_box" round dense flat>
+                        <q-uploader-add-trigger />
+                        <q-tooltip>Pick Files</q-tooltip>
+                      </q-btn>
+                      <!-- <q-btn v-if="scope.canUpload" icon="cloud_upload" @click="scope.upload" round dense flat >
+                        <q-tooltip>Upload Files</q-tooltip>
+                      </q-btn> -->
+
+                      <q-btn v-if="scope.isUploading" icon="clear" @click="scope.abort" round dense flat >
+                        <q-tooltip>Abort Upload</q-tooltip>
+                      </q-btn>
+                    </div>
+                  </template>
+                  <template v-slot:list="scope">
+                    <q-list separator>
+
+                      <q-item v-for="file in scope.files" :key="file.name">
+                        <q-item-section>
+                          <q-item-label class="full-width ellipsis">
+                            {{ file.name }}
+                          </q-item-label>
+
+                          <!-- <q-item-label caption>
+                            Status: {{ file.__status }}
+                          </q-item-label> -->
+
+                          <q-item-label caption>
+                            {{ file.__sizeLabel }}
+                             <!-- / {{ file.__progressLabel }} -->
+                          </q-item-label>
+                        </q-item-section>
+
+                        <q-item-section
+                          v-if="file.__img"
+                          thumbnail
+                          class="gt-xs"
+                        >
+                          <img :src="file.__img.src">
+                        </q-item-section>
+
+                        <q-item-section top side>
+                          <q-btn
+                            class="gt-xs"
+                            size="12px"
+                            flat
+                            dense
+                            round
+                            color="red"
+                            icon="delete"
+                            @click="scope.removeFile(file)"
+                          />
+                        </q-item-section>
+                      </q-item>
+
+                    </q-list>
+                  </template>
+                </q-uploader>
               </div>
             </q-card-section>
           </q-card>
@@ -624,6 +686,50 @@ const optionsmunicipios = [
               icon: 'img:./../media/iconospng/Flag_of_Villanueva.png'
           }
 ];
+const anexofile = [
+  {
+    name:'fFichaInscripcion',
+    label:'Formato - Ficha de inscripción'
+  },
+  {
+    name:'aListadoAsociados',
+    label:'Anexo - Listado de asociados'
+  },
+  {
+    name:'aCartaConsentimiento',
+    label:'Anexo - Carta de consentimiento'
+  },
+  {
+    name:'aCartaIntencion',
+    label:'Anexo - Carta de intención'
+  }
+];
+const anexarfile = [
+  {
+    name:'cExistenciaRepresentacionLegalVigente',
+    label:'Certificado de existencia y representación legal vigente'
+  },
+  {
+    name:'cDisponeEmpresa',
+    label:'Certificaciones con las que dispone actualmente la empresa'
+  },
+  {
+    name:'prActualEmpresa',
+    label:'Permisos o registros con los que cuenta actualmente la empresa'
+  },
+  {
+    name:'rutFacturacionDian',
+    label:'RUT o resolución de facturación DIAN'
+  },
+  {
+    name:'listadoAsociadosDiligenciado',
+    label:'Listado de asociados diligenciado'
+  },
+  {
+    name:'cartaConcentimientoInformadoFirma',
+    label:'Carta de consentimiento informado diligenciada y firmada - Anexo 2'
+  }
+]
 export default {
   name: 'FormularioNegocios',
   components: { EmpresaAvatar},
@@ -638,13 +744,12 @@ export default {
   //     categoria: state => state.categoria,
   //   })
   // },
-  beforeMount() {
-    this.AXIO_GET_CATEGORIAS()
-    this.verificarProps();
-    // this.agregarCategorias();
-  },
+  
   data () {
     return {
+      anexofile:anexofile,
+      anexarfile:anexarfile,
+      formData: new FormData(),
       documentos: [],
       selected: [],
       ticked: [],
@@ -774,24 +879,93 @@ export default {
       accept: false
     }
   },
+  beforeMount() {
+    this.AXIO_GET_CATEGORIAS()
+    this.verificarProps();
+    // this.agregarCategorias();
+  },
+  // created () {
+  //   console.log(this.$refs.a_listado_asociados)
+  // },
+  mounted(){
+    const interval = setInterval(() => {
+      if (this.$refs.qUploader) {
+        this.loaddoc();
+        clearInterval(interval)
+      }
+    }, 1000)
+  },
   methods: {
-    factoryFn (files) {
-      let formData = new FormData();
-      formData.append('documentos', files[0]);
-      // this.$store.dispatch('formulario/GUARDAR_DOC',formData).then(function(resp) {
-      //     console.log(resp)
-      // })
-      const app = this;
-      return new Promise((resolve) => {
-        app.$store.dispatch('formulario/GUARDAR_DOC',formData).then(function(resp) {
-          app.documentos.push({
-            urldocumento:resp.resp.url,
-            imgnombre:resp.resp.imgnombre,
-            tmpnombre:resp.resp.tmpnombre
-          });
-          resolve(resp)
-        })  
-      })
+    addedFile(file){
+      // console.log(file)
+      // console.log(this.$refs)
+    },
+    uploadedFile(info){
+      console.log('Uploaded')
+    },
+    startFile(){ 
+      console.log('Start')
+    },
+    removeFiele(file){
+      // console.log(file)
+      // get index of object with id:37
+      var removeIndex = this.documentos.map(function(item) { return item.id; }).indexOf(file[0].lastModified);
+
+      // remove object
+      this.documentos.splice(removeIndex, 1);
+      // console.log(this.documentos);
+    },
+    loaddoc(){
+      let url = 'media/uploads/doc/176023ficha_inscripcion_nv_v2020.xlsx';
+      let fileName = 'ficha_inscripcion_nv_v2020.xlsx';
+      let size = 87331;
+      // let type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';      
+
+      let file = [{
+          id:'176023',
+          size: size,
+          type: fileName.split('.').pop(),
+          ref:'fFichaInscripcion',
+          // type:type,
+          name: fileName,
+          // __proto__:File
+          __proto__:{
+            src: url
+          }
+        },{
+          id:'176023',
+          size: size,
+          type: fileName.split('.').pop(),
+          ref:'aListadoAsociados',
+          // type:type,
+          name: fileName,
+          // __proto__:File
+          __proto__:{
+            src: url
+          }
+        },{
+          id:'176023',
+          size: size,
+          type: fileName.split('.').pop(),
+          ref:'aCartaConsentimiento',
+          // type:type,
+          name: fileName,
+          // __proto__:File
+          __proto__:{
+            src: url
+          }
+        }]
+      this.addfile(file)
+    },
+    addfile(file){
+      console.log(this.$refs)
+      console.log(this.$refs.qUploader)
+       this.$refs.qUploader.forEach(element => {
+        var index =  file.map(function(item) { return item.ref; }).indexOf(element.$attrs.name);
+        if (index>=0) {
+          element.addFiles([file[index]]);
+        }
+      });
     },
     AXIO_GET_CATEGORIAS() {
       this.$store.dispatch('formulario/CARGAR_CATEGORIA');
@@ -814,15 +988,15 @@ export default {
       console.log(node)
     },
     verificarProps() {
-      console.log('propformulario');
-      console.log(this.propformulario);
-      console.log(this.formulario.nombreempresa.data);
-      console.log('propformulario');
+      // console.log('propformulario');
+      // console.log(this.propformulario);
+      // console.log(this.formulario.nombreempresa.data);
+      // console.log('propformulario');
       if (this.propformulario != null) {
         Object.entries(this.propformulario).forEach(([key, value]) => {
-            console.log(key+' : '+value);
+            // console.log(key+' : '+value);
             if(this.formulario[key]!=null){
-              console.log( this.formulario[key].data);
+              // console.log( this.formulario[key].data);
               if (key=='productos') {
                 this.formulario[key]=value
               }else{
@@ -831,7 +1005,7 @@ export default {
             }
             
         })
-      }
+      }      
     },
     uploadimg () {
       if (!this.$refs.child.croppa.hasImage()) {
@@ -907,17 +1081,39 @@ export default {
       // console.log(submitResult)
       // console.log(this.documentos)
       // return
+      let docFiles=[]
+      let doc
+      this.$refs.qUploader.forEach(element => {
+        if (element.files[0]!=null && element.files[0].lastModified!=null) {          
+          doc = element.files[0]
+          doc.ref = element.$attrs.name;
+          docFiles.push(doc);
+          // console.log(element.$attrs.name)
+        }
+      });
+      
+          // console.log(docFiles); return
+      // console.log(this.$refs.qUploader.value)
+      // let formData = new FormData();
+      for (let i = 0; i < docFiles.length; i++) {
+        this.formData.append('documentos['+i+']', docFiles[i],docFiles[i].ref+','+docFiles[i].name);
+      }
+      // console.log(this.formData)
       this.$refs.child.croppa.generateBlob((blob) => {
-        var fd = new FormData()
-        fd.append('file', blob, 'filename.jpg')
+        var img = new FormData()
+        // var doc = new FormData()
+        console.log(blob)
+        // this.documentos.push(files[0]);
+        img.append('imagenLogo', blob,'imagenLogo,imagennamelogo.jpg')
+        // doc.append('documentos', this.documentos)
         let obj = {
-          prop1: fd,
-          prop2: submitResult,
-          prop3: this.formulario.productos,
-          prop4: this.documentos
+          formulario: submitResult,
+          productos: this.formulario.productos,
+          documentos: this.formData,
+          imagenlogo: img
         }
         return new Promise((resolve) => {
-          app.$store.dispatch('formulario/GUARDAR_IMG',obj).then(function(resp) {
+          app.$store.dispatch('formulario/GUARDAR_FORMULARIO',obj).then(function(resp) {
             // app.onReset()
             resolve(resp)
           })  

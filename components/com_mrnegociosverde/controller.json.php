@@ -59,52 +59,75 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $data = new stdClass();
         echo json_encode($item);
     }
-    public function uploadimg(Type $var = null)
-    {
-        $valid_extensions = array('jpeg', 'jpg', 'png', 'gif', 'bmp' , 'pdf' , 'doc' , 'ppt'); // valid extensions
-        $path = 'media/uploads/'; // upload directory        
-        if(true){
-        $img = $_FILES['file']['name'];
-        $tmp = $_FILES['file']['tmp_name'];
-        // get uploaded file's extension
-        $ext = strtolower(pathinfo($img, PATHINFO_EXTENSION));
-        // can upload same image using rand function
-        $final_image = rand(1000,1000000).$img;
-        // check's valid format
-            if(in_array($ext, $valid_extensions)){ 
-                $path = $path.strtolower($final_image);
-                if(move_uploaded_file($tmp,$path)){
-                    // print_r($path);
-                    // print_r($_POST);
-                    // echo "<img src='$path' />";die;
-                    echo $path;
+    function incoming_files() {
+        $files = $_FILES;
+        $files2 = [];
+        foreach ($files as $input => $infoArr) {
+            $filesByInput = [];
+            foreach ($infoArr as $key => $valueArr) {
+                if (is_array($valueArr)) { // file input "multiple"
+                    foreach($valueArr as $i=>$value) {
+                        $filesByInput[$i][$key] = $value;
+                    }
                 }
-            }else{
-                echo 'invalid';
+                else { // -> string, normal file input
+                    $filesByInput[] = $infoArr;
+                    break;
+                }
             }
+            $files2 = array_merge($files2,$filesByInput);
         }
+        $files3 = [];
+        foreach($files2 as $file) { // let's filter empty & errors
+            if (!$file['error']) $files3[] = $file;
+        }
+        return $files3;
     }
-    public function uploaddoc(Type $var = null)
+    public function uploadFile()
     {
-        $valid_extensions = array('jpeg', 'jpg', 'png', 'gif', 'bmp' , 'pdf' , 'doc' ,'docx' , 'ppt','xlsx'); // valid extensions
-        $path = 'media/uploads/doc/'; // upload directory
-        if(true){
-        $img = $_FILES['documentos']['name'];
-        $tmp = $_FILES['documentos']['tmp_name'];
-        // get uploaded file's extension
-        $ext = strtolower(pathinfo($img, PATHINFO_EXTENSION));
-        // can upload same image using rand function
-        $final_image = rand(1000,1000000).$img;
-        // check's valid format
-            if(in_array($ext, $valid_extensions)){ 
-                $path = $path.strtolower($final_image);
-                $item = new stdClass();
-                $item->url = $path;
-                $item->imgnombre = $img;
-                $item->tmpnombre = $tmp;
-                echo json_encode($item);
-            }else{
-                echo 'invalid';
+        $app = JFactory::getApplication();  
+        $input = $app->input;
+        $idempresa = $input->get("idempresa", 0, "int");
+        $valid_extensions = array('jpeg', 'jpg', 'png', 'gif', 'bmp' , 'pdf' , 'docx' , 'ppt','xlsx','xls','doc'); // valid extensions
+        // $path = 'media/uploads/'; // upload directory      
+        $tmpFiles = $this->incoming_files();
+        if(!empty($tmpFiles)){
+            foreach ($tmpFiles as $key => $value) {                
+                $name = explode( ',', $value['name']);
+                $tmp = $value['tmp_name'];
+                $siz = $value['size'];                
+                // get uploaded file's extension
+                $ext = strtolower(pathinfo($name[1], PATHINFO_EXTENSION));
+                // can upload same image using rand function
+                $final_file = $idempresa.'_'.rand(1000,1000000).$name[0].'.'.$ext;
+                // check's valid format
+                if(in_array($ext, $valid_extensions)){ 
+                    $path = $name[0]=='imagenLogo'?'media/uploads/imgLogos/':'media/uploads/doc/';
+                    $path = $path.strtolower($final_file);
+                    $item = new stdClass();
+                    // print_r($path);
+                    if(move_uploaded_file($tmp,$path)){
+                        $db = JFactory::getDBO();
+                        if ($name[0] == 'imagenLogo') {
+                            $updateNulls = true;
+                            $item->idempresa = $idempresa;
+                            $item->imagenlogo = $path;
+                            $result = $db->updateObject('#__negocios_v_empresas', $item , 'idempresa', $updateNulls);
+                        }else{
+                            $item->idempresa = $idempresa;
+                            $item->urldocumento = $path;
+                            $item->size = $siz;
+                            $item->name = $name[1];
+                            $item->ext = $ext;
+                            $item->ref = $name[0];
+                            // print_r($item);
+                            $result = $db->insertObject('#__negocios_v_documentos', $item); 
+                        }
+                        // echo $path;
+                    }
+                }else{
+                    echo 'invalid';
+                }
             }
         }
     }
@@ -126,31 +149,6 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $db = JFactory::getDBO();
         foreach ($Itemid as $key => $value) {
             $result = $db->insertObject('#__negocios_v_productos', $value);            
-        }
-        // echo ($ultimoid);
-    }
-    public function adddocumentos(Type $var = null)
-    {
-        $app = JFactory::getApplication();
-        $rawDataPost = $app->input->getArray($_POST);
-        $Itemid = json_decode($rawDataPost['json']);
-        $db = JFactory::getDBO();
-        foreach ($Itemid as $key => $value) {
-            print_r($value);
-            $tmp = $value->tmpnombre;
-            $path = $value->urldocumento;
-            if(rename($tmp,$path)){
-                unset($value->tmpnombre);
-                unset($value->imgnombre);
-                print_r($value);
-                // $result = $db->insertObject('#__negocios_v_documentos', $value); 
-            }else{
-                echo 'invalid';
-            }
-            // unset($value->tmpnombre);
-            // unset($value->imgnombre);
-            // print_r($value);
-            // $result = $db->insertObject('#__negocios_v_documentos', $value);
         }
         // echo ($ultimoid);
     }

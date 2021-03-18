@@ -2511,6 +2511,68 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
  // import { mapState } from 'vuex'
 
 var optionsmunicipios = [{
@@ -2574,6 +2636,38 @@ var optionsmunicipios = [{
   value: 'Villanueva',
   icon: 'img:./../media/iconospng/Flag_of_Villanueva.png'
 }];
+var anexofile = [{
+  name: 'fFichaInscripcion',
+  label: 'Formato - Ficha de inscripción'
+}, {
+  name: 'aListadoAsociados',
+  label: 'Anexo - Listado de asociados'
+}, {
+  name: 'aCartaConsentimiento',
+  label: 'Anexo - Carta de consentimiento'
+}, {
+  name: 'aCartaIntencion',
+  label: 'Anexo - Carta de intención'
+}];
+var anexarfile = [{
+  name: 'cExistenciaRepresentacionLegalVigente',
+  label: 'Certificado de existencia y representación legal vigente'
+}, {
+  name: 'cDisponeEmpresa',
+  label: 'Certificaciones con las que dispone actualmente la empresa'
+}, {
+  name: 'prActualEmpresa',
+  label: 'Permisos o registros con los que cuenta actualmente la empresa'
+}, {
+  name: 'rutFacturacionDian',
+  label: 'RUT o resolución de facturación DIAN'
+}, {
+  name: 'listadoAsociadosDiligenciado',
+  label: 'Listado de asociados diligenciado'
+}, {
+  name: 'cartaConcentimientoInformadoFirma',
+  label: 'Carta de consentimiento informado diligenciada y firmada - Anexo 2'
+}];
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'FormularioNegocios',
   components: {
@@ -2590,12 +2684,11 @@ var optionsmunicipios = [{
   //     categoria: state => state.categoria,
   //   })
   // },
-  beforeMount: function beforeMount() {
-    this.AXIO_GET_CATEGORIAS();
-    this.verificarProps(); // this.agregarCategorias();
-  },
   data: function data() {
     return {
+      anexofile: anexofile,
+      anexarfile: anexarfile,
+      formData: new FormData(),
       documentos: [],
       selected: [],
       ticked: [],
@@ -2745,23 +2838,95 @@ var optionsmunicipios = [{
       accept: false
     };
   },
-  methods: {
-    factoryFn: function factoryFn(files) {
-      var formData = new FormData();
-      formData.append('documentos', files[0]); // this.$store.dispatch('formulario/GUARDAR_DOC',formData).then(function(resp) {
-      //     console.log(resp)
-      // })
+  beforeMount: function beforeMount() {
+    this.AXIO_GET_CATEGORIAS();
+    this.verificarProps(); // this.agregarCategorias();
+  },
+  // created () {
+  //   console.log(this.$refs.a_listado_asociados)
+  // },
+  mounted: function mounted() {
+    var _this = this;
 
-      var app = this;
-      return new Promise(function (resolve) {
-        app.$store.dispatch('formulario/GUARDAR_DOC', formData).then(function (resp) {
-          app.documentos.push({
-            urldocumento: resp.resp.url,
-            imgnombre: resp.resp.imgnombre,
-            tmpnombre: resp.resp.tmpnombre
-          });
-          resolve(resp);
-        });
+    var interval = setInterval(function () {
+      if (_this.$refs.qUploader) {
+        _this.loaddoc();
+
+        clearInterval(interval);
+      }
+    }, 1000);
+  },
+  methods: {
+    addedFile: function addedFile(file) {// console.log(file)
+      // console.log(this.$refs)
+    },
+    uploadedFile: function uploadedFile(info) {
+      console.log('Uploaded');
+    },
+    startFile: function startFile() {
+      console.log('Start');
+    },
+    removeFiele: function removeFiele(file) {
+      // console.log(file)
+      // get index of object with id:37
+      var removeIndex = this.documentos.map(function (item) {
+        return item.id;
+      }).indexOf(file[0].lastModified); // remove object
+
+      this.documentos.splice(removeIndex, 1); // console.log(this.documentos);
+    },
+    loaddoc: function loaddoc() {
+      var url = 'media/uploads/doc/176023ficha_inscripcion_nv_v2020.xlsx';
+      var fileName = 'ficha_inscripcion_nv_v2020.xlsx';
+      var size = 87331; // let type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';      
+
+      var file = [{
+        id: '176023',
+        size: size,
+        type: fileName.split('.').pop(),
+        ref: 'fFichaInscripcion',
+        // type:type,
+        name: fileName,
+        // __proto__:File
+        __proto__: {
+          src: url
+        }
+      }, {
+        id: '176023',
+        size: size,
+        type: fileName.split('.').pop(),
+        ref: 'aListadoAsociados',
+        // type:type,
+        name: fileName,
+        // __proto__:File
+        __proto__: {
+          src: url
+        }
+      }, {
+        id: '176023',
+        size: size,
+        type: fileName.split('.').pop(),
+        ref: 'aCartaConsentimiento',
+        // type:type,
+        name: fileName,
+        // __proto__:File
+        __proto__: {
+          src: url
+        }
+      }];
+      this.addfile(file);
+    },
+    addfile: function addfile(file) {
+      console.log(this.$refs);
+      console.log(this.$refs.qUploader);
+      this.$refs.qUploader.forEach(function (element) {
+        var index = file.map(function (item) {
+          return item.ref;
+        }).indexOf(element.$attrs.name);
+
+        if (index >= 0) {
+          element.addFiles([file[index]]);
+        }
       });
     },
     AXIO_GET_CATEGORIAS: function AXIO_GET_CATEGORIAS() {
@@ -2786,35 +2951,32 @@ var optionsmunicipios = [{
       console.log(node);
     },
     verificarProps: function verificarProps() {
-      var _this = this;
+      var _this2 = this;
 
-      console.log('propformulario');
-      console.log(this.propformulario);
-      console.log(this.formulario.nombreempresa.data);
-      console.log('propformulario');
-
+      // console.log('propformulario');
+      // console.log(this.propformulario);
+      // console.log(this.formulario.nombreempresa.data);
+      // console.log('propformulario');
       if (this.propformulario != null) {
         Object.entries(this.propformulario).forEach(function (_ref) {
           var _ref2 = _slicedToArray(_ref, 2),
               key = _ref2[0],
               value = _ref2[1];
 
-          console.log(key + ' : ' + value);
-
-          if (_this.formulario[key] != null) {
-            console.log(_this.formulario[key].data);
-
+          // console.log(key+' : '+value);
+          if (_this2.formulario[key] != null) {
+            // console.log( this.formulario[key].data);
             if (key == 'productos') {
-              _this.formulario[key] = value;
+              _this2.formulario[key] = value;
             } else {
-              _this.formulario[key].data = value;
+              _this2.formulario[key].data = value;
             }
           }
         });
       }
     },
     uploadimg: function uploadimg() {
-      var _this2 = this;
+      var _this3 = this;
 
       if (!this.$refs.child.croppa.hasImage()) {
         console.log('no image to upload');
@@ -2857,11 +3019,11 @@ var optionsmunicipios = [{
         var obj = {
           prop1: fd,
           prop2: submitResult,
-          prop3: _this2.formulario.productos,
-          prop4: _this2.documentos
+          prop3: _this3.formulario.productos,
+          prop4: _this3.documentos
         };
         return new Promise(function (resolve) {
-          _this2.$store.dispatch('formulario/GUARDAR_IMG', obj).then(function (resp) {
+          _this3.$store.dispatch('formulario/GUARDAR_IMG', obj).then(function (resp) {
             resolve(resp);
           });
         });
@@ -2878,7 +3040,7 @@ var optionsmunicipios = [{
       this.formulario.productos.splice(counter, 1);
     },
     onSubmit: function onSubmit(evt) {
-      var _this3 = this;
+      var _this4 = this;
 
       var app = this;
 
@@ -2904,17 +3066,38 @@ var optionsmunicipios = [{
       // console.log(this.documentos)
       // return
 
+      var docFiles = [];
+      var doc;
+      this.$refs.qUploader.forEach(function (element) {
+        if (element.files[0] != null && element.files[0].lastModified != null) {
+          doc = element.files[0];
+          doc.ref = element.$attrs.name;
+          docFiles.push(doc); // console.log(element.$attrs.name)
+        }
+      }); // console.log(docFiles); return
+      // console.log(this.$refs.qUploader.value)
+      // let formData = new FormData();
+
+      for (var i = 0; i < docFiles.length; i++) {
+        this.formData.append('documentos[' + i + ']', docFiles[i], docFiles[i].ref + ',' + docFiles[i].name);
+      } // console.log(this.formData)
+
+
       this.$refs.child.croppa.generateBlob(function (blob) {
-        var fd = new FormData();
-        fd.append('file', blob, 'filename.jpg');
+        var img = new FormData(); // var doc = new FormData()
+
+        console.log(blob); // this.documentos.push(files[0]);
+
+        img.append('imagenLogo', blob, 'imagenLogo,imagennamelogo.jpg'); // doc.append('documentos', this.documentos)
+
         var obj = {
-          prop1: fd,
-          prop2: submitResult,
-          prop3: _this3.formulario.productos,
-          prop4: _this3.documentos
+          formulario: submitResult,
+          productos: _this4.formulario.productos,
+          documentos: _this4.formData,
+          imagenlogo: img
         };
         return new Promise(function (resolve) {
-          app.$store.dispatch('formulario/GUARDAR_IMG', obj).then(function (resp) {
+          app.$store.dispatch('formulario/GUARDAR_FORMULARIO', obj).then(function (resp) {
             // app.onReset()
             resolve(resp);
           });
@@ -2929,7 +3112,7 @@ var optionsmunicipios = [{
       });
     },
     onReset: function onReset() {
-      var _this4 = this;
+      var _this5 = this;
 
       Object.entries(this.formulario).forEach(function (_ref7) {
         var _ref8 = _slicedToArray(_ref7, 2),
@@ -2937,7 +3120,7 @@ var optionsmunicipios = [{
             value = _ref8[1];
 
         if (value.data != '' && value.data != null) {
-          _this4.formulario[key].data = null;
+          _this5.formulario[key].data = null;
         }
       });
       this.formulario.productos = [{
@@ -3031,7 +3214,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "GUARDAR_FORMULARIO": () => (/* binding */ GUARDAR_FORMULARIO),
 /* harmony export */   "GUARDAR_DOCUMENTOS": () => (/* binding */ GUARDAR_DOCUMENTOS),
 /* harmony export */   "GUARDAR_PRODUCTOS": () => (/* binding */ GUARDAR_PRODUCTOS),
-/* harmony export */   "GUARDAR_IMG": () => (/* binding */ GUARDAR_IMG),
+/* harmony export */   "GUARDAR_FILE": () => (/* binding */ GUARDAR_FILE),
 /* harmony export */   "GUARDAR_DOC": () => (/* binding */ GUARDAR_DOC),
 /* harmony export */   "CARGANDO": () => (/* binding */ CARGANDO),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -3060,7 +3243,7 @@ var CATEGORIAS = 'CATEGORIAS';
 var GUARDAR_FORMULARIO = 'GUARDAR_FORMULARIO';
 var GUARDAR_DOCUMENTOS = 'GUARDAR_DOCUMENTOS';
 var GUARDAR_PRODUCTOS = 'GUARDAR_PRODUCTOS';
-var GUARDAR_IMG = 'GUARDAR_IMG';
+var GUARDAR_FILE = 'GUARDAR_FILE';
 var GUARDAR_DOC = 'GUARDAR_DOC';
 var CARGANDO = 'CARGANDO';
 var store = {
@@ -3107,44 +3290,37 @@ var store = {
         }, _callee);
       }))();
     },
-    GUARDAR_IMG: function GUARDAR_IMG(_ref2, datos) {
-      var _this = this;
-
+    GUARDAR_FILE: function GUARDAR_FILE(_ref2, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
-        var commit, resp;
+        var commit, config, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 commit = _ref2.commit;
                 commit(CARGANDO, true);
-                _context2.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=uploadimg&format=json', datos.prop1);
+                config = {
+                  headers: {
+                    'Content-Type': 'multipart/form-data'
+                  }
+                };
+                _context2.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=uploadFile&format=json&idempresa=' + datos.idempresa, datos.file, config);
 
-              case 4:
+              case 5:
                 resp = _context2.sent;
 
                 if (!resp.ok) {
-                  _context2.next = 12;
+                  _context2.next = 8;
                   break;
                 }
 
-                if (!(datos.prop2 != null)) {
-                  _context2.next = 11;
-                  break;
-                }
-
-                datos.prop2.imagenlogo = resp.resp;
-
-                _this.dispatch('formulario/GUARDAR_FORMULARIO', datos);
-
-                _context2.next = 12;
-                break;
-
-              case 11:
                 return _context2.abrupt("return", resp);
 
-              case 12:
+              case 8:
+                commit(CARGANDO, false);
+
+              case 9:
               case "end":
                 return _context2.stop();
             }
@@ -3152,28 +3328,70 @@ var store = {
         }, _callee2);
       }))();
     },
-    GUARDAR_DOC: function GUARDAR_DOC(_ref3, datos) {
+    GUARDAR_FORMULARIO: function GUARDAR_FORMULARIO(_ref3, datos) {
+      var _this = this;
+
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
-        var commit, resp;
+        var commit, datopost, resp, obj, _obj;
+
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
                 commit = _ref3.commit;
-                _context3.next = 3;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=uploaddoc&format=json', datos);
+                commit(CARGANDO, true);
+                datopost = 'json=' + JSON.stringify(datos.formulario);
+                _context3.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
 
-              case 3:
+              case 5:
                 resp = _context3.sent;
 
                 if (!resp.ok) {
-                  _context3.next = 6;
+                  _context3.next = 16;
                   break;
                 }
 
+                if (!(datos.productos != null)) {
+                  _context3.next = 13;
+                  break;
+                }
+
+                datos.productos.forEach(function (element, key) {
+                  datos.productos[key].idempresa = resp.resp;
+                });
+
+                _this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
+
+                if (datos.imagenlogo != null) {
+                  obj = {
+                    idempresa: resp.resp,
+                    file: datos.imagenlogo
+                  };
+
+                  _this.dispatch('formulario/GUARDAR_FILE', obj);
+
+                  if (datos.documentos != null) {
+                    _obj = {
+                      idempresa: resp.resp,
+                      file: datos.documentos
+                    };
+
+                    _this.dispatch('formulario/GUARDAR_FILE', _obj);
+                  }
+                }
+
+                _context3.next = 15;
+                break;
+
+              case 13:
+                commit(CARGANDO, false);
                 return _context3.abrupt("return", resp);
 
-              case 6:
+              case 15:
+                commit(CARGANDO, false);
+
+              case 16:
               case "end":
                 return _context3.stop();
             }
@@ -3181,9 +3399,7 @@ var store = {
         }, _callee3);
       }))();
     },
-    GUARDAR_FORMULARIO: function GUARDAR_FORMULARIO(_ref4, datos) {
-      var _this2 = this;
-
+    GUARDAR_PRODUCTOS: function GUARDAR_PRODUCTOS(_ref4, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
@@ -3192,48 +3408,24 @@ var store = {
               case 0:
                 commit = _ref4.commit;
                 commit(CARGANDO, true);
-                datopost = 'json=' + JSON.stringify(datos.prop2);
+                datopost = 'json=' + JSON.stringify(datos.productos);
                 _context4.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=addproductos&format=json', datopost);
 
               case 5:
                 resp = _context4.sent;
 
                 if (!resp.ok) {
-                  _context4.next = 16;
+                  _context4.next = 8;
                   break;
                 }
 
-                if (!(datos.prop3 != null)) {
-                  _context4.next = 13;
-                  break;
-                }
-
-                datos.prop3.forEach(function (element, key) {
-                  datos.prop3[key].idempresa = resp.resp;
-                });
-
-                _this2.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
-
-                if (datos.prop4 != null) {
-                  datos.prop4.forEach(function (element, key) {
-                    datos.prop4[key].idempresa = resp.resp;
-                  });
-
-                  _this2.dispatch('formulario/GUARDAR_DOCUMENTOS', datos);
-                }
-
-                _context4.next = 15;
-                break;
-
-              case 13:
-                commit(CARGANDO, false);
                 return _context4.abrupt("return", resp);
 
-              case 15:
+              case 8:
                 commit(CARGANDO, false);
 
-              case 16:
+              case 9:
               case "end":
                 return _context4.stop();
             }
@@ -3241,7 +3433,7 @@ var store = {
         }, _callee4);
       }))();
     },
-    GUARDAR_PRODUCTOS: function GUARDAR_PRODUCTOS(_ref5, datos) {
+    GUARDAR_DOCUMENTOS: function GUARDAR_DOCUMENTOS(_ref5, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
@@ -3250,9 +3442,9 @@ var store = {
               case 0:
                 commit = _ref5.commit;
                 commit(CARGANDO, true);
-                datopost = 'json=' + JSON.stringify(datos.prop3);
+                datopost = 'json=' + JSON.stringify(datos.prop4);
                 _context5.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=addproductos&format=json', datopost);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=adddocumentos&format=json', datopost);
 
               case 5:
                 resp = _context5.sent;
@@ -3274,41 +3466,6 @@ var store = {
             }
           }
         }, _callee5);
-      }))();
-    },
-    GUARDAR_DOCUMENTOS: function GUARDAR_DOCUMENTOS(_ref6, datos) {
-      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
-        var commit, datopost, resp;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
-          while (1) {
-            switch (_context6.prev = _context6.next) {
-              case 0:
-                commit = _ref6.commit;
-                commit(CARGANDO, true);
-                datopost = 'json=' + JSON.stringify(datos.prop4);
-                _context6.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=adddocumentos&format=json', datopost);
-
-              case 5:
-                resp = _context6.sent;
-
-                if (!resp.ok) {
-                  _context6.next = 9;
-                  break;
-                }
-
-                commit(CARGANDO, false);
-                return _context6.abrupt("return", resp);
-
-              case 9:
-                commit(CARGANDO, false);
-
-              case 10:
-              case "end":
-                return _context6.stop();
-            }
-          }
-        }, _callee6);
       }))();
     }
   }
@@ -3364,12 +3521,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 
-var request = function request(url, data, method) {
+var request = function request(url, data, config, method) {
   var _method;
 
   method = (_method = method) !== null && _method !== void 0 ? _method : 'post';
   return new Promise(function (resolve, reject) {
-    (axios__WEBPACK_IMPORTED_MODULE_0___default())[method](url.replace('/administrator', ''), data).then(function (resp) {
+    (axios__WEBPACK_IMPORTED_MODULE_0___default())[method](url.replace('/administrator', ''), data, config).then(function (resp) {
       resolve({
         ok: true,
         resp: resp.data
@@ -54632,83 +54789,239 @@ var render = function() {
                   _vm._v(" "),
                   _c("q-separator"),
                   _vm._v(" "),
-                  _c("q-card-section", [
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label: "Formato - Ficha de inscripción",
-                            "auto-upload": "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label: "Anexo - Listado de asociados",
-                            "auto-upload": "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label: "Anexo - Carta de consentimiento",
-                            "auto-upload": "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label: "Anexo - Carta de intención",
-                            "auto-upload": "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    )
-                  ])
+                  _c(
+                    "q-card-section",
+                    _vm._l(_vm.anexofile, function(item, count) {
+                      return _c(
+                        "div",
+                        {
+                          key: count,
+                          staticClass: "row justify-center items-center"
+                        },
+                        [
+                          _c("q-uploader", {
+                            ref: "qUploader",
+                            refInFor: true,
+                            staticClass: "divuploader",
+                            staticStyle: { "max-width": "700px" },
+                            attrs: {
+                              label: item.label,
+                              name: item.name,
+                              "max-files": "1",
+                              accept: ".xls , .xlsx, .docx, .doc, .pdf"
+                            },
+                            on: {
+                              removed: _vm.removeFiele,
+                              uploaded: _vm.uploadedFile,
+                              start: _vm.startFile,
+                              added: _vm.addedFile
+                            },
+                            scopedSlots: _vm._u(
+                              [
+                                {
+                                  key: "header",
+                                  fn: function(scope) {
+                                    return [
+                                      _c(
+                                        "div",
+                                        {
+                                          staticClass:
+                                            "row no-wrap items-center q-pa-sm q-gutter-xs"
+                                        },
+                                        [
+                                          scope.isUploading
+                                            ? _c("q-spinner", {
+                                                staticClass:
+                                                  "q-uploader__spinner"
+                                              })
+                                            : _vm._e(),
+                                          _vm._v(" "),
+                                          _c("div", { staticClass: "col" }, [
+                                            _c(
+                                              "div",
+                                              {
+                                                staticClass: "q-uploader__title"
+                                              },
+                                              [_vm._v(_vm._s(item.label))]
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "div",
+                                              {
+                                                staticClass:
+                                                  "q-uploader__subtitle"
+                                              },
+                                              [
+                                                _vm._v(
+                                                  _vm._s(
+                                                    scope.uploadSizeLabel
+                                                  ) +
+                                                    " \n                      "
+                                                )
+                                              ]
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          scope.canAddFiles
+                                            ? _c(
+                                                "q-btn",
+                                                {
+                                                  attrs: {
+                                                    type: "a",
+                                                    icon: "add_box",
+                                                    round: "",
+                                                    dense: "",
+                                                    flat: ""
+                                                  }
+                                                },
+                                                [
+                                                  _c("q-uploader-add-trigger"),
+                                                  _vm._v(" "),
+                                                  _c("q-tooltip", [
+                                                    _vm._v("Pick Files")
+                                                  ])
+                                                ],
+                                                1
+                                              )
+                                            : _vm._e(),
+                                          _vm._v(" "),
+                                          scope.isUploading
+                                            ? _c(
+                                                "q-btn",
+                                                {
+                                                  attrs: {
+                                                    icon: "clear",
+                                                    round: "",
+                                                    dense: "",
+                                                    flat: ""
+                                                  },
+                                                  on: { click: scope.abort }
+                                                },
+                                                [
+                                                  _c("q-tooltip", [
+                                                    _vm._v("Abort Upload")
+                                                  ])
+                                                ],
+                                                1
+                                              )
+                                            : _vm._e()
+                                        ],
+                                        1
+                                      )
+                                    ]
+                                  }
+                                },
+                                {
+                                  key: "list",
+                                  fn: function(scope) {
+                                    return [
+                                      _c(
+                                        "q-list",
+                                        { attrs: { separator: "" } },
+                                        _vm._l(scope.files, function(file) {
+                                          return _c(
+                                            "q-item",
+                                            { key: file.name },
+                                            [
+                                              _c(
+                                                "q-item-section",
+                                                [
+                                                  _c(
+                                                    "q-item-label",
+                                                    {
+                                                      staticClass:
+                                                        "full-width ellipsis"
+                                                    },
+                                                    [
+                                                      _vm._v(
+                                                        "\n                        " +
+                                                          _vm._s(file.name) +
+                                                          "\n                      "
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-label",
+                                                    { attrs: { caption: "" } },
+                                                    [
+                                                      _vm._v(
+                                                        "\n                        " +
+                                                          _vm._s(
+                                                            file.__sizeLabel
+                                                          ) +
+                                                          "\n                         "
+                                                      )
+                                                    ]
+                                                  )
+                                                ],
+                                                1
+                                              ),
+                                              _vm._v(" "),
+                                              file.__img
+                                                ? _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "gt-xs",
+                                                      attrs: { thumbnail: "" }
+                                                    },
+                                                    [
+                                                      _c("img", {
+                                                        attrs: {
+                                                          src: file.__img.src
+                                                        }
+                                                      })
+                                                    ]
+                                                  )
+                                                : _vm._e(),
+                                              _vm._v(" "),
+                                              _c(
+                                                "q-item-section",
+                                                {
+                                                  attrs: { top: "", side: "" }
+                                                },
+                                                [
+                                                  _c("q-btn", {
+                                                    staticClass: "gt-xs",
+                                                    attrs: {
+                                                      size: "12px",
+                                                      flat: "",
+                                                      dense: "",
+                                                      round: "",
+                                                      color: "red",
+                                                      icon: "delete"
+                                                    },
+                                                    on: {
+                                                      click: function($event) {
+                                                        return scope.removeFile(
+                                                          file
+                                                        )
+                                                      }
+                                                    }
+                                                  })
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        }),
+                                        1
+                                      )
+                                    ]
+                                  }
+                                }
+                              ],
+                              null,
+                              true
+                            )
+                          })
+                        ],
+                        1
+                      )
+                    }),
+                    0
+                  )
                 ],
                 1
               ),
@@ -54725,137 +55038,239 @@ var render = function() {
                   _vm._v(" "),
                   _c("q-separator"),
                   _vm._v(" "),
-                  _c("q-card-section", [
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label:
-                              "Certificado de existencia y representación legal vigente",
-                            "auto-upload": "",
-                            flat: "",
-                            bordered: "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label:
-                              "Certificaciones con las que dispone actualmente la empresa",
-                            "auto-upload": "",
-                            flat: "",
-                            bordered: "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label:
-                              "Permisos o registros con los que cuenta actualmente la empresa",
-                            "auto-upload": "",
-                            flat: "",
-                            bordered: "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label: "RUT o resolución de facturación DIAN",
-                            "auto-upload": "",
-                            flat: "",
-                            bordered: "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label: "Listado de asociados diligenciado",
-                            "auto-upload": "",
-                            flat: "",
-                            bordered: "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c("q-uploader", {
-                          staticClass: "divuploader",
-                          staticStyle: { "max-width": "600px" },
-                          attrs: {
-                            label:
-                              "Carta de consentimiento informado diligenciada y firmada - Anexo 2",
-                            "auto-upload": "",
-                            flat: "",
-                            bordered: "",
-                            "max-files": "1",
-                            factory: _vm.factoryFn,
-                            accept: ".xls , .xlsx, .docx, .pdf"
-                          }
-                        })
-                      ],
-                      1
-                    )
-                  ])
+                  _c(
+                    "q-card-section",
+                    _vm._l(_vm.anexarfile, function(item, count) {
+                      return _c(
+                        "div",
+                        {
+                          key: count,
+                          staticClass: "row justify-center items-center"
+                        },
+                        [
+                          _c("q-uploader", {
+                            ref: "qUploader",
+                            refInFor: true,
+                            staticClass: "divuploader",
+                            staticStyle: { "max-width": "700px" },
+                            attrs: {
+                              label: item.label,
+                              name: item.name,
+                              "max-files": "1",
+                              accept: ".xls , .xlsx, .docx, .doc, .pdf"
+                            },
+                            on: {
+                              removed: _vm.removeFiele,
+                              uploaded: _vm.uploadedFile,
+                              start: _vm.startFile,
+                              added: _vm.addedFile
+                            },
+                            scopedSlots: _vm._u(
+                              [
+                                {
+                                  key: "header",
+                                  fn: function(scope) {
+                                    return [
+                                      _c(
+                                        "div",
+                                        {
+                                          staticClass:
+                                            "row no-wrap items-center q-pa-sm q-gutter-xs"
+                                        },
+                                        [
+                                          scope.isUploading
+                                            ? _c("q-spinner", {
+                                                staticClass:
+                                                  "q-uploader__spinner"
+                                              })
+                                            : _vm._e(),
+                                          _vm._v(" "),
+                                          _c("div", { staticClass: "col" }, [
+                                            _c(
+                                              "div",
+                                              {
+                                                staticClass: "q-uploader__title"
+                                              },
+                                              [_vm._v(_vm._s(item.label))]
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "div",
+                                              {
+                                                staticClass:
+                                                  "q-uploader__subtitle"
+                                              },
+                                              [
+                                                _vm._v(
+                                                  _vm._s(
+                                                    scope.uploadSizeLabel
+                                                  ) +
+                                                    " \n                      "
+                                                )
+                                              ]
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          scope.canAddFiles
+                                            ? _c(
+                                                "q-btn",
+                                                {
+                                                  attrs: {
+                                                    type: "a",
+                                                    icon: "add_box",
+                                                    round: "",
+                                                    dense: "",
+                                                    flat: ""
+                                                  }
+                                                },
+                                                [
+                                                  _c("q-uploader-add-trigger"),
+                                                  _vm._v(" "),
+                                                  _c("q-tooltip", [
+                                                    _vm._v("Pick Files")
+                                                  ])
+                                                ],
+                                                1
+                                              )
+                                            : _vm._e(),
+                                          _vm._v(" "),
+                                          scope.isUploading
+                                            ? _c(
+                                                "q-btn",
+                                                {
+                                                  attrs: {
+                                                    icon: "clear",
+                                                    round: "",
+                                                    dense: "",
+                                                    flat: ""
+                                                  },
+                                                  on: { click: scope.abort }
+                                                },
+                                                [
+                                                  _c("q-tooltip", [
+                                                    _vm._v("Abort Upload")
+                                                  ])
+                                                ],
+                                                1
+                                              )
+                                            : _vm._e()
+                                        ],
+                                        1
+                                      )
+                                    ]
+                                  }
+                                },
+                                {
+                                  key: "list",
+                                  fn: function(scope) {
+                                    return [
+                                      _c(
+                                        "q-list",
+                                        { attrs: { separator: "" } },
+                                        _vm._l(scope.files, function(file) {
+                                          return _c(
+                                            "q-item",
+                                            { key: file.name },
+                                            [
+                                              _c(
+                                                "q-item-section",
+                                                [
+                                                  _c(
+                                                    "q-item-label",
+                                                    {
+                                                      staticClass:
+                                                        "full-width ellipsis"
+                                                    },
+                                                    [
+                                                      _vm._v(
+                                                        "\n                        " +
+                                                          _vm._s(file.name) +
+                                                          "\n                      "
+                                                      )
+                                                    ]
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-label",
+                                                    { attrs: { caption: "" } },
+                                                    [
+                                                      _vm._v(
+                                                        "\n                        " +
+                                                          _vm._s(
+                                                            file.__sizeLabel
+                                                          ) +
+                                                          "\n                         "
+                                                      )
+                                                    ]
+                                                  )
+                                                ],
+                                                1
+                                              ),
+                                              _vm._v(" "),
+                                              file.__img
+                                                ? _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "gt-xs",
+                                                      attrs: { thumbnail: "" }
+                                                    },
+                                                    [
+                                                      _c("img", {
+                                                        attrs: {
+                                                          src: file.__img.src
+                                                        }
+                                                      })
+                                                    ]
+                                                  )
+                                                : _vm._e(),
+                                              _vm._v(" "),
+                                              _c(
+                                                "q-item-section",
+                                                {
+                                                  attrs: { top: "", side: "" }
+                                                },
+                                                [
+                                                  _c("q-btn", {
+                                                    staticClass: "gt-xs",
+                                                    attrs: {
+                                                      size: "12px",
+                                                      flat: "",
+                                                      dense: "",
+                                                      round: "",
+                                                      color: "red",
+                                                      icon: "delete"
+                                                    },
+                                                    on: {
+                                                      click: function($event) {
+                                                        return scope.removeFile(
+                                                          file
+                                                        )
+                                                      }
+                                                    }
+                                                  })
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        }),
+                                        1
+                                      )
+                                    ]
+                                  }
+                                }
+                              ],
+                              null,
+                              true
+                            )
+                          })
+                        ],
+                        1
+                      )
+                    }),
+                    0
+                  )
                 ],
                 1
               ),

@@ -9,7 +9,7 @@ export const CATEGORIAS = 'CATEGORIAS'
 export const GUARDAR_FORMULARIO = 'GUARDAR_FORMULARIO'
 export const GUARDAR_DOCUMENTOS = 'GUARDAR_DOCUMENTOS'
 export const GUARDAR_PRODUCTOS = 'GUARDAR_PRODUCTOS'
-export const GUARDAR_IMG = 'GUARDAR_IMG'
+export const GUARDAR_FILE = 'GUARDAR_FILE'
 export const GUARDAR_DOC = 'GUARDAR_DOC'
 export const CARGANDO = 'CARGANDO'
 
@@ -42,40 +42,39 @@ const store =
                     commit(CATEGORIAS,resp)
                 }
             },
-            async GUARDAR_IMG ({ commit },datos){
+            async GUARDAR_FILE ({ commit },datos){
                 commit(CARGANDO,true)
-                let resp = await request('?option=com_mrnegociosverde&task=uploadimg&format=json',datos.prop1)
+                const config = { headers:{'Content-Type':'multipart/form-data'}};
+                let resp = await request('?option=com_mrnegociosverde&task=uploadFile&format=json&idempresa='+datos.idempresa,datos.file,config)
                 if(resp.ok){
-                    if (datos.prop2!=null) {                        
-                        datos.prop2.imagenlogo = resp.resp            
-                        this.dispatch('formulario/GUARDAR_FORMULARIO', datos);
-                    }else{
-                        return resp;
-                    }   
+                    return resp;
                 }
-            },
-            async GUARDAR_DOC ({ commit },datos){
-                let resp = await request('?option=com_mrnegociosverde&task=uploaddoc&format=json',datos)
-                if(resp.ok){
-                    return resp
-                }
+                commit(CARGANDO,false)
             },
             async GUARDAR_FORMULARIO ({ commit },datos){
                 commit(CARGANDO,true)         
-                var datopost = 'json='+JSON.stringify(datos.prop2);
+                var datopost = 'json='+JSON.stringify(datos.formulario);
                 let resp = await request('?option=com_mrnegociosverde&task=savedatosempresa&format=json',datopost)                
                 if(resp.ok){
-                    if (datos.prop3!=null) {                        
-                        datos.prop3.forEach((element,key) => {
-                            datos.prop3[key].idempresa = resp.resp;
+                    if (datos.productos!=null) {                        
+                        datos.productos.forEach((element,key) => {
+                            datos.productos[key].idempresa = resp.resp;
                         });
                         this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
-                        if (datos.prop4!=null) {
-                            datos.prop4.forEach((element,key) => {
-                                datos.prop4[key].idempresa = resp.resp;
-                            });
-                            this.dispatch('formulario/GUARDAR_DOCUMENTOS', datos);
-                        } 
+                        if (datos.imagenlogo!=null) {
+                            let obj = {
+                                idempresa: resp.resp,
+                                file: datos.imagenlogo
+                            }
+                            this.dispatch('formulario/GUARDAR_FILE', obj);
+                            if (datos.documentos!=null) {
+                                let obj = {
+                                    idempresa: resp.resp,
+                                    file: datos.documentos
+                                }
+                                this.dispatch('formulario/GUARDAR_FILE', obj);
+                            } 
+                        }
                     }else{
                         commit(CARGANDO,false)
                         return resp
@@ -85,10 +84,9 @@ const store =
             },
             async GUARDAR_PRODUCTOS ({ commit },datos){                
                 commit(CARGANDO,true)
-                var datopost = 'json='+JSON.stringify(datos.prop3);
+                var datopost = 'json='+JSON.stringify(datos.productos);
                 let resp = await request('?option=com_mrnegociosverde&task=addproductos&format=json',datopost)
-                if(resp.ok){                      
-                    commit(CARGANDO,false)
+                if(resp.ok){                
                     return resp
                 }
                 commit(CARGANDO,false)
