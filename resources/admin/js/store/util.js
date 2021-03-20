@@ -6,7 +6,7 @@ export const request = function(url, data, method) {
         axios[method](url, data).then(function(resp) {
             resolve({ok:true,resp:resp.data})            
         }).catch(function(ex) {
-            resolve({ok:false,resp:e.response.data}) 
+            resolve({ok:false,resp:ex.response.data}) 
         })        
     })
 }

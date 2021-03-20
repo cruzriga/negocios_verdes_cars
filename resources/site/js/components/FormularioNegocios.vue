@@ -6,6 +6,7 @@
         class="q-gutter-md"
       >
                 <!-- <a @click.prevent="addfiletest">Trigger A's method</a> -->
+      <!-- {{formulario.idempresa}} -->
       <masonry :cols="{default: 2, 1000: 2, 700: 1}" :gutter="10">
         <q-card class="my-card q-ma-md">
           <q-card-section>
@@ -218,7 +219,7 @@
               v-model="formulario.categoria.data"
               option-label="nombre"
               option-value="idcategoria"
-              :options="this.$store.state.formulario.categoria.resp!=null?this.$store.state.formulario.categoria.resp.categorias:[]"
+              :options="this.$store.state.formulario.categoria!=null?this.$store.state.formulario.categoria.categorias:[]"
               @input="onchange"
               filled
               :rules="formulario.categoria.rules"
@@ -240,7 +241,7 @@
                 v-model="formulario.subcategoria.data"
                 option-label="nombre"
                 option-value="idsubcategoria"
-                :options="this.$store.state.formulario.categoria.resp!=null?this.$store.state.formulario.categoria.resp.subcategorias.filter(post => { return post.idcategoria == formulario.categoria.data.idcategoria}):[]"               
+                :options="this.$store.state.formulario.categoria!=null?this.$store.state.formulario.categoria.subcategorias.filter(post => { return post.idcategoria == formulario.categoria.data.idcategoria}):[]"               
                 @input="onchange"
                 filled
               >
@@ -260,7 +261,8 @@
                 </template>
               </q-select>
             </q-intersection>
-            <q-select v-if="formulario.subcategoria.data!=null && this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}).length>0"
+            <!-- <q-select v-if="formulario.subcategoria.data!=null && typeof this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}).length === 'undefined'" -->
+            <q-select v-if="formulario.subcategoria.data!=null && this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}).length >1 "
               :name="formulario.tiposubcategoria.nombre"
               :label="formulario.tiposubcategoria.label"
               transition-show="flip-up"
@@ -268,7 +270,7 @@
               v-model="formulario.tiposubcategoria.data"
               option-label="nombre"
               option-value="idtiposubcategoria"
-              :options="this.$store.state.formulario.categoria.resp!=null?this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}):[]"
+              :options="this.$store.state.formulario.categoria!=null?this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}):[]"
               filled
             >
             <template v-slot:option="scope">
@@ -286,8 +288,8 @@
                 </q-item>
               </template>
             </q-select>
-          <!-- {{this.$store.state.formulario.categoria.resp.tiposubcategorias}}
-          {{this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria})}} -->
+          <!-- {{this.$store.state.formulario.categoria.tiposubcategorias}}
+          {{this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria})}} -->
           </q-card-section>
         </q-card>        
         <q-card class="my-card q-ma-md">
@@ -337,7 +339,7 @@
                     </div> -->
                   </q-item-section>
                 </q-item>
-                <q-separator spaced /> 
+                <!-- <q-separator spaced />  -->
               <q-intersection
                 v-for="(applicant, counter) in formulario.productos" v-bind:key="counter"
                 transition="scale"
@@ -414,6 +416,9 @@
                           <!-- / {{ scope.uploadProgressLabel }} -->
                           </div>
                       </div>
+                      <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="'/media/attachments/2021/03/08/'+item.doc" class="sppb-btn sppb-btn-dark sppb-btn-round">
+                        <q-icon size="2rem" :name="'img:./../media/iconssvg/'+item.icon"/>
+                      </a>
                       <q-btn v-if="scope.canAddFiles" type="a" icon="add_box" round dense flat>
                         <q-uploader-add-trigger />
                         <q-tooltip>Pick Files</q-tooltip>
@@ -689,19 +694,27 @@ const optionsmunicipios = [
 const anexofile = [
   {
     name:'fFichaInscripcion',
-    label:'Formato - Ficha de inscripción'
+    label:'Formato - Ficha de inscripción',
+    doc:'ficha_inscripcion_nv_v2020.xlsx',
+    icon: 'xlsx.svg'
   },
   {
     name:'aListadoAsociados',
-    label:'Anexo - Listado de asociados'
+    label:'Anexo - Listado de asociados',
+    doc:'anexo-listado_asociados.xlsx',
+    icon: 'xlsx.svg'
   },
   {
     name:'aCartaConsentimiento',
-    label:'Anexo - Carta de consentimiento'
+    label:'Anexo - Carta de consentimiento',
+    doc:'carta_de_consentimiento_informado_v2020.docx',
+    icon: 'docx.svg'
   },
   {
     name:'aCartaIntencion',
-    label:'Anexo - Carta de intención'
+    label:'Anexo - Carta de intención',
+    doc:'carta-de-intencion-nodo--aliados.docx',
+    icon: 'docx.svg'
   }
 ];
 const anexarfile = [
@@ -758,7 +771,8 @@ export default {
       step: 1,
       url: 'https://78.media.tumblr.com/tumblr_m39nv7PcCU1r326q7o1_500.png',
       lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-      formulario: {       
+      formulario: {   
+        idempresa:null,    
         nombreempresa: {
           nombre: 'nombreempresa',
           type: 'text',
@@ -867,6 +881,7 @@ export default {
         },
         productos: [
           {
+            idproducto:null,
             nombre: null,
             descripcion: null,
             urlimagen: null
@@ -880,21 +895,28 @@ export default {
     }
   },
   beforeMount() {
-    this.AXIO_GET_CATEGORIAS()
     // this.verificarProps();
     // this.agregarCategorias();
+    
+    // console.log(this.formulario.subcategoria.data)
+    // console.log(this.$store.state.formulario.categoria)
   },
   // created () {
   //   console.log(this.$refs.a_listado_asociados)
   // },
-  mounted(){
-    const interval = setInterval(() => {
-      if (this.$refs.qUploader) {
-        // this.loaddoc();        
-        this.verificarProps();
-        clearInterval(interval)
-      }
-    }, 1000)
+  mounted(){    
+    this.$store.commit('formulario/CARGANDO',true)
+    this.AXIO_GET_CATEGORIAS()   
+    if (this.propformulario != null) {
+      const interval = setInterval(() => {
+        if (this.$refs.qUploader) {
+          // this.loaddoc();          
+          this.verificarProps();
+          clearInterval(interval)
+        }
+      }, 500)
+    }
+    this.$store.commit('formulario/CARGANDO',false)
   },
   methods: {
     addedFile(file){
@@ -936,8 +958,8 @@ export default {
       this.addfile(files)
     },
     addfile(file){
-      console.log(this.$refs)
-      console.log(this.$refs.qUploader)
+      // console.log(this.$refs)
+      // console.log(this.$refs.qUploader)
        this.$refs.qUploader.forEach(element => {
         var index =  file.map(function(item) { return item.ref; }).indexOf(element.$attrs.name);
         if (index>=0) {
@@ -975,65 +997,26 @@ export default {
             // console.log(key+' : '+value);
             if(this.formulario[key]!=null){
               // console.log( this.formulario[key].data);
-              if (key=='productos') {
-                this.formulario[key]=value
-              }else{
+              if (key!=='productos') {
                 this.formulario[key].data = value
               }
-            }            
+            }
+            if (key=='idempresa') {
+              this.formulario[key]=value
+            }
+            if (key=='productos' && value!=null && value!=false) {
+              // console.log(value)
+              this.formulario[key]=value
+            }
         })
         if (this.propformulario.documentos) {          
           this.loaddoc(this.propformulario.documentos);
         }
       }      
     },
-    uploadimg () {
-      if (!this.$refs.child.croppa.hasImage()) {
-        console.log('no image to upload')
-        return
-      }
-      var submitResult = {}    
-      Object.entries(this.formulario).forEach(([key, value]) => {
-        if (value.data!='' && value.data!=null) {
-          if(key=='categoria' || key=='subcategoria' || key=='tiposubcategoria'){
-              submitResult['id'+key] = value.data['id'+key]==''?null:value.data['id'+key]
-          }else{
-            submitResult[key] = value.data==''?null:value.data
-          }
-        }if(key=='productos'){
-          submitResult[key]=value
-        }
-      })
-      // console.log(this.formulario.productos);
-      // console.log(submitResult);
-      // let obj = {
-      //   prop1: null,
-      //   prop2: null,
-      //   prop3: this.formulario.productos
-      // }
-      // return new Promise((resolve) => {
-      //   this.$store.dispatch('formulario/GUARDAR_PRODUCTOS',obj).then(function(resp) {
-      //     resolve(resp)
-      //   })  
-      // })
-      this.$refs.child.croppa.generateBlob((blob) => {
-        var fd = new FormData()
-        fd.append('file', blob, 'logoEmpresa.jpg')
-        let obj = {
-          prop1: fd,
-          prop2: submitResult,
-          prop3: this.formulario.productos,
-          prop4: this.documentos
-        }
-        return new Promise((resolve) => {
-          this.$store.dispatch('formulario/GUARDAR_IMG',obj).then(function(resp) {
-            resolve(resp)
-          })  
-        })
-      })      
-    },
     addVisa () {
       this.formulario.productos.push({
+        idproducto:null,
         nombre: null,
         descripcion: null,
         urlimagen: null
@@ -1048,18 +1031,23 @@ export default {
         console.log('No')
         return
       }
-      var submitResult = {}    
+      var submitResult = {}
       Object.entries(this.formulario).forEach(([key, value]) => {
-        if (value.data!='' && value.data!=null) {        
-          if(key=='categoria' || key=='subcategoria' || key=='tiposubcategoria'){
+        // console.log(key+' : '+value)
+        if (key!='idempresa' ) {          
+          if (value.data!='' && value.data!=null) {
+            if(key=='categoria' || key=='subcategoria' || key=='tiposubcategoria'){
               submitResult['id'+key] = value.data['id'+key]==''?null:value.data['id'+key]
-          }else{
-            submitResult[key] = value.data==''?null:value.data
+            }else{
+              submitResult[key] = value.data==''?null:value.data
+            }
           }
+        }
+        if (key=='idempresa'&&value!=null) {
+          submitResult[key]=value;
         }
       })
       // console.log(submitResult)
-      // console.log(this.documentos)
       // return
       let docFiles=[]
       let doc
@@ -1072,40 +1060,61 @@ export default {
         }
       });
       
-          // console.log(docFiles); return
+      // console.log(docFiles); return
       // console.log(this.$refs.qUploader.value)
-      // let formData = new FormData();
-      for (let i = 0; i < docFiles.length; i++) {
-        this.formData.append('documentos['+i+']', docFiles[i],docFiles[i].ref+','+docFiles[i].name);
+      let formDataDocument = new FormData();
+      // console.log(docFiles.length)
+      if (docFiles.length>0) {        
+        for (let i = 0; i < docFiles.length; i++) {
+          formDataDocument.append('documentos['+i+']', docFiles[i],docFiles[i].ref+','+docFiles[i].name);
+        }
+      }else{
+        formDataDocument = null
       }
-      // console.log(this.formData)
+      // console.log(this.formulario.productos)
+      // return
       this.$refs.child.croppa.generateBlob((blob) => {
         var img = new FormData()
-        // var doc = new FormData()
-        console.log(blob)
+        // // var doc = new FormData()
+        // console.log(blob)
         // this.documentos.push(files[0]);
         img.append('imagenLogo', blob,'imagenLogo,imagennamelogo.jpg')
         // doc.append('documentos', this.documentos)
         let obj = {
           formulario: submitResult,
           productos: this.formulario.productos,
-          documentos: this.formData,
+          documentos: formDataDocument,
           imagenlogo: img
         }
+        // console.log(obj);
+        // return;
         return new Promise((resolve) => {
           app.$store.dispatch('formulario/GUARDAR_FORMULARIO',obj).then(function(resp) {
-            // app.onReset()
+            // app.onReset()            
+            if (!resp.ok) {             
+              app.$q.notify({
+                color: 'negative',
+                textColor: 'white',
+                icon: 'cloud_done',
+                message: 'Error ',                
+                position:'center'
+              })
+            }else{
+              console.log(submitResult);
+                app.$q.notify({
+                  color: 'green-4',
+                  textColor: 'white',
+                  icon: 'cloud_done',
+                  message: 'Formulario Enviado',
+                  position:'center'
+                })
+            }
+            app.$store.commit('formulario/CARGANDO',false)
             resolve(resp)
           })  
         })
       })           
-      console.log(submitResult);
-        this.$q.notify({
-          color: 'green-4',
-          textColor: 'white',
-          icon: 'cloud_done',
-          message: 'Submitted'
-        })
+     
     },
     onReset () {
       Object.entries(this.formulario).forEach(([key, value]) => {
@@ -1115,6 +1124,7 @@ export default {
       })
       this.formulario.productos = [
           {
+            idproducto:null,
             nombre: null,
             descripcion: null,
             urlimagen: null

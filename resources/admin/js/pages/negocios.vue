@@ -1,7 +1,7 @@
 <template>
   <q-page >
-    <!-- <div> {{this.$store.state.admin.empresas.resp.data[0]}}</div> -->
-    <!-- <div v-for="(empresa, count) in this.$store.state.admin.empresas.resp.data" v-bind:key="count">
+    <!-- <div> {{this.$store.state.admin.empresas.data[0]}}</div> -->
+    <!-- <div v-for="(empresa, count) in this.$store.state.admin.empresas.data" v-bind:key="count">
       <div>{{counter}} : {{applicant}}</div>
     </div>     -->
     <!-- <div class="hello">
@@ -23,19 +23,22 @@
         </q-toolbar>
       </q-item-label>
       <template v-if = "items.length > 0">
-      <div v-for="(empresa, count) in this.$store.state.admin.empresas.resp.data" v-bind:key="count">
+      <div v-for="(empresa, count) in this.$store.state.admin.empresas.data" v-bind:key="count">
         <!-- {{empresa}} -->
         <q-separator spaced/>
         <q-item>
           <q-item-section avatar top>
             <div>
               <q-toggle
-                :false-value="0"
-                :true-value="1"
+                false-value="0"
+                true-value="1"
                 v-model="empresa.activo"
-                name="activo"
+                :key="empresa.idempresa"
+                :name="empresa.idempresa"
+                :ref="'activo'+empresa.idempresa"
                 color="green"
                 icon="check"
+                @input="onToggleChange"
               />
             </div>
 
@@ -209,6 +212,9 @@
           </q-item-section>
         </q-item>
     </q-list>
+    <q-inner-loading :showing="this.$store.state.admin.cargando">
+      <q-spinner-hourglass size="5.5em" color="green" />
+    </q-inner-loading>
   </q-page>
 </template>
 
@@ -231,6 +237,54 @@ export default {
     this.$store.dispatch('admin/CARGAR_EMPRESAS');
   },
   methods: {
+    onToggleChange(value,evt){
+      // console.log(value)
+      // console.log(evt)
+      // console.log(evt.path[0].parentElement.firstChild.name) 
+      // console.log(evt.path.find(element => element > 'div.q-toggle__thumb.absolute.flex.flex-center.no-wrap'));
+      // evt.path.forEach((element,key) => {
+      //   console.log(element)
+      //   console.log(key)
+      // });
+      // var removeIndex = this.documentos.map(function(item) { return item.id; }).indexOf(file[0].lastModified);
+      // console.log(removeIndex)
+      let data= {
+        idempresa:evt.path[0].parentElement.firstChild.name!=null?evt.path[0].parentElement.firstChild.name:evt.path[1].parentElement.firstChild.name,
+        activo:value
+      }
+      // console.log(data)
+      // return
+      let app=this;
+      this.$store.dispatch('admin/CAMBIAR_ESTADO_EMPRESA',data).then(function(resp) {
+        // app.onReset()            
+        if (!resp.ok) {             
+          app.$q.notify({
+            color: 'negative',
+            textColor: 'white',
+            icon: 'cloud_done',
+            message: 'Error ',                
+            position:'center'
+          })
+        }else{
+          app.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'cloud_done',
+            message: 'Enviado',
+            position:'center'
+          })
+        }
+        app.$store.commit('admin/CARGANDO',false)
+      })
+      // return new Promise((resolve) => {
+      //   resolve(resp)
+      // }) 
+      // [0].parentElement.firstChild.name
+    },
+    toggleChange(value,evt){
+      // console.log(value)
+      // console.log(evt)
+    },
     openFormulario (empresa){
       this.$router.push({name: 'formulario', params: {prop:empresa}});
     }
@@ -239,7 +293,7 @@ export default {
 </script>
 
 <style scoped>
-    .no-results{
+/* .no-results{
 
-    }
+} */
 </style>

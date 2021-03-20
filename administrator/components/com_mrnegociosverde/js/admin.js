@@ -2255,6 +2255,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
   data: function data() {
@@ -2273,6 +2279,53 @@ __webpack_require__.r(__webpack_exports__);
     this.$store.dispatch('admin/CARGAR_EMPRESAS');
   },
   methods: {
+    onToggleChange: function onToggleChange(value, evt) {
+      // console.log(value)
+      // console.log(evt)
+      // console.log(evt.path[0].parentElement.firstChild.name) 
+      // console.log(evt.path.find(element => element > 'div.q-toggle__thumb.absolute.flex.flex-center.no-wrap'));
+      // evt.path.forEach((element,key) => {
+      //   console.log(element)
+      //   console.log(key)
+      // });
+      // var removeIndex = this.documentos.map(function(item) { return item.id; }).indexOf(file[0].lastModified);
+      // console.log(removeIndex)
+      var data = {
+        idempresa: evt.path[0].parentElement.firstChild.name != null ? evt.path[0].parentElement.firstChild.name : evt.path[1].parentElement.firstChild.name,
+        activo: value
+      }; // console.log(data)
+      // return
+
+      var app = this;
+      this.$store.dispatch('admin/CAMBIAR_ESTADO_EMPRESA', data).then(function (resp) {
+        // app.onReset()            
+        if (!resp.ok) {
+          app.$q.notify({
+            color: 'negative',
+            textColor: 'white',
+            icon: 'cloud_done',
+            message: 'Error ',
+            position: 'center'
+          });
+        } else {
+          app.$q.notify({
+            color: 'green-4',
+            textColor: 'white',
+            icon: 'cloud_done',
+            message: 'Enviado',
+            position: 'center'
+          });
+        }
+
+        app.$store.commit('admin/CARGANDO', false);
+      }); // return new Promise((resolve) => {
+      //   resolve(resp)
+      // }) 
+      // [0].parentElement.firstChild.name
+    },
+    toggleChange: function toggleChange(value, evt) {// console.log(value)
+      // console.log(evt)
+    },
     openFormulario: function openFormulario(empresa) {
       this.$router.push({
         name: 'formulario',
@@ -3014,6 +3067,11 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 //
 //
 //
+//
+//
+//
+//
+//
  // import { mapState } from 'vuex'
 
 var optionsmunicipios = [{
@@ -3079,16 +3137,24 @@ var optionsmunicipios = [{
 }];
 var anexofile = [{
   name: 'fFichaInscripcion',
-  label: 'Formato - Ficha de inscripción'
+  label: 'Formato - Ficha de inscripción',
+  doc: 'ficha_inscripcion_nv_v2020.xlsx',
+  icon: 'xlsx.svg'
 }, {
   name: 'aListadoAsociados',
-  label: 'Anexo - Listado de asociados'
+  label: 'Anexo - Listado de asociados',
+  doc: 'anexo-listado_asociados.xlsx',
+  icon: 'xlsx.svg'
 }, {
   name: 'aCartaConsentimiento',
-  label: 'Anexo - Carta de consentimiento'
+  label: 'Anexo - Carta de consentimiento',
+  doc: 'carta_de_consentimiento_informado_v2020.docx',
+  icon: 'docx.svg'
 }, {
   name: 'aCartaIntencion',
-  label: 'Anexo - Carta de intención'
+  label: 'Anexo - Carta de intención',
+  doc: 'carta-de-intencion-nodo--aliados.docx',
+  icon: 'docx.svg'
 }];
 var anexarfile = [{
   name: 'cExistenciaRepresentacionLegalVigente',
@@ -3139,6 +3205,7 @@ var anexarfile = [{
       url: 'https://78.media.tumblr.com/tumblr_m39nv7PcCU1r326q7o1_500.png',
       lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
       formulario: {
+        idempresa: null,
         nombreempresa: {
           nombre: 'nombreempresa',
           type: 'text',
@@ -3268,6 +3335,7 @@ var anexarfile = [{
           label: 'Tipo Sub Categoria'
         },
         productos: [{
+          idproducto: null,
           nombre: null,
           descripcion: null,
           urlimagen: null
@@ -3279,9 +3347,10 @@ var anexarfile = [{
       accept: false
     };
   },
-  beforeMount: function beforeMount() {
-    this.AXIO_GET_CATEGORIAS(); // this.verificarProps();
+  beforeMount: function beforeMount() {// this.verificarProps();
     // this.agregarCategorias();
+    // console.log(this.formulario.subcategoria.data)
+    // console.log(this.$store.state.formulario.categoria)
   },
   // created () {
   //   console.log(this.$refs.a_listado_asociados)
@@ -3289,14 +3358,21 @@ var anexarfile = [{
   mounted: function mounted() {
     var _this = this;
 
-    var interval = setInterval(function () {
-      if (_this.$refs.qUploader) {
-        // this.loaddoc();        
-        _this.verificarProps();
+    this.$store.commit('formulario/CARGANDO', true);
+    this.AXIO_GET_CATEGORIAS();
 
-        clearInterval(interval);
-      }
-    }, 1000);
+    if (this.propformulario != null) {
+      var interval = setInterval(function () {
+        if (_this.$refs.qUploader) {
+          // this.loaddoc();          
+          _this.verificarProps();
+
+          clearInterval(interval);
+        }
+      }, 500);
+    }
+
+    this.$store.commit('formulario/CARGANDO', false);
   },
   methods: {
     addedFile: function addedFile(file) {// console.log(file)
@@ -3337,8 +3413,8 @@ var anexarfile = [{
       this.addfile(files);
     },
     addfile: function addfile(file) {
-      console.log(this.$refs);
-      console.log(this.$refs.qUploader);
+      // console.log(this.$refs)
+      // console.log(this.$refs.qUploader)
       this.$refs.qUploader.forEach(function (element) {
         var index = file.map(function (item) {
           return item.ref;
@@ -3386,11 +3462,18 @@ var anexarfile = [{
           // console.log(key+' : '+value);
           if (_this2.formulario[key] != null) {
             // console.log( this.formulario[key].data);
-            if (key == 'productos') {
-              _this2.formulario[key] = value;
-            } else {
+            if (key !== 'productos') {
               _this2.formulario[key].data = value;
             }
+          }
+
+          if (key == 'idempresa') {
+            _this2.formulario[key] = value;
+          }
+
+          if (key == 'productos' && value != null && value != false) {
+            // console.log(value)
+            _this2.formulario[key] = value;
           }
         });
 
@@ -3399,62 +3482,9 @@ var anexarfile = [{
         }
       }
     },
-    uploadimg: function uploadimg() {
-      var _this3 = this;
-
-      if (!this.$refs.child.croppa.hasImage()) {
-        console.log('no image to upload');
-        return;
-      }
-
-      var submitResult = {};
-      Object.entries(this.formulario).forEach(function (_ref3) {
-        var _ref4 = _slicedToArray(_ref3, 2),
-            key = _ref4[0],
-            value = _ref4[1];
-
-        if (value.data != '' && value.data != null) {
-          if (key == 'categoria' || key == 'subcategoria' || key == 'tiposubcategoria') {
-            submitResult['id' + key] = value.data['id' + key] == '' ? null : value.data['id' + key];
-          } else {
-            submitResult[key] = value.data == '' ? null : value.data;
-          }
-        }
-
-        if (key == 'productos') {
-          submitResult[key] = value;
-        }
-      }); // console.log(this.formulario.productos);
-      // console.log(submitResult);
-      // let obj = {
-      //   prop1: null,
-      //   prop2: null,
-      //   prop3: this.formulario.productos
-      // }
-      // return new Promise((resolve) => {
-      //   this.$store.dispatch('formulario/GUARDAR_PRODUCTOS',obj).then(function(resp) {
-      //     resolve(resp)
-      //   })  
-      // })
-
-      this.$refs.child.croppa.generateBlob(function (blob) {
-        var fd = new FormData();
-        fd.append('file', blob, 'logoEmpresa.jpg');
-        var obj = {
-          prop1: fd,
-          prop2: submitResult,
-          prop3: _this3.formulario.productos,
-          prop4: _this3.documentos
-        };
-        return new Promise(function (resolve) {
-          _this3.$store.dispatch('formulario/GUARDAR_IMG', obj).then(function (resp) {
-            resolve(resp);
-          });
-        });
-      });
-    },
     addVisa: function addVisa() {
       this.formulario.productos.push({
+        idproducto: null,
         nombre: null,
         descripcion: null,
         urlimagen: null
@@ -3464,7 +3494,7 @@ var anexarfile = [{
       this.formulario.productos.splice(counter, 1);
     },
     onSubmit: function onSubmit(evt) {
-      var _this4 = this;
+      var _this3 = this;
 
       var app = this;
 
@@ -3474,20 +3504,26 @@ var anexarfile = [{
       }
 
       var submitResult = {};
-      Object.entries(this.formulario).forEach(function (_ref5) {
-        var _ref6 = _slicedToArray(_ref5, 2),
-            key = _ref6[0],
-            value = _ref6[1];
+      Object.entries(this.formulario).forEach(function (_ref3) {
+        var _ref4 = _slicedToArray(_ref3, 2),
+            key = _ref4[0],
+            value = _ref4[1];
 
-        if (value.data != '' && value.data != null) {
-          if (key == 'categoria' || key == 'subcategoria' || key == 'tiposubcategoria') {
-            submitResult['id' + key] = value.data['id' + key] == '' ? null : value.data['id' + key];
-          } else {
-            submitResult[key] = value.data == '' ? null : value.data;
+        // console.log(key+' : '+value)
+        if (key != 'idempresa') {
+          if (value.data != '' && value.data != null) {
+            if (key == 'categoria' || key == 'subcategoria' || key == 'tiposubcategoria') {
+              submitResult['id' + key] = value.data['id' + key] == '' ? null : value.data['id' + key];
+            } else {
+              submitResult[key] = value.data == '' ? null : value.data;
+            }
           }
         }
+
+        if (key == 'idempresa' && value != null) {
+          submitResult[key] = value;
+        }
       }); // console.log(submitResult)
-      // console.log(this.documentos)
       // return
 
       var docFiles = [];
@@ -3500,54 +3536,76 @@ var anexarfile = [{
         }
       }); // console.log(docFiles); return
       // console.log(this.$refs.qUploader.value)
-      // let formData = new FormData();
 
-      for (var i = 0; i < docFiles.length; i++) {
-        this.formData.append('documentos[' + i + ']', docFiles[i], docFiles[i].ref + ',' + docFiles[i].name);
-      } // console.log(this.formData)
+      var formDataDocument = new FormData(); // console.log(docFiles.length)
+
+      if (docFiles.length > 0) {
+        for (var i = 0; i < docFiles.length; i++) {
+          formDataDocument.append('documentos[' + i + ']', docFiles[i], docFiles[i].ref + ',' + docFiles[i].name);
+        }
+      } else {
+        formDataDocument = null;
+      } // console.log(this.formulario.productos)
+      // return
 
 
       this.$refs.child.croppa.generateBlob(function (blob) {
-        var img = new FormData(); // var doc = new FormData()
-
-        console.log(blob); // this.documentos.push(files[0]);
+        var img = new FormData(); // // var doc = new FormData()
+        // console.log(blob)
+        // this.documentos.push(files[0]);
 
         img.append('imagenLogo', blob, 'imagenLogo,imagennamelogo.jpg'); // doc.append('documentos', this.documentos)
 
         var obj = {
           formulario: submitResult,
-          productos: _this4.formulario.productos,
-          documentos: _this4.formData,
+          productos: _this3.formulario.productos,
+          documentos: formDataDocument,
           imagenlogo: img
-        };
+        }; // console.log(obj);
+        // return;
+
         return new Promise(function (resolve) {
           app.$store.dispatch('formulario/GUARDAR_FORMULARIO', obj).then(function (resp) {
-            // app.onReset()
+            // app.onReset()            
+            if (!resp.ok) {
+              app.$q.notify({
+                color: 'negative',
+                textColor: 'white',
+                icon: 'cloud_done',
+                message: 'Error ',
+                position: 'center'
+              });
+            } else {
+              console.log(submitResult);
+              app.$q.notify({
+                color: 'green-4',
+                textColor: 'white',
+                icon: 'cloud_done',
+                message: 'Formulario Enviado',
+                position: 'center'
+              });
+            }
+
+            app.$store.commit('formulario/CARGANDO', false);
             resolve(resp);
           });
         });
       });
-      console.log(submitResult);
-      this.$q.notify({
-        color: 'green-4',
-        textColor: 'white',
-        icon: 'cloud_done',
-        message: 'Submitted'
-      });
     },
     onReset: function onReset() {
-      var _this5 = this;
+      var _this4 = this;
 
-      Object.entries(this.formulario).forEach(function (_ref7) {
-        var _ref8 = _slicedToArray(_ref7, 2),
-            key = _ref8[0],
-            value = _ref8[1];
+      Object.entries(this.formulario).forEach(function (_ref5) {
+        var _ref6 = _slicedToArray(_ref5, 2),
+            key = _ref6[0],
+            value = _ref6[1];
 
         if (value.data != '' && value.data != null) {
-          _this5.formulario[key].data = null;
+          _this4.formulario[key].data = null;
         }
       });
       this.formulario.productos = [{
+        idproducto: null,
         nombre: null,
         descripcion: null,
         urlimagen: null
@@ -3698,6 +3756,7 @@ router.afterEach(function (to, from) {});
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CARGAR_EMPRESAS": () => (/* binding */ CARGAR_EMPRESAS),
+/* harmony export */   "CAMBIAR_ESTADO_EMPRESA": () => (/* binding */ CAMBIAR_ESTADO_EMPRESA),
 /* harmony export */   "EMPRESAS": () => (/* binding */ EMPRESAS),
 /* harmony export */   "CARGANDO": () => (/* binding */ CARGANDO),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -3722,12 +3781,15 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.default);
 var CARGAR_EMPRESAS = 'CARGAR_EMPRESAS';
+var CAMBIAR_ESTADO_EMPRESA = 'CAMBIAR_ESTADO_EMPRESA';
 var EMPRESAS = 'EMPRESAS';
 var CARGANDO = 'CARGANDO';
 var store = {
   namespaced: true,
   state: {
-    empresas: [],
+    empresas: {
+      data: []
+    },
     cargando: false
   },
   getters: {
@@ -3755,18 +3817,50 @@ var store = {
 
               case 4:
                 resp = _context.sent;
+                console.log(resp);
 
                 if (resp.ok) {
-                  commit(EMPRESAS, resp);
+                  commit(EMPRESAS, resp.resp);
                   commit(CARGANDO, false);
                 }
 
-              case 6:
+              case 7:
               case "end":
                 return _context.stop();
             }
           }
         }, _callee);
+      }))();
+    },
+    CAMBIAR_ESTADO_EMPRESA: function CAMBIAR_ESTADO_EMPRESA(_ref2, datos) {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
+        var commit, datopost, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                commit = _ref2.commit;
+                commit(CARGANDO, true);
+                datopost = 'json=' + JSON.stringify(datos);
+                _context2.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=updateEstadorEmpresa&format=json', datopost);
+
+              case 5:
+                resp = _context2.sent;
+
+                if (!resp.ok) {
+                  _context2.next = 8;
+                  break;
+                }
+
+                return _context2.abrupt("return", resp);
+
+              case 8:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2);
       }))();
     }
   }
@@ -3832,7 +3926,7 @@ var request = function request(url, data, method) {
     })["catch"](function (ex) {
       resolve({
         ok: false,
-        resp: e.response.data
+        resp: ex.response.data
       });
     });
   });
@@ -3889,7 +3983,11 @@ var CARGANDO = 'CARGANDO';
 var store = {
   namespaced: true,
   state: {
-    categoria: [],
+    categoria: {
+      categorias: [],
+      subcategorias: [],
+      tiposubcategorias: []
+    },
     cargando: false
   },
   getters: {
@@ -3919,7 +4017,7 @@ var store = {
 
                 // console.log(resp);
                 if (resp.ok) {
-                  commit(CATEGORIAS, resp);
+                  commit(CATEGORIAS, resp.resp);
                 }
 
               case 5:
@@ -3945,7 +4043,7 @@ var store = {
                   }
                 };
                 _context2.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=uploadFile&format=json&idempresa=' + datos.idempresa, datos.file, config);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('../?option=com_mrnegociosverde&task=uploadFile&format=json&idempresa=' + datos.idempresa, datos.file, config);
 
               case 5:
                 resp = _context2.sent;
@@ -3958,9 +4056,9 @@ var store = {
                 return _context2.abrupt("return", resp);
 
               case 8:
-                commit(CARGANDO, false);
+                return _context2.abrupt("return", resp);
 
-              case 9:
+              case 10:
               case "end":
                 return _context2.stop();
             }
@@ -3972,7 +4070,7 @@ var store = {
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
-        var commit, datopost, resp, obj, _obj;
+        var commit, datopost, resp, resppro, obj, respdoc, _obj;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
@@ -3980,58 +4078,98 @@ var store = {
               case 0:
                 commit = _ref3.commit;
                 commit(CARGANDO, true);
-                datopost = 'json=' + JSON.stringify(datos.formulario);
+                datopost = 'json=' + JSON.stringify(datos.formulario); // console.log(datos.formulario.idempresa);
+
                 _context3.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('../?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
 
               case 5:
                 resp = _context3.sent;
 
                 if (!resp.ok) {
-                  _context3.next = 16;
+                  _context3.next = 33;
                   break;
                 }
 
                 if (!(datos.productos != null)) {
-                  _context3.next = 13;
+                  _context3.next = 31;
                   break;
                 }
 
                 datos.productos.forEach(function (element, key) {
-                  datos.productos[key].idempresa = resp.resp;
-                });
-
-                _this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
-
-                if (datos.imagenlogo != null) {
-                  obj = {
-                    idempresa: resp.resp,
-                    file: datos.imagenlogo
-                  };
-
-                  _this.dispatch('formulario/GUARDAR_FILE', obj);
-
-                  if (datos.documentos != null) {
-                    _obj = {
-                      idempresa: resp.resp,
-                      file: datos.documentos
-                    };
-
-                    _this.dispatch('formulario/GUARDAR_FILE', _obj);
+                  if (datos.productos[key].idempresa == null || datos.productos[key].idempresa == '') {
+                    datos.productos[key].idempresa = resp.resp == null || resp.resp == '' ? datos.formulario.idempresa : resp.resp;
                   }
+                }); // console.log(datos)
+
+                console.log(datos.formulario.idempresa);
+                _context3.next = 12;
+                return _this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
+
+              case 12:
+                resppro = _context3.sent;
+
+                if (resppro.ok) {
+                  _context3.next = 15;
+                  break;
                 }
 
-                _context3.next = 15;
-                break;
-
-              case 13:
-                commit(CARGANDO, false);
-                return _context3.abrupt("return", resp);
+                return _context3.abrupt("return", resppro);
 
               case 15:
+                if (!(datos.imagenlogo != null)) {
+                  _context3.next = 29;
+                  break;
+                }
+
+                console.log(datos.formulario.idempresa);
+                obj = {
+                  idempresa: resp.resp == null || resp.resp == '' ? datos.formulario.idempresa : resp.resp,
+                  file: datos.imagenlogo
+                };
+                _context3.next = 20;
+                return _this.dispatch('formulario/GUARDAR_FILE', obj);
+
+              case 20:
+                respdoc = _context3.sent;
+
+                if (respdoc.ok) {
+                  _context3.next = 23;
+                  break;
+                }
+
+                return _context3.abrupt("return", respdoc);
+
+              case 23:
+                if (!(datos.documentos != null)) {
+                  _context3.next = 28;
+                  break;
+                }
+
+                _obj = {
+                  idempresa: resp.resp == null || resp.resp == '' ? datos.formulario.idempresa : resp.resp,
+                  file: datos.documentos
+                };
+                _context3.next = 27;
+                return _this.dispatch('formulario/GUARDAR_FILE', _obj);
+
+              case 27:
+                respdoc = _context3.sent;
+
+              case 28:
+                return _context3.abrupt("return", respdoc);
+
+              case 29:
+                _context3.next = 32;
+                break;
+
+              case 31:
+                return _context3.abrupt("return", resp);
+
+              case 32:
                 commit(CARGANDO, false);
 
-              case 16:
+              case 33:
               case "end":
                 return _context3.stop();
             }
@@ -4050,7 +4188,7 @@ var store = {
                 commit(CARGANDO, true);
                 datopost = 'json=' + JSON.stringify(datos.productos);
                 _context4.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=addproductos&format=json', datopost);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('../?option=com_mrnegociosverde&task=addproductos&format=json', datopost);
 
               case 5:
                 resp = _context4.sent;
@@ -4141,7 +4279,7 @@ var request = function request(url, data, config, method) {
     })["catch"](function (ex) {
       resolve({
         ok: false,
-        resp: e.response.data
+        resp: ex.response.data
       });
     });
   });
@@ -4190,7 +4328,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.no-results[data-v-afd3855c]{\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -55091,7 +55229,7 @@ var render = function() {
           ),
           _vm._v(" "),
           _vm.items.length > 0
-            ? _vm._l(this.$store.state.admin.empresas.resp.data, function(
+            ? _vm._l(this.$store.state.admin.empresas.data, function(
                 empresa,
                 count
               ) {
@@ -55112,13 +55250,17 @@ var render = function() {
                               "div",
                               [
                                 _c("q-toggle", {
+                                  key: empresa.idempresa,
+                                  ref: "activo" + empresa.idempresa,
+                                  refInFor: true,
                                   attrs: {
-                                    "false-value": 0,
-                                    "true-value": 1,
-                                    name: "activo",
+                                    "false-value": "0",
+                                    "true-value": "1",
+                                    name: empresa.idempresa,
                                     color: "green",
                                     icon: "check"
                                   },
+                                  on: { input: _vm.onToggleChange },
                                   model: {
                                     value: empresa.activo,
                                     callback: function($$v) {
@@ -55476,6 +55618,17 @@ var render = function() {
               )
         ],
         2
+      ),
+      _vm._v(" "),
+      _c(
+        "q-inner-loading",
+        { attrs: { showing: this.$store.state.admin.cargando } },
+        [
+          _c("q-spinner-hourglass", {
+            attrs: { size: "5.5em", color: "green" }
+          })
+        ],
+        1
       )
     ],
     1
@@ -56183,8 +56336,8 @@ var render = function() {
                           "option-label": "nombre",
                           "option-value": "idcategoria",
                           options:
-                            this.$store.state.formulario.categoria.resp != null
-                              ? this.$store.state.formulario.categoria.resp
+                            this.$store.state.formulario.categoria != null
+                              ? this.$store.state.formulario.categoria
                                   .categorias
                               : [],
                           filled: "",
@@ -56246,9 +56399,9 @@ var render = function() {
                                   "option-label": "nombre",
                                   "option-value": "idsubcategoria",
                                   options:
-                                    this.$store.state.formulario.categoria
-                                      .resp != null
-                                      ? this.$store.state.formulario.categoria.resp.subcategorias.filter(
+                                    this.$store.state.formulario.categoria !=
+                                    null
+                                      ? this.$store.state.formulario.categoria.subcategorias.filter(
                                           function(post) {
                                             return (
                                               post.idcategoria ==
@@ -56339,14 +56492,14 @@ var render = function() {
                       ),
                       _vm._v(" "),
                       _vm.formulario.subcategoria.data != null &&
-                      this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(
+                      this.$store.state.formulario.categoria.tiposubcategorias.filter(
                         function(post) {
                           return (
                             post.idsubcategoria ==
                             _vm.formulario.subcategoria.data.idsubcategoria
                           )
                         }
-                      ).length > 0
+                      ).length > 1
                         ? _c("q-select", {
                             attrs: {
                               name: _vm.formulario.tiposubcategoria.nombre,
@@ -56356,9 +56509,8 @@ var render = function() {
                               "option-label": "nombre",
                               "option-value": "idtiposubcategoria",
                               options:
-                                this.$store.state.formulario.categoria.resp !=
-                                null
-                                  ? this.$store.state.formulario.categoria.resp.tiposubcategorias.filter(
+                                this.$store.state.formulario.categoria != null
+                                  ? this.$store.state.formulario.categoria.tiposubcategorias.filter(
                                       function(post) {
                                         return (
                                           post.idsubcategoria ==
@@ -56574,8 +56726,6 @@ var render = function() {
                         ],
                         1
                       ),
-                      _vm._v(" "),
-                      _c("q-separator", { attrs: { spaced: "" } }),
                       _vm._v(" "),
                       _vm._l(_vm.formulario.productos, function(
                         applicant,
@@ -56793,6 +56943,36 @@ var render = function() {
                                               ]
                                             )
                                           ]),
+                                          _vm._v(" "),
+                                          _c(
+                                            "a",
+                                            {
+                                              staticClass:
+                                                "sppb-btn sppb-btn-dark sppb-btn-round",
+                                              staticStyle: {
+                                                "margin-right": "20px"
+                                              },
+                                              attrs: {
+                                                rel: "noopener noreferrer",
+                                                target: "_blank",
+                                                id: "btn-1615192830423",
+                                                href:
+                                                  "/media/attachments/2021/03/08/" +
+                                                  item.doc
+                                              }
+                                            },
+                                            [
+                                              _c("q-icon", {
+                                                attrs: {
+                                                  size: "2rem",
+                                                  name:
+                                                    "img:./../media/iconssvg/" +
+                                                    item.icon
+                                                }
+                                              })
+                                            ],
+                                            1
+                                          ),
                                           _vm._v(" "),
                                           scope.canAddFiles
                                             ? _c(

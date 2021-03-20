@@ -61,6 +61,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
     }
     function incoming_files() {
         $files = $_FILES;
+        print_r($files);
         $files2 = [];
         foreach ($files as $input => $infoArr) {
             $filesByInput = [];
@@ -106,24 +107,32 @@ class MrNegociosVerdeController extends JControllerLegacy {
                     $path = $path.strtolower($final_file);
                     $item = new stdClass();
                     // print_r($path);
+                    // print_r($name[0]);
                     if(move_uploaded_file($tmp,$path)){
                         $db = JFactory::getDBO();
+                        $updateNulls = true;
                         if ($name[0] == 'imagenLogo') {
-                            $updateNulls = true;
                             $item->idempresa = $idempresa;
                             $item->imagenlogo = $path;
                             $result = $db->updateObject('#__negocios_v_empresas', $item , 'idempresa', $updateNulls);
                         }else{
+                            $model= $this->getModel('mrnegociosverde');                            
+                            $documento= $model->getDocument($idempresa,$name[0]);
                             $item->idempresa = $idempresa;
                             $item->urldocumento = $path;
                             $item->size = $siz;
                             $item->name = $name[1];
                             $item->ext = $ext;
                             $item->ref = $name[0];
-                            // print_r($item);
-                            $result = $db->insertObject('#__negocios_v_documentos', $item); 
+                            if (empty($documento)) {
+                                $result = $db->insertObject('#__negocios_v_documentos', $item); 
+                            }else{
+                                $result = $db->updateObject('#__negocios_v_documentos', $item , 'idempresa,ref', $updateNulls);
+                            }
+                            // print_r($result);
                         }
-                        // echo $path;
+                        // print_r($item);
+                        echo $path;
                     }
                 }else{
                     echo 'invalid';
@@ -137,9 +146,17 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $rawDataPost = $app->input->getArray($_POST);
         $Itemid = json_decode($rawDataPost['json']);
         $db = JFactory::getDBO();
-        $result = $db->insertObject('#__negocios_v_empresas', $Itemid);
-        $ultimoid = $db->insertid();
-        echo ($ultimoid);
+        // print_r( $Itemid );
+        if (!empty($Itemid->idempresa)) {
+            $Itemid->idtiposubcategoria = empty($Itemid->idtiposubcategoria)?null:$Itemid->idtiposubcategoria;
+            $Itemid->idsubcategoria = empty($Itemid->idsubcategoria)?null:$Itemid->idsubcategoria;
+            $updateNulls = true;
+            $result = $db->updateObject('#__negocios_v_empresas', $Itemid , 'idempresa', $updateNulls);
+        }else{
+            $result = $db->insertObject('#__negocios_v_empresas', $Itemid);
+            $ultimoid = $db->insertid();
+            echo $ultimoid;
+        }
     }
     public function addproductos(Type $var = null)
     {
@@ -147,8 +164,9 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $rawDataPost = $app->input->getArray($_POST);
         $Itemid = json_decode($rawDataPost['json']);
         $db = JFactory::getDBO();
+        $updateNulls = true;
         foreach ($Itemid as $key => $value) {
-            $result = $db->insertObject('#__negocios_v_productos', $value);            
+            $retVal = !empty($value->idproducto)?$db->updateObject('#__negocios_v_productos', $value , 'idproducto', $updateNulls): $db->insertObject('#__negocios_v_productos', $value) ;      
         }
         // echo ($ultimoid);
     }

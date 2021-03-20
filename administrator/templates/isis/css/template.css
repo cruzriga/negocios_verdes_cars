@@ -227,8 +227,8 @@ a:focus {
 	margin-left: -20px;
 	*zoom: 1;
 }
-.row:before,
-.row:after {
+.row:before:not(#app-admin-container *),
+.row:after:not(#app-admin-container *) {
 	display: table;
 	content: "";
 	line-height: 0;
@@ -4769,12 +4769,12 @@ a.badge:focus {
 	}
 }
 @media (min-width: 768px) and (max-width: 979px) {
-	.row:not(#app-admin-container) {
+	.row:not(#app-admin-container *) {
 		margin-left: -20px;
 		*zoom: 1;
 	}
-	.row:before,
-	.row:after {
+	.row:before:not(#app-admin-container *),
+	.row:after:not(#app-admin-container *) {
 		display: table;
 		content: "";
 		line-height: 0;
@@ -5113,8 +5113,8 @@ a.badge:focus {
 		margin-left: -30px;
 		*zoom: 1;
 	}
-	.row:before,
-	.row:after {
+	.row:before:not(#app-admin-container *),
+	.row:after:not(#app-admin-container *) {
 		display: table;
 		content: "";
 		line-height: 0;

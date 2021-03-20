@@ -66,21 +66,45 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $empresas= $model->getEmpresas();
         foreach ($empresas as $key => $value) {
             $categoria          = $model->getCategorias($value->idcategoria);
-            $subcategoria       = $model->getSubCategorias($value->idcategoria,$value->idsubcategoria);
-            $tiposubcategoria   = $model->getTipoSubCategorias($value->idsubcategoria,$value->idtiposubcategoria);
+            $subcategoria       = [];
+            $tiposubcategoria   = [];
             $productos          = $model->getProductos($value->idempresa);
             $documentos          = $model->getDocumentos($value->idempresa);
-
+            
+            if ($value->idsubcategoria!=null) {
+                $subcategoria = $model->getSubCategorias($value->idcategoria,$value->idsubcategoria)[0];
+            }
+            if ($value->idtiposubcategoria!=null) {
+                $tiposubcategoria = $model->getTipoSubCategorias($value->idsubcategoria,$value->idtiposubcategoria)[0];
+            }
             unset($value->idcategoria);
             unset($value->idsubcategoria);
             unset($value->idtiposubcategoria);
 
             $empresas[$key]->categoria = $categoria[0];
-            $empresas[$key]->subcategoria = $subcategoria[0];
-            $empresas[$key]->tiposubcategoria = $tiposubcategoria[0];
+            $empresas[$key]->subcategoria = $subcategoria;
+            $empresas[$key]->tiposubcategoria = $tiposubcategoria;
             $empresas[$key]->productos = $productos;
             $empresas[$key]->documentos = $documentos;
         }
+        $app->enqueueMessage("Enqueued notice", "notice");
+        $app->enqueueMessage("Enqueued warning", "warning");
+        try 
+        {   
+            echo new JResponseJson($empresas, "It worked!");
+        }
+        catch (Exception $e)
+        {
+            echo new JResponseJson($e);
+        }
+    }
+    public function updateEstadorEmpresa()
+    {        
+        $app = JFactory::getApplication(); 
+        $model= $this->getModel('mrnegociosverde');
+        $rawDataPost = $app->input->getArray($_POST);
+        $Itemid = json_decode($rawDataPost['json']);
+        $empresas= $model->updateEstadoEmpresa($Itemid);
         $app->enqueueMessage("Enqueued notice", "notice");
         $app->enqueueMessage("Enqueued warning", "warning");
         try 

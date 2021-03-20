@@ -198,4 +198,17 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         }
         return false;
     }
+
+    public function updateEstadoEmpresa( $item ) {
+
+        $db = JFactory::getDBO();
+        $updateNulls = true;
+        // print_r($item);
+        $result = $db->updateObject('#__negocios_v_empresas', $item , 'idempresa', $updateNulls);
+        // print_r($result);
+        if ($result) {
+            return $result;
+        }
+        return false;
+    }
 }

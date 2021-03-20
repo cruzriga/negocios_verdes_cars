@@ -17,7 +17,11 @@ const store =
     {        
         namespaced: true,
         state: {
-            categoria:[],
+            categoria:{
+                categorias:[],
+                subcategorias:[],
+                tiposubcategorias:[]
+            },
             cargando:false
         },
         getters:{
@@ -39,44 +43,61 @@ const store =
                 let resp = await request('?option=com_mrnegociosverde&task=categorias&format=json')
                 // console.log(resp);
                 if(resp.ok){
-                    commit(CATEGORIAS,resp)
+                    commit(CATEGORIAS,resp.resp)
                 }
             },
             async GUARDAR_FILE ({ commit },datos){
                 commit(CARGANDO,true)
                 const config = { headers:{'Content-Type':'multipart/form-data'}};
-                let resp = await request('?option=com_mrnegociosverde&task=uploadFile&format=json&idempresa='+datos.idempresa,datos.file,config)
+                let resp = await request('../?option=com_mrnegociosverde&task=uploadFile&format=json&idempresa='+datos.idempresa,datos.file,config)
+                // console.log(resp)
                 if(resp.ok){
                     return resp;
                 }
+                return resp;
                 commit(CARGANDO,false)
             },
             async GUARDAR_FORMULARIO ({ commit },datos){
                 commit(CARGANDO,true)         
                 var datopost = 'json='+JSON.stringify(datos.formulario);
-                let resp = await request('?option=com_mrnegociosverde&task=savedatosempresa&format=json',datopost)                
+                // console.log(datos.formulario.idempresa);
+                let resp = await request('../?option=com_mrnegociosverde&task=savedatosempresa&format=json',datopost)   
+                // console.log(resp);
+                // return resp
                 if(resp.ok){
-                    if (datos.productos!=null) {                        
+                    if (datos.productos!=null) {
                         datos.productos.forEach((element,key) => {
-                            datos.productos[key].idempresa = resp.resp;
+                            if (datos.productos[key].idempresa==null || datos.productos[key].idempresa=='') {                                
+                                datos.productos[key].idempresa = (resp.resp==null||resp.resp=='')?datos.formulario.idempresa:resp.resp;
+                            }
                         });
-                        this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
+                        // console.log(datos)
+                        console.log(datos.formulario.idempresa);
+                        let resppro = await this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
+                        if(!resppro.ok){
+                            return resppro
+                        }
                         if (datos.imagenlogo!=null) {
+                            console.log(datos.formulario.idempresa);
                             let obj = {
-                                idempresa: resp.resp,
+                                idempresa: (resp.resp==null||resp.resp=='')?datos.formulario.idempresa:resp.resp,
                                 file: datos.imagenlogo
                             }
-                            this.dispatch('formulario/GUARDAR_FILE', obj);
+                            let respdoc = await this.dispatch('formulario/GUARDAR_FILE', obj);
+                            // console.log(respdoc)
+                            if(!respdoc.ok){
+                                return respdoc
+                            }
                             if (datos.documentos!=null) {
                                 let obj = {
-                                    idempresa: resp.resp,
+                                    idempresa: (resp.resp==null||resp.resp=='')?datos.formulario.idempresa:resp.resp,
                                     file: datos.documentos
                                 }
-                                this.dispatch('formulario/GUARDAR_FILE', obj);
-                            } 
+                                respdoc = await this.dispatch('formulario/GUARDAR_FILE', obj);
+                            }
+                            return respdoc
                         }
                     }else{
-                        commit(CARGANDO,false)
                         return resp
                     }
                     commit(CARGANDO,false)
@@ -85,7 +106,7 @@ const store =
             async GUARDAR_PRODUCTOS ({ commit },datos){                
                 commit(CARGANDO,true)
                 var datopost = 'json='+JSON.stringify(datos.productos);
-                let resp = await request('?option=com_mrnegociosverde&task=addproductos&format=json',datopost)
+                let resp = await request('../?option=com_mrnegociosverde&task=addproductos&format=json',datopost)
                 if(resp.ok){                
                     return resp
                 }
