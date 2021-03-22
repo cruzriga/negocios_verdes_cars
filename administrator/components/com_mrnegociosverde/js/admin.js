@@ -3082,6 +3082,9 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 //
 //
 //
+//
+//
+//
  // import { mapState } from 'vuex'
 
 var optionsmunicipios = [{
@@ -56069,6 +56072,17 @@ var render = function() {
                                       )
                                     ]
                                   }
+                                },
+                                {
+                                  key: "prepend",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", {
+                                        attrs: { name: "explore" }
+                                      })
+                                    ]
+                                  },
+                                  proxy: true
                                 }
                               ]),
                               model: {
@@ -56106,6 +56120,19 @@ var render = function() {
                                 dense: _vm.dense,
                                 rules: _vm.formulario.direccion.rules
                               },
+                              scopedSlots: _vm._u([
+                                {
+                                  key: "prepend",
+                                  fn: function() {
+                                    return [
+                                      _c("q-icon", {
+                                        attrs: { name: "location_on" }
+                                      })
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              ]),
                               model: {
                                 value: _vm.formulario.direccion.data,
                                 callback: function($$v) {

@@ -1,8 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import negocios from "./pages/negocios";
-import categorias from "./pages/categorias";
-import archivos from "./pages/archivos";
+import listanegocios from "./pages/ListaNegocios";
+import registrar from "./pages/Registrar";
 
 Vue.use(VueRouter);
 
@@ -15,7 +14,7 @@ const router = new VueRouter(
                 redirect: '/',
             },
             {
-                path: '/', component: negocios, props:true,
+                path: '/', component: listanegocios, props:true,
                 children: [
                     /* {
                      path: '/',
@@ -25,7 +24,7 @@ const router = new VueRouter(
                 ]
             },
             {
-                path: '/categorias', component: categorias, props:true,
+                path: '/registrar', component: registrar, props:true,
                 children: [
                     /* {s
                      path: '/',
@@ -33,17 +32,7 @@ const router = new VueRouter(
                      name: 'main'
                      },*/
                 ]
-            },
-            {
-                path: '/archivos', component: archivos, props:true,
-                children: [
-                    /* {
-                     path: '/',
-                     component: Business,
-                     name: 'main'
-                     },*/
-                ]
-            },
+            }
         ]
     }
 );

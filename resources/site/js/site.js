@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import store from './store/store';
-// import router from './router';
+import router from './router';
 import index from './index'
 import Quasar from "quasar";
 import VueMasonry from 'vue-masonry-css'
@@ -20,8 +20,9 @@ Vue.use(VueMasonry);
 Vue.use(Croppa);
 
 window.vue  = new Vue({
-                        //   router,
+                          router,
                           store,
                           data:{},
                           render: h => h(index)}
+                          
 ).$mount('#appsite');

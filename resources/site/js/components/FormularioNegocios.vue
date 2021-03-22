@@ -100,7 +100,10 @@
                         </q-item-section>
                       </q-item>
                     </template>
-                  </q-select>
+                    <template v-slot:prepend>
+                      <q-icon name="explore" />
+                    </template>
+                </q-select>
               </div>
             </div>
             <div class="row justify-center items-center">
@@ -109,9 +112,9 @@
               </div> -->
               <div class="col-12 col-md-9">
                   <q-input v-model="formulario.direccion.data" label="Direccion" type="text" counter maxlength="200" :dense="dense" :rules="formulario.direccion.rules">
-                  <!-- <template v-slot:prepend>
-                      <q-icon class="room" />
-                  </template> -->
+                  <template v-slot:prepend>
+                      <q-icon name="location_on" />
+                  </template>
                   </q-input>
               </div>
             </div>

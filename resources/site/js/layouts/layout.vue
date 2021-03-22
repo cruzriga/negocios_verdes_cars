@@ -1,5 +1,5 @@
 <template>
-  <div id="app-admin-container">
+  <div id="app-site-container">
     <q-layout view="hHh lpR fFf"  container>
 
       <q-header elevated class="bg-white text-grey">
@@ -8,9 +8,8 @@
 
           </q-toolbar-title>
           <q-tabs>
-            <q-route-tab to="/" icon="eco" name="Negocios" label="Negocios" />
-            <q-route-tab to="/categorias" icon="list" name="Categorias" label="Categorias" />
-            <q-route-tab to="/archivos" icon="attach_file" name="Archivos" label="Archivos" />
+            <q-route-tab to="/" icon="eco" name="Negocios" label="Lista" />
+            <q-route-tab to="/registrar" icon="assignment_ind" name="Categorias" label="Inscribete" />
           </q-tabs>
         </q-toolbar>
 
