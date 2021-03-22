@@ -30,10 +30,10 @@ const store =
             
         },
         actions:{
-            async CARGAR_EMPRESAS ({ commit }){
+            async CARGAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
-                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresas&format=json')
-                console.log(resp)
+                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresas&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
+                // console.log(resp)
                 if(resp.ok){
                     commit(EMPRESAS,resp.resp)
                     commit(CARGANDO,false)

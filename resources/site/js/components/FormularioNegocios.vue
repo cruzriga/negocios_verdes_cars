@@ -190,6 +190,7 @@
           <q-separator />
           <q-card-section cass="justify-center items-center">
             <div class="column items-center" style="">
+              <!-- {{formulario.imagenlogo.data}} -->
                 <!-- <div class="col">
                   <div class="text-h6">Logo</div>
                 </div> -->
@@ -310,42 +311,13 @@
                 <q-btn @click="addVisa" label="Agregar Producto" color="primary"/>
             </div> -->
             <q-card-section>           
-              <!-- <q-separator spaced />    -->
-              <q-item class="row justify-center items-center">
-                  <!-- <q-item-section avatar top>
-                    <q-icon name="account_tree" color="black" size="34px" />
-                  </q-item-section>
-
-                  <q-item-section top class="col-2 gt-sm">
-                    <q-item-label class="q-mt-sm">GitHub</q-item-label>
-                  </q-item-section> -->
-
-                  <q-item-section top>
-                    <q-item-label lines="1">
-                      <q-input v-model="formulario.productos[0].nombre" label="Nombrel del producto" type="text" :rules="[ val => val && val.length > 0 || 'Campo vacio']">
-                      </q-input>
-                    </q-item-label>
-                    <q-item-label lines="1">
-                      <q-input v-model="formulario.productos[0].descripcion" label="Descripcion" type="text" :rules="[ val => val && val.length > 0 || 'Campo vacio']">
-                      </q-input>
-                    </q-item-label>
-                  </q-item-section>
-
-                  <q-item-section top side>
-                    <!-- <div class="text-grey-8 q-gutter-xs">
-                      <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
-                      <q-btn class="gt-xs" size="12px" flat dense round icon="done" />
-                      <q-btn size="12px" flat dense round icon="more_vert" />
-                    </div> -->
-                  </q-item-section>
-                </q-item>
                 <!-- <q-separator spaced />  -->
               <q-intersection
-                v-for="(applicant, counter) in formulario.productos" v-bind:key="counter"
+                v-for="(applicant, counter) in formulario.productos.filter(post => { return post.activo == 1})" v-bind:key="counter"
                 transition="scale"
                 leave="scale"
                 >
-                 <q-item v-if="counter>0" class="row justify-center items-center">
+                 <q-item class="row justify-center items-center">
                   <!-- <q-item-section avatar top>
                     <q-icon name="account_tree" color="black" size="34px" />
                   </q-item-section>
@@ -416,8 +388,13 @@
                           <!-- / {{ scope.uploadProgressLabel }} -->
                           </div>
                       </div>
+                      <div v-if="item.urlActual!=null">
+                        <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="'../'+item.urlActual" class="sppb-btn sppb-btn-dark sppb-btn-round">
+                          <q-icon size="2rem" :name="'img:./../media/iconssvg/'+item.urlActual.split('.').pop()+'.svg'"/>
+                        </a>
+                      </div>
                       <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="'/media/attachments/2021/03/08/'+item.doc" class="sppb-btn sppb-btn-dark sppb-btn-round">
-                        <q-icon size="2rem" :name="'img:./../media/iconssvg/'+item.icon"/>
+                        <q-icon size="2rem" :name="'img:./../media/iconssvg/'+item.icon+'.svg'"/>
                       </a>
                       <q-btn v-if="scope.canAddFiles" type="a" icon="add_box" round dense flat>
                         <q-uploader-add-trigger />
@@ -696,51 +673,61 @@ const anexofile = [
     name:'fFichaInscripcion',
     label:'Formato - Ficha de inscripción',
     doc:'ficha_inscripcion_nv_v2020.xlsx',
-    icon: 'xlsx.svg'
+    icon: 'xlsx',
+    urlActual:null
   },
   {
     name:'aListadoAsociados',
     label:'Anexo - Listado de asociados',
     doc:'anexo-listado_asociados.xlsx',
-    icon: 'xlsx.svg'
+    icon: 'xlsx',
+    urlActual:null
   },
   {
     name:'aCartaConsentimiento',
     label:'Anexo - Carta de consentimiento',
     doc:'carta_de_consentimiento_informado_v2020.docx',
-    icon: 'docx.svg'
+    icon: 'docx',
+    urlActual:null
   },
   {
     name:'aCartaIntencion',
     label:'Anexo - Carta de intención',
     doc:'carta-de-intencion-nodo--aliados.docx',
-    icon: 'docx.svg'
+    icon: 'docx',
+    urlActual:null
   }
 ];
 const anexarfile = [
   {
     name:'cExistenciaRepresentacionLegalVigente',
-    label:'Certificado de existencia y representación legal vigente'
+    label:'Certificado de existencia y representación legal vigente',
+    urlActual:null
   },
   {
     name:'cDisponeEmpresa',
-    label:'Certificaciones con las que dispone actualmente la empresa'
+    label:'Certificaciones con las que dispone actualmente la empresa',
+    urlActual:null
   },
   {
     name:'prActualEmpresa',
-    label:'Permisos o registros con los que cuenta actualmente la empresa'
+    label:'Permisos o registros con los que cuenta actualmente la empresa',
+    urlActual:null
   },
   {
     name:'rutFacturacionDian',
-    label:'RUT o resolución de facturación DIAN'
+    label:'RUT o resolución de facturación DIAN',
+    urlActual:null
   },
   {
     name:'listadoAsociadosDiligenciado',
-    label:'Listado de asociados diligenciado'
+    label:'Listado de asociados diligenciado',
+    urlActual:null
   },
   {
     name:'cartaConcentimientoInformadoFirma',
-    label:'Carta de consentimiento informado diligenciada y firmada - Anexo 2'
+    label:'Carta de consentimiento informado diligenciada y firmada - Anexo 2',
+    urlActual:null
   }
 ]
 export default {
@@ -884,7 +871,8 @@ export default {
             idproducto:null,
             nombre: null,
             descripcion: null,
-            urlimagen: null
+            urlimagen: null,
+            activo: 1
           }
         ]
       },
@@ -895,15 +883,7 @@ export default {
     }
   },
   beforeMount() {
-    // this.verificarProps();
-    // this.agregarCategorias();
-    
-    // console.log(this.formulario.subcategoria.data)
-    // console.log(this.$store.state.formulario.categoria)
   },
-  // created () {
-  //   console.log(this.$refs.a_listado_asociados)
-  // },
   mounted(){    
     this.$store.commit('formulario/CARGANDO',true)
     this.AXIO_GET_CATEGORIAS()   
@@ -941,7 +921,7 @@ export default {
     loaddoc(documentos){
       let files = [];
       let file = Object;
-      // let type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';      
+      // let type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
       documentos.forEach(element => {
          file = {
           id:element.iddocumentos,
@@ -949,6 +929,7 @@ export default {
           type: element.name.split('.').pop(),
           ref:element.ref,
           name: element.name,
+          url: element.urldocumento,
           __proto__:{
             src: element.urldocumento
           }
@@ -961,7 +942,17 @@ export default {
       // console.log(this.$refs)
       // console.log(this.$refs.qUploader)
        this.$refs.qUploader.forEach(element => {
+        var indexa =  anexofile.map(function(item) { return item.name; }).indexOf(element.$attrs.name);
+        var indexaa =  anexarfile.map(function(item) { return item.name; }).indexOf(element.$attrs.name);
         var index =  file.map(function(item) { return item.ref; }).indexOf(element.$attrs.name);
+        if (indexa>=0 && index>=0) {
+          // console.log(anexofile[indexa])
+          // console.log( file[index])
+          anexofile[indexa].urlActual = file[index].__proto__.src;
+        }
+        if (indexaa>=0 && index>=0) {
+          // anexarfile[indexaa].urlActual = file[index].__proto__.src;
+        }
         if (index>=0) {
           element.addFiles([file[index]]);
         }
@@ -1013,17 +1004,25 @@ export default {
           this.loaddoc(this.propformulario.documentos);
         }
       }      
+      // console.log(this.formulario)
     },
     addVisa () {
+      // console.log('asdasd')
       this.formulario.productos.push({
         idproducto:null,
         nombre: null,
         descripcion: null,
-        urlimagen: null
+        urlimagen: null,
+        activo: 1
       })
     },
     deleteVisa (counter) {
-      this.formulario.productos.splice(counter, 1);
+      if (this.formulario.productos[counter].idproducto==null) {
+        this.formulario.productos.splice(counter, 1);        
+      }else{
+        this.formulario.productos[counter].activo = 0;
+      }
+      console.log(this.formulario.productos);
     },
     onSubmit (evt) {
       const app = this;
@@ -1109,7 +1108,8 @@ export default {
                   position:'center'
                 })
             }
-            app.$store.commit('formulario/CARGANDO',false)
+            app.$store.commit('formulario/CARGANDO',false);         
+            app.$router.go(-1);
             resolve(resp)
           })  
         })

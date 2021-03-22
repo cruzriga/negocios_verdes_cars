@@ -61,7 +61,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
     }
     function incoming_files() {
         $files = $_FILES;
-        print_r($files);
+        // print_r($files);
         $files2 = [];
         foreach ($files as $input => $infoArr) {
             $filesByInput = [];
@@ -109,7 +109,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
                     // print_r($path);
                     // print_r($name[0]);
                     if(move_uploaded_file($tmp,$path)){
-                        $db = JFactory::getDBO();
+                        $db = JFactory::getDbo();
                         $updateNulls = true;
                         if ($name[0] == 'imagenLogo') {
                             $item->idempresa = $idempresa;
@@ -127,7 +127,10 @@ class MrNegociosVerdeController extends JControllerLegacy {
                             if (empty($documento)) {
                                 $result = $db->insertObject('#__negocios_v_documentos', $item); 
                             }else{
-                                $result = $db->updateObject('#__negocios_v_documentos', $item , 'idempresa,ref', $updateNulls);
+                                $query = $db->getQuery(true);
+                                $query = 'UPDATE #__negocios_v_documentos SET urldocumento' . ' = "' .$item->urldocumento.'",'. 'size' . ' ='.$item->size.','. 'name' . ' ="'.$item->name.'",'. 'ext' . ' ="'.$item->ext.'" WHERE idempresa='.$item->idempresa.' and '.'ref="'.$item->ref.'"' ;
+                                $db->setQuery( $query );
+                                $result = $db->execute();
                             }
                             // print_r($result);
                         }

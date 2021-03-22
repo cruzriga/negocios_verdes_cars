@@ -1,25 +1,26 @@
 <template>
 <div>
+    <!-- {{url}}
+    {{urlImg}} -->
     <croppa v-model="croppa"
-                :width="width!=null?width:250"
-                :height="height!=null?height:250"
-                placeholder="Seleccione Imagen"
-                canvas-color="#eeeeee"
-                :placeholder-font-size="19"
-                :show-remove-button="true"
-                remove-button-color="black"
-                :show-loading="true"
-                :loading-size="50"
-                :disable-drag-and-drop="true"
-                @new-image-drawn="onNewImage"                
-                :initial-image="urlImg!=null?urlImg:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'"
-                accept=".jpeg,.png">
-        </croppa>
-        <!-- prevent-white-space -->
-        <input color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal">
-        <!-- <q-slider @input ="onSliderChange" v-model="sliderVal" :min="sliderMin" :max="sliderMax" step="0.001"/> -->
-        <!-- <button @click="croppa.zoomIn()">zoom in</button>
-        <button @click="croppa.zoomOut()">zoom out</button> -->
+        :width="width!=null?width:250"
+        :height="height!=null?height:250"
+        placeholder="Seleccione Imagen"
+        canvas-color="#eeeeee"
+        :placeholder-font-size="19"
+        :show-remove-button="true"
+        remove-button-color="black"
+        :show-loading="true"
+        :loading-size="50"
+        :disable-drag-and-drop="true"
+        accept=".jpeg,.png">
+        <img crossOrigin="anonymous" :src="urlImg!=null?url:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'" slot="initial">
+    </croppa>
+    <!-- :initial-image="urlImg!=null?urlImg:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'"-->
+    <input color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal">
+    <!-- <q-slider @input ="onSliderChange" v-model="sliderVal" :min="sliderMin" :max="sliderMax" step="0.001"/> -->
+    <!-- <button @click="croppa.zoomIn()">zoom in</button>
+    <button @click="croppa.zoomOut()">zoom out</button> -->
 </div>
 </template>
 
@@ -42,8 +43,30 @@ export default {
             croppa: {},
             sliderVal: 0,
             sliderMin: 0,
-            sliderMax: 0
+            sliderMax: 0,
+            url:null
         }
+    },
+    updated (){
+        // console.log(this.urlImg)
+        // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
+        console.log(this.urlImg)
+        this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
+
+        // var image = new Image()
+        // // Notice: it's necessary to set "crossorigin" attribute before "src" attribute.
+        // image.setAttribute('crossorigin', 'anonymous')
+        // image.src = this.url!=null?this.url:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'
+        
+        // this.url = image
+        this.croppa.refresh()
+    },
+    created (){
+        // console.log(this.urlImg)
+        // console.log(document.location.host)
+        // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
+    },
+    beforeMount() {
     },
     methods: {
          onInit() {

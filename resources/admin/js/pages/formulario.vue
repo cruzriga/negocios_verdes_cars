@@ -2,13 +2,14 @@
     <q-page style="display: flex;justify-content: center;">
         <div id="app-site-container">
                 <q-btn
+                    style="margin-left: 15px;"
                     v-on:click="navigate()"
                     size="22px"
                     class="q-px-xl q-py-xs"
                     color="primary"
                     label="Atras"
                 />
-            <FormularioNegocios v-bind:propformulario="prop"/>
+            <FormularioNegocios v-bind:propformulario="prop" v-bind:thisadminroute="this.$router"/>
         </div>
     </q-page >
 </template>

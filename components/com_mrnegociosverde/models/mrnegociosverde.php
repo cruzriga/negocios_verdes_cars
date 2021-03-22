@@ -153,7 +153,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         $rows = $db->loadObjectList();
         if ($rows) {
             foreach ($rows as $row) {
-                $main[] = $this->getMapObject($row);            
+                $main[] = $row;            
             }
             return $main;
         }

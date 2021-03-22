@@ -18,12 +18,12 @@
           </q-input>
           <q-space/>
           <div>
-             <span class="q-mr-md"> 1 - 25 de 100 </span> <q-btn flat round dense icon="arrow_back_ios" class=""/> <q-btn flat round dense icon="arrow_forward_ios" />
+             <span class="q-mr-md"> {{this.$store.state.admin.empresas.data.pagina+1}} - {{this.$store.state.admin.empresas.data.total}} </span> <q-btn @click="nextPage(-1)" flat round dense icon="arrow_back_ios" class=""/> <q-btn @click="nextPage(1)" flat round dense icon="arrow_forward_ios" />
           </div>
         </q-toolbar>
       </q-item-label>
       <template v-if = "items.length > 0">
-      <div v-for="(empresa, count) in this.$store.state.admin.empresas.data" v-bind:key="count">
+      <div v-for="(empresa, count) in this.$store.state.admin.empresas.data.empresas" v-bind:key="count">
         <!-- {{empresa}} -->
         <q-separator spaced/>
         <q-item>
@@ -231,12 +231,25 @@ export default {
       items : [1],
       adic: 60,
       cump : 80,
+      pagina:0,
+      numlist: 15
     }
   },
   beforeMount () {
-    this.$store.dispatch('admin/CARGAR_EMPRESAS');
+    let obj = {
+      pagina: this.pagina,
+      numlist: this.numlist
+    }
+    this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
   },
   methods: {
+    nextPage(n){
+      let obj = {
+      pagina: this.$store.state.admin.empresas.data.pagina+n,
+      numlist: this.$store.state.admin.empresas.data.numList
+    }
+    this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
+    },
     onToggleChange(value,evt){
       // console.log(value)
       // console.log(evt)

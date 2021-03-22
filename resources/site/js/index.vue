@@ -28,12 +28,14 @@ export default {
           {
             nombre: 'Vasos',
             descripcion: 'Buenos',
-            urlimagen: null
+            urlimagen: null,
+            activo:1
           },
           {
             nombre: 'Gorras',
             descripcion: 'A mano',
-            urlimagen: null
+            urlimagen: null,
+            activo:1
           }
         ]
       }

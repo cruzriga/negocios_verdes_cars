@@ -2000,6 +2000,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'FormSite',
@@ -2272,13 +2273,26 @@ __webpack_require__.r(__webpack_exports__);
       online: false,
       items: [1],
       adic: 60,
-      cump: 80
+      cump: 80,
+      pagina: 0,
+      numlist: 15
     };
   },
   beforeMount: function beforeMount() {
-    this.$store.dispatch('admin/CARGAR_EMPRESAS');
+    var obj = {
+      pagina: this.pagina,
+      numlist: this.numlist
+    };
+    this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
   },
   methods: {
+    nextPage: function nextPage(n) {
+      var obj = {
+        pagina: this.$store.state.admin.empresas.data.pagina + n,
+        numlist: this.$store.state.admin.empresas.data.numList
+      };
+      this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
+    },
     onToggleChange: function onToggleChange(value, evt) {
       // console.log(value)
       // console.log(evt)
@@ -2375,6 +2389,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'EmpresaAvatar',
   props: {
@@ -2393,9 +2408,27 @@ __webpack_require__.r(__webpack_exports__);
       croppa: {},
       sliderVal: 0,
       sliderMin: 0,
-      sliderMax: 0
+      sliderMax: 0,
+      url: null
     };
   },
+  updated: function updated() {
+    // console.log(this.urlImg)
+    // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
+    console.log(this.urlImg);
+    this.url = this.urlImg != null ? 'http://' + document.location.host + '/' + this.urlImg : null; // var image = new Image()
+    // // Notice: it's necessary to set "crossorigin" attribute before "src" attribute.
+    // image.setAttribute('crossorigin', 'anonymous')
+    // image.src = this.url!=null?this.url:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'
+    // this.url = image
+
+    this.croppa.refresh();
+  },
+  created: function created() {// console.log(this.urlImg)
+    // console.log(document.location.host)
+    // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
+  },
+  beforeMount: function beforeMount() {},
   methods: {
     onInit: function onInit() {
       this.croppa.addClipPlugin(function (ctx, x, y, w, h) {
@@ -2460,29 +2493,6 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -3139,41 +3149,51 @@ var anexofile = [{
   name: 'fFichaInscripcion',
   label: 'Formato - Ficha de inscripción',
   doc: 'ficha_inscripcion_nv_v2020.xlsx',
-  icon: 'xlsx.svg'
+  icon: 'xlsx',
+  urlActual: null
 }, {
   name: 'aListadoAsociados',
   label: 'Anexo - Listado de asociados',
   doc: 'anexo-listado_asociados.xlsx',
-  icon: 'xlsx.svg'
+  icon: 'xlsx',
+  urlActual: null
 }, {
   name: 'aCartaConsentimiento',
   label: 'Anexo - Carta de consentimiento',
   doc: 'carta_de_consentimiento_informado_v2020.docx',
-  icon: 'docx.svg'
+  icon: 'docx',
+  urlActual: null
 }, {
   name: 'aCartaIntencion',
   label: 'Anexo - Carta de intención',
   doc: 'carta-de-intencion-nodo--aliados.docx',
-  icon: 'docx.svg'
+  icon: 'docx',
+  urlActual: null
 }];
 var anexarfile = [{
   name: 'cExistenciaRepresentacionLegalVigente',
-  label: 'Certificado de existencia y representación legal vigente'
+  label: 'Certificado de existencia y representación legal vigente',
+  urlActual: null
 }, {
   name: 'cDisponeEmpresa',
-  label: 'Certificaciones con las que dispone actualmente la empresa'
+  label: 'Certificaciones con las que dispone actualmente la empresa',
+  urlActual: null
 }, {
   name: 'prActualEmpresa',
-  label: 'Permisos o registros con los que cuenta actualmente la empresa'
+  label: 'Permisos o registros con los que cuenta actualmente la empresa',
+  urlActual: null
 }, {
   name: 'rutFacturacionDian',
-  label: 'RUT o resolución de facturación DIAN'
+  label: 'RUT o resolución de facturación DIAN',
+  urlActual: null
 }, {
   name: 'listadoAsociadosDiligenciado',
-  label: 'Listado de asociados diligenciado'
+  label: 'Listado de asociados diligenciado',
+  urlActual: null
 }, {
   name: 'cartaConcentimientoInformadoFirma',
-  label: 'Carta de consentimiento informado diligenciada y firmada - Anexo 2'
+  label: 'Carta de consentimiento informado diligenciada y firmada - Anexo 2',
+  urlActual: null
 }];
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'FormularioNegocios',
@@ -3338,7 +3358,8 @@ var anexarfile = [{
           idproducto: null,
           nombre: null,
           descripcion: null,
-          urlimagen: null
+          urlimagen: null,
+          activo: 1
         }]
       },
       options: optionsmunicipios,
@@ -3347,14 +3368,7 @@ var anexarfile = [{
       accept: false
     };
   },
-  beforeMount: function beforeMount() {// this.verificarProps();
-    // this.agregarCategorias();
-    // console.log(this.formulario.subcategoria.data)
-    // console.log(this.$store.state.formulario.categoria)
-  },
-  // created () {
-  //   console.log(this.$refs.a_listado_asociados)
-  // },
+  beforeMount: function beforeMount() {},
   mounted: function mounted() {
     var _this = this;
 
@@ -3395,7 +3409,7 @@ var anexarfile = [{
     },
     loaddoc: function loaddoc(documentos) {
       var files = [];
-      var file = Object; // let type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';      
+      var file = Object; // let type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
       documentos.forEach(function (element) {
         file = {
@@ -3404,6 +3418,7 @@ var anexarfile = [{
           type: element.name.split('.').pop(),
           ref: element.ref,
           name: element.name,
+          url: element.urldocumento,
           __proto__: {
             src: element.urldocumento
           }
@@ -3416,9 +3431,24 @@ var anexarfile = [{
       // console.log(this.$refs)
       // console.log(this.$refs.qUploader)
       this.$refs.qUploader.forEach(function (element) {
+        var indexa = anexofile.map(function (item) {
+          return item.name;
+        }).indexOf(element.$attrs.name);
+        var indexaa = anexarfile.map(function (item) {
+          return item.name;
+        }).indexOf(element.$attrs.name);
         var index = file.map(function (item) {
           return item.ref;
         }).indexOf(element.$attrs.name);
+
+        if (indexa >= 0 && index >= 0) {
+          // console.log(anexofile[indexa])
+          // console.log( file[index])
+          anexofile[indexa].urlActual = file[index].__proto__.src;
+        }
+
+        if (indexaa >= 0 && index >= 0) {// anexarfile[indexaa].urlActual = file[index].__proto__.src;
+        }
 
         if (index >= 0) {
           element.addFiles([file[index]]);
@@ -3480,18 +3510,27 @@ var anexarfile = [{
         if (this.propformulario.documentos) {
           this.loaddoc(this.propformulario.documentos);
         }
-      }
+      } // console.log(this.formulario)
+
     },
     addVisa: function addVisa() {
+      // console.log('asdasd')
       this.formulario.productos.push({
         idproducto: null,
         nombre: null,
         descripcion: null,
-        urlimagen: null
+        urlimagen: null,
+        activo: 1
       });
     },
     deleteVisa: function deleteVisa(counter) {
-      this.formulario.productos.splice(counter, 1);
+      if (this.formulario.productos[counter].idproducto == null) {
+        this.formulario.productos.splice(counter, 1);
+      } else {
+        this.formulario.productos[counter].activo = 0;
+      }
+
+      console.log(this.formulario.productos);
     },
     onSubmit: function onSubmit(evt) {
       var _this3 = this;
@@ -3587,6 +3626,7 @@ var anexarfile = [{
             }
 
             app.$store.commit('formulario/CARGANDO', false);
+            app.$router.go(-1);
             resolve(resp);
           });
         });
@@ -3803,7 +3843,7 @@ var store = {
     state.cargando = bool;
   }), _mutations),
   actions: {
-    CARGAR_EMPRESAS: function CARGAR_EMPRESAS(_ref) {
+    CARGAR_EMPRESAS: function CARGAR_EMPRESAS(_ref, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
         var commit, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
@@ -3813,18 +3853,18 @@ var store = {
                 commit = _ref.commit;
                 commit(CARGANDO, true);
                 _context.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresas&format=json');
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresas&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
 
               case 4:
                 resp = _context.sent;
-                console.log(resp);
 
+                // console.log(resp)
                 if (resp.ok) {
                   commit(EMPRESAS, resp.resp);
                   commit(CARGANDO, false);
                 }
 
-              case 7:
+              case 6:
               case "end":
                 return _context.stop();
             }
@@ -4087,12 +4127,12 @@ var store = {
                 resp = _context3.sent;
 
                 if (!resp.ok) {
-                  _context3.next = 33;
+                  _context3.next = 31;
                   break;
                 }
 
                 if (!(datos.productos != null)) {
-                  _context3.next = 31;
+                  _context3.next = 29;
                   break;
                 }
 
@@ -4101,48 +4141,48 @@ var store = {
                     datos.productos[key].idempresa = resp.resp == null || resp.resp == '' ? datos.formulario.idempresa : resp.resp;
                   }
                 }); // console.log(datos)
+                // console.log(datos.formulario.idempresa);
 
-                console.log(datos.formulario.idempresa);
-                _context3.next = 12;
+                _context3.next = 11;
                 return _this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
 
-              case 12:
+              case 11:
                 resppro = _context3.sent;
 
                 if (resppro.ok) {
-                  _context3.next = 15;
+                  _context3.next = 14;
                   break;
                 }
 
                 return _context3.abrupt("return", resppro);
 
-              case 15:
+              case 14:
                 if (!(datos.imagenlogo != null)) {
-                  _context3.next = 29;
+                  _context3.next = 27;
                   break;
                 }
 
-                console.log(datos.formulario.idempresa);
+                // console.log(datos.formulario.idempresa);
                 obj = {
                   idempresa: resp.resp == null || resp.resp == '' ? datos.formulario.idempresa : resp.resp,
                   file: datos.imagenlogo
                 };
-                _context3.next = 20;
+                _context3.next = 18;
                 return _this.dispatch('formulario/GUARDAR_FILE', obj);
 
-              case 20:
+              case 18:
                 respdoc = _context3.sent;
 
                 if (respdoc.ok) {
-                  _context3.next = 23;
+                  _context3.next = 21;
                   break;
                 }
 
                 return _context3.abrupt("return", respdoc);
 
-              case 23:
+              case 21:
                 if (!(datos.documentos != null)) {
-                  _context3.next = 28;
+                  _context3.next = 26;
                   break;
                 }
 
@@ -4150,26 +4190,26 @@ var store = {
                   idempresa: resp.resp == null || resp.resp == '' ? datos.formulario.idempresa : resp.resp,
                   file: datos.documentos
                 };
-                _context3.next = 27;
+                _context3.next = 25;
                 return _this.dispatch('formulario/GUARDAR_FILE', _obj);
 
-              case 27:
+              case 25:
                 respdoc = _context3.sent;
 
-              case 28:
+              case 26:
                 return _context3.abrupt("return", respdoc);
 
-              case 29:
-                _context3.next = 32;
+              case 27:
+                _context3.next = 30;
                 break;
 
-              case 31:
+              case 29:
                 return _context3.abrupt("return", resp);
 
-              case 32:
+              case 30:
                 commit(CARGANDO, false);
 
-              case 33:
+              case 31:
               case "end":
                 return _context3.stop();
             }
@@ -4328,7 +4368,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -55099,6 +55139,7 @@ var render = function() {
         [
           _c("q-btn", {
             staticClass: "q-px-xl q-py-xs",
+            staticStyle: { "margin-left": "15px" },
             attrs: { size: "22px", color: "primary", label: "Atras" },
             on: {
               click: function($event) {
@@ -55107,7 +55148,9 @@ var render = function() {
             }
           }),
           _vm._v(" "),
-          _c("FormularioNegocios", { attrs: { propformulario: _vm.prop } })
+          _c("FormularioNegocios", {
+            attrs: { propformulario: _vm.prop, thisadminroute: this.$router }
+          })
         ],
         1
       )
@@ -55198,7 +55241,17 @@ var render = function() {
                     "div",
                     [
                       _c("span", { staticClass: "q-mr-md" }, [
-                        _vm._v(" 1 - 25 de 100 ")
+                        _vm._v(
+                          " " +
+                            _vm._s(
+                              this.$store.state.admin.empresas.data.pagina + 1
+                            ) +
+                            " - " +
+                            _vm._s(
+                              this.$store.state.admin.empresas.data.total
+                            ) +
+                            " "
+                        )
                       ]),
                       _vm._v(" "),
                       _c("q-btn", {
@@ -55207,6 +55260,11 @@ var render = function() {
                           round: "",
                           dense: "",
                           icon: "arrow_back_ios"
+                        },
+                        on: {
+                          click: function($event) {
+                            return _vm.nextPage(-1)
+                          }
                         }
                       }),
                       _vm._v(" "),
@@ -55216,6 +55274,11 @@ var render = function() {
                           round: "",
                           dense: "",
                           icon: "arrow_forward_ios"
+                        },
+                        on: {
+                          click: function($event) {
+                            return _vm.nextPage(1)
+                          }
                         }
                       })
                     ],
@@ -55229,7 +55292,7 @@ var render = function() {
           ),
           _vm._v(" "),
           _vm.items.length > 0
-            ? _vm._l(this.$store.state.admin.empresas.data, function(
+            ? _vm._l(this.$store.state.admin.empresas.data.empresas, function(
                 empresa,
                 count
               ) {
@@ -55660,33 +55723,44 @@ var render = function() {
   return _c(
     "div",
     [
-      _c("croppa", {
-        attrs: {
-          width: _vm.width != null ? _vm.width : 250,
-          height: _vm.height != null ? _vm.height : 250,
-          placeholder: "Seleccione Imagen",
-          "canvas-color": "#eeeeee",
-          "placeholder-font-size": 19,
-          "show-remove-button": true,
-          "remove-button-color": "black",
-          "show-loading": true,
-          "loading-size": 50,
-          "disable-drag-and-drop": true,
-          "initial-image":
-            _vm.urlImg != null
-              ? _vm.urlImg
-              : "https://zhanziyang.github.io/vue-croppa/static/500.jpeg",
-          accept: ".jpeg,.png"
-        },
-        on: { "new-image-drawn": _vm.onNewImage },
-        model: {
-          value: _vm.croppa,
-          callback: function($$v) {
-            _vm.croppa = $$v
+      _c(
+        "croppa",
+        {
+          attrs: {
+            width: _vm.width != null ? _vm.width : 250,
+            height: _vm.height != null ? _vm.height : 250,
+            placeholder: "Seleccione Imagen",
+            "canvas-color": "#eeeeee",
+            "placeholder-font-size": 19,
+            "show-remove-button": true,
+            "remove-button-color": "black",
+            "show-loading": true,
+            "loading-size": 50,
+            "disable-drag-and-drop": true,
+            accept: ".jpeg,.png"
           },
-          expression: "croppa"
-        }
-      }),
+          model: {
+            value: _vm.croppa,
+            callback: function($$v) {
+              _vm.croppa = $$v
+            },
+            expression: "croppa"
+          }
+        },
+        [
+          _c("img", {
+            attrs: {
+              slot: "initial",
+              crossOrigin: "anonymous",
+              src:
+                _vm.urlImg != null
+                  ? _vm.url
+                  : "https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
+            },
+            slot: "initial"
+          })
+        ]
+      ),
       _vm._v(" "),
       _c("input", {
         directives: [
@@ -56641,96 +56715,11 @@ var render = function() {
                   _vm._v(" "),
                   _c(
                     "q-card-section",
-                    [
-                      _c(
-                        "q-item",
-                        { staticClass: "row justify-center items-center" },
-                        [
-                          _c(
-                            "q-item-section",
-                            { attrs: { top: "" } },
-                            [
-                              _c(
-                                "q-item-label",
-                                { attrs: { lines: "1" } },
-                                [
-                                  _c("q-input", {
-                                    attrs: {
-                                      label: "Nombrel del producto",
-                                      type: "text",
-                                      rules: [
-                                        function(val) {
-                                          return (
-                                            (val && val.length > 0) ||
-                                            "Campo vacio"
-                                          )
-                                        }
-                                      ]
-                                    },
-                                    model: {
-                                      value: _vm.formulario.productos[0].nombre,
-                                      callback: function($$v) {
-                                        _vm.$set(
-                                          _vm.formulario.productos[0],
-                                          "nombre",
-                                          $$v
-                                        )
-                                      },
-                                      expression:
-                                        "formulario.productos[0].nombre"
-                                    }
-                                  })
-                                ],
-                                1
-                              ),
-                              _vm._v(" "),
-                              _c(
-                                "q-item-label",
-                                { attrs: { lines: "1" } },
-                                [
-                                  _c("q-input", {
-                                    attrs: {
-                                      label: "Descripcion",
-                                      type: "text",
-                                      rules: [
-                                        function(val) {
-                                          return (
-                                            (val && val.length > 0) ||
-                                            "Campo vacio"
-                                          )
-                                        }
-                                      ]
-                                    },
-                                    model: {
-                                      value:
-                                        _vm.formulario.productos[0].descripcion,
-                                      callback: function($$v) {
-                                        _vm.$set(
-                                          _vm.formulario.productos[0],
-                                          "descripcion",
-                                          $$v
-                                        )
-                                      },
-                                      expression:
-                                        "formulario.productos[0].descripcion"
-                                    }
-                                  })
-                                ],
-                                1
-                              )
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _c("q-item-section", { attrs: { top: "", side: "" } })
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _vm._l(_vm.formulario.productos, function(
-                        applicant,
-                        counter
-                      ) {
+                    _vm._l(
+                      _vm.formulario.productos.filter(function(post) {
+                        return post.activo == 1
+                      }),
+                      function(applicant, counter) {
                         return _c(
                           "q-intersection",
                           {
@@ -56738,105 +56727,72 @@ var render = function() {
                             attrs: { transition: "scale", leave: "scale" }
                           },
                           [
-                            counter > 0
-                              ? _c(
-                                  "q-item",
-                                  {
-                                    staticClass:
-                                      "row justify-center items-center"
-                                  },
+                            _c(
+                              "q-item",
+                              {
+                                staticClass: "row justify-center items-center"
+                              },
+                              [
+                                _c(
+                                  "q-item-section",
+                                  { attrs: { top: "" } },
                                   [
                                     _c(
-                                      "q-item-section",
-                                      { attrs: { top: "" } },
+                                      "q-item-label",
+                                      { attrs: { lines: "1" } },
                                       [
-                                        _c(
-                                          "q-item-label",
-                                          { attrs: { lines: "1" } },
-                                          [
-                                            _c("q-input", {
-                                              attrs: {
-                                                label: "Nombrel del producto",
-                                                type: "text",
-                                                rules: [
-                                                  function(val) {
-                                                    return (
-                                                      (val && val.length > 0) ||
-                                                      "Campo vacio"
-                                                    )
-                                                  }
-                                                ]
-                                              },
-                                              model: {
-                                                value: applicant.nombre,
-                                                callback: function($$v) {
-                                                  _vm.$set(
-                                                    applicant,
-                                                    "nombre",
-                                                    $$v
-                                                  )
-                                                },
-                                                expression: "applicant.nombre"
+                                        _c("q-input", {
+                                          attrs: {
+                                            label: "Nombrel del producto",
+                                            type: "text",
+                                            rules: [
+                                              function(val) {
+                                                return (
+                                                  (val && val.length > 0) ||
+                                                  "Campo vacio"
+                                                )
                                               }
-                                            })
-                                          ],
-                                          1
-                                        ),
-                                        _vm._v(" "),
-                                        _c(
-                                          "q-item-label",
-                                          { attrs: { lines: "1" } },
-                                          [
-                                            _c("q-input", {
-                                              attrs: {
-                                                label: "Descripcion",
-                                                type: "text",
-                                                rules: [
-                                                  function(val) {
-                                                    return (
-                                                      (val && val.length > 0) ||
-                                                      "Campo vacio"
-                                                    )
-                                                  }
-                                                ]
-                                              },
-                                              model: {
-                                                value: applicant.descripcion,
-                                                callback: function($$v) {
-                                                  _vm.$set(
-                                                    applicant,
-                                                    "descripcion",
-                                                    $$v
-                                                  )
-                                                },
-                                                expression:
-                                                  "applicant.descripcion"
-                                              }
-                                            })
-                                          ],
-                                          1
-                                        )
+                                            ]
+                                          },
+                                          model: {
+                                            value: applicant.nombre,
+                                            callback: function($$v) {
+                                              _vm.$set(applicant, "nombre", $$v)
+                                            },
+                                            expression: "applicant.nombre"
+                                          }
+                                        })
                                       ],
                                       1
                                     ),
                                     _vm._v(" "),
                                     _c(
-                                      "q-item-section",
-                                      { attrs: { top: "", side: "" } },
+                                      "q-item-label",
+                                      { attrs: { lines: "1" } },
                                       [
-                                        _c("q-icon", {
-                                          staticStyle: {
-                                            margin: "0px 5px 17px 5px"
-                                          },
+                                        _c("q-input", {
                                           attrs: {
-                                            size: "2rem",
-                                            color: "red",
-                                            name: "delete"
+                                            label: "Descripcion",
+                                            type: "text",
+                                            rules: [
+                                              function(val) {
+                                                return (
+                                                  (val && val.length > 0) ||
+                                                  "Campo vacio"
+                                                )
+                                              }
+                                            ]
                                           },
-                                          on: {
-                                            click: function($event) {
-                                              return _vm.deleteVisa(counter)
-                                            }
+                                          model: {
+                                            value: applicant.descripcion,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                applicant,
+                                                "descripcion",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "applicant.descripcion"
                                           }
                                         })
                                       ],
@@ -56844,16 +56800,41 @@ var render = function() {
                                     )
                                   ],
                                   1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "q-item-section",
+                                  { attrs: { top: "", side: "" } },
+                                  [
+                                    _c("q-icon", {
+                                      staticStyle: {
+                                        margin: "0px 5px 17px 5px"
+                                      },
+                                      attrs: {
+                                        size: "2rem",
+                                        color: "red",
+                                        name: "delete"
+                                      },
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.deleteVisa(counter)
+                                        }
+                                      }
+                                    })
+                                  ],
+                                  1
                                 )
-                              : _vm._e(),
+                              ],
+                              1
+                            ),
                             _vm._v(" "),
                             _c("q-separator", { attrs: { spaced: "" } })
                           ],
                           1
                         )
-                      })
-                    ],
-                    2
+                      }
+                    ),
+                    1
                   )
                 ],
                 1
@@ -56944,6 +56925,43 @@ var render = function() {
                                             )
                                           ]),
                                           _vm._v(" "),
+                                          item.urlActual != null
+                                            ? _c("div", [
+                                                _c(
+                                                  "a",
+                                                  {
+                                                    staticClass:
+                                                      "sppb-btn sppb-btn-dark sppb-btn-round",
+                                                    staticStyle: {
+                                                      "margin-right": "20px"
+                                                    },
+                                                    attrs: {
+                                                      rel:
+                                                        "noopener noreferrer",
+                                                      target: "_blank",
+                                                      id: "btn-1615192830423",
+                                                      href:
+                                                        "../" + item.urlActual
+                                                    }
+                                                  },
+                                                  [
+                                                    _c("q-icon", {
+                                                      attrs: {
+                                                        size: "2rem",
+                                                        name:
+                                                          "img:./../media/iconssvg/" +
+                                                          item.urlActual
+                                                            .split(".")
+                                                            .pop() +
+                                                          ".svg"
+                                                      }
+                                                    })
+                                                  ],
+                                                  1
+                                                )
+                                              ])
+                                            : _vm._e(),
+                                          _vm._v(" "),
                                           _c(
                                             "a",
                                             {
@@ -56967,7 +56985,8 @@ var render = function() {
                                                   size: "2rem",
                                                   name:
                                                     "img:./../media/iconssvg/" +
-                                                    item.icon
+                                                    item.icon +
+                                                    ".svg"
                                                 }
                                               })
                                             ],

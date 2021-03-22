@@ -61,15 +61,21 @@ class MrNegociosVerdeController extends JControllerLegacy {
     }
     public function getEmpresas()
     {
-        $app = JFactory::getApplication();  
+        $app = JFactory::getApplication();
+
         $model= $this->getModel('mrnegociosverde');
-        $empresas= $model->getEmpresas();
+        $input = $app->input;
+        $pagina = $input->get("pagina", 0, "int");
+        $numList = $input->get("numlist", 15, "int");
+        $empresas= $model->getEmpresas($pagina,$numList);
         foreach ($empresas as $key => $value) {
             $categoria          = $model->getCategorias($value->idcategoria);
             $subcategoria       = [];
             $tiposubcategoria   = [];
             $productos          = $model->getProductos($value->idempresa);
-            $documentos          = $model->getDocumentos($value->idempresa);
+            $documentos         = $model->getDocumentos($value->idempresa);
+            $total              = $model->contarEmpresaQuery();
+            
             
             if ($value->idsubcategoria!=null) {
                 $subcategoria = $model->getSubCategorias($value->idcategoria,$value->idsubcategoria)[0];
@@ -89,14 +95,24 @@ class MrNegociosVerdeController extends JControllerLegacy {
         }
         $app->enqueueMessage("Enqueued notice", "notice");
         $app->enqueueMessage("Enqueued warning", "warning");
+        $datos = new \stdClass();
+        $datos->total = round($this->round_up($total->total/$numList), 0, PHP_ROUND_HALF_EVEN);
+        $datos->pagina = $pagina;
+        $datos->numList = $numList;
+        $datos->empresas = $empresas;
         try 
         {   
-            echo new JResponseJson($empresas, "It worked!");
+            echo new JResponseJson($datos, "It worked!");
         }
         catch (Exception $e)
         {
             echo new JResponseJson($e);
         }
+    }
+    function round_up($number, $precision = 0)
+    {
+        $fig = (int) str_pad('1', $precision, '0');
+        return (ceil($number * $fig) / $fig);
     }
     public function updateEstadorEmpresa()
     {        

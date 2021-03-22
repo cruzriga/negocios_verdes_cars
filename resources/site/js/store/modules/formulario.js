@@ -72,13 +72,13 @@ const store =
                             }
                         });
                         // console.log(datos)
-                        console.log(datos.formulario.idempresa);
+                        // console.log(datos.formulario.idempresa);
                         let resppro = await this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
                         if(!resppro.ok){
                             return resppro
                         }
                         if (datos.imagenlogo!=null) {
-                            console.log(datos.formulario.idempresa);
+                            // console.log(datos.formulario.idempresa);
                             let obj = {
                                 idempresa: (resp.resp==null||resp.resp=='')?datos.formulario.idempresa:resp.resp,
                                 file: datos.imagenlogo

@@ -177,24 +177,49 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
 	}
 
-    public function getEmpresas() {
-        $db = JFactory::getDbo(); 
-        $query = $db->getQuery(true);
+    public function getEmpresas($pagina=0,$limite=15) {
+        $app = JFactory::getApplication();
+        $db = JFactory::getDbo();
+        // $query = $db->getQuery(true);
+        
+        $limit	= $app->getUserStateFromRequest('global.list.limit', 'limit', $limite, 'int'); //I guess getUserStateFromRequest is for session or different reasons
+        $limitstart	= JRequest::getVar('limitstart', $pagina, '', 'int');
         // $query->select('e.idempresa, e.nombreempresa, e.representantelegal, e.descripcion, e.telefono, e.direccion, e.municipio, e.email, e.twitter, e.facebook, e.instagram, e.linkvideo, e.imagenlogo')
-        $query->select('*')
+        $query = $db->getQuery(true)
+            ->select('*')
             ->from($db->quoteName('#__negocios_v_empresas','e'))
-            // ->where($db->quoteName('e.activo') . ' = ' . $db->quote('1'))
+            ->where($db->quoteName('e.isActivo') . ' = ' . $db->quote('1'))
             // ->group($db->quoteName('a.idempresa'))
             ->order('e.nombreempresa DESC')
         ;
 
-        $db->setQuery($query); 
+        $db->setQuery($query,$limitstart, $limit);
+        
+        // $db->setQuery($queryCount);
         $rows = $db->loadObjectList();
         if ($rows) {
             foreach ($rows as $row) {
                 $main[] = $row;            
             }
             return $main;
+        }
+        return false;
+    }
+    public function contarEmpresaQuery(Type $var = null)
+    {
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true)
+            ->select('count(*) as total')
+            ->from($db->quoteName('#__negocios_v_empresas','e'))
+            ->where($db->quoteName('e.isActivo') . ' = ' . $db->quote('1'))
+        ;
+        $db->setQuery($query);
+        $rows = $db->loadObjectList();
+        if ($rows) {
+            foreach ($rows as $row) {
+                $main[] = $row;            
+            }
+            return $row;
         }
         return false;
     }
