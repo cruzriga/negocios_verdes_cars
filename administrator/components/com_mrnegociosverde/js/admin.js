@@ -2415,7 +2415,7 @@ __webpack_require__.r(__webpack_exports__);
   updated: function updated() {
     // console.log(this.urlImg)
     // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
-    console.log(this.urlImg);
+    // console.log(this.urlImg)
     this.url = this.urlImg != null ? 'http://' + document.location.host + '/' + this.urlImg : null; // var image = new Image()
     // // Notice: it's necessary to set "crossorigin" attribute before "src" attribute.
     // image.setAttribute('crossorigin', 'anonymous')
@@ -3618,7 +3618,7 @@ var anexarfile = [{
                 position: 'center'
               });
             } else {
-              console.log(submitResult);
+              // console.log(submitResult);
               app.$q.notify({
                 color: 'green-4',
                 textColor: 'white',
@@ -3831,7 +3831,10 @@ var store = {
   namespaced: true,
   state: {
     empresas: {
-      data: []
+      data: {
+        pagina: 0,
+        empresas: []
+      }
     },
     cargando: false
   },
@@ -4124,7 +4127,7 @@ var store = {
               case 0:
                 commit = _ref3.commit;
                 commit(CARGANDO, true);
-                datopost = 'json=' + JSON.stringify(datos.formulario); // console.log(datos.formulario.idempresa);
+                datopost = 'json=' + encodeURIComponent(JSON.stringify(datos.formulario)); // console.log(datopost); return;
 
                 _context3.next = 5;
                 return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('../?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
@@ -55790,7 +55793,7 @@ var render = function() {
               src:
                 _vm.urlImg != null
                   ? _vm.url
-                  : "https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
+                  : "img:./../media/iconospng/192_831617imagenlogo.jpeg"
             },
             slot: "initial"
           })

@@ -14,7 +14,7 @@
         :loading-size="50"
         :disable-drag-and-drop="true"
         accept=".jpeg,.png">
-        <img crossOrigin="anonymous" :src="urlImg!=null?url:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'" slot="initial">
+        <img crossOrigin="anonymous" :src="urlImg!=null?url:'img:./../media/iconospng/192_831617imagenlogo.jpeg'" slot="initial">
     </croppa>
     <!-- :initial-image="urlImg!=null?urlImg:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'"-->
     <input color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal">
@@ -50,7 +50,7 @@ export default {
     updated (){
         // console.log(this.urlImg)
         // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
-        console.log(this.urlImg)
+        // console.log(this.urlImg)
         this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
 
         // var image = new Image()

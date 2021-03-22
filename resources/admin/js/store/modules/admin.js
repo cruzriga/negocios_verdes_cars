@@ -12,7 +12,12 @@ const store =
     {
         namespaced: true,
         state: {
-            empresas:{data:[]},
+            empresas:{
+                data:{
+                    pagina:0,
+                    empresas:[]
+                }
+            },
             cargando:false
         },
         getters:{

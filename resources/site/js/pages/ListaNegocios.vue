@@ -4,7 +4,7 @@
   <div class="q-gutter-lg">
     <q-item-label  header>
       <q-toolbar class="text-primary" style="height: 50px">
-        <q-input class="GPL__toolbar-input" dense standout="bg-primary" v-model="search" placeholder="Buscar">
+        <q-input @keyup.enter="buscar" class="GPL__toolbar-input" dense standout="bg-primary" v-model="search" placeholder="Buscar">
           <template v-slot:prepend>
             <q-icon v-if="search === ''" name="search" />
             <q-icon v-else name="clear" class="cursor-pointer" @click="search = ''" />
@@ -45,6 +45,13 @@ export default {
     this.AXIO_GET_EMPRESAS();
   },     
   methods: {
+    buscar(){
+      console.log(this.search)
+      let obj = {
+        buscar: this.search
+      }
+      this.$store.dispatch('listado/BUSCAR_EMPRESAS',obj);
+    },
     AXIO_GET_EMPRESAS() {
       let obj = {
         pagina: this.pagina,

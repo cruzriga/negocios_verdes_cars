@@ -16,3 +16,11 @@
   margin-left: 10px !important;
   margin-right: 10px !important;
 }
+.q-item__label{
+  &.q-item__label--header{
+    .row{  
+      margin-right: 0px !important;
+      margin-left: 0px !important;
+    }
+  }
+}

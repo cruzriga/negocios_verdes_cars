@@ -95,7 +95,8 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
             $query->where($db->quoteName('c.idcategoria') . ' = ' . $db->quote($idcategoria));
         }
 		$db->setQuery($query); 
-        $rows = $db->loadObjectList();		
+        $rows = $db->loadObjectList();
+        
 		if ($rows) {
             return $rows;
         }
@@ -177,7 +178,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
 	}
 
-    public function getEmpresas($pagina=0,$limite=15) {
+    public function getEmpresas($pagina=0,$limite=15,$buscar=null) {
         $app = JFactory::getApplication();
         $db = JFactory::getDbo();
         // $query = $db->getQuery(true);
@@ -192,6 +193,10 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
             // ->group($db->quoteName('a.idempresa'))
             ->order('e.nombreempresa DESC')
         ;
+
+        if (!empty($buscar)) {
+            $query->where($db->quoteName('e.nombreempresa') . ' like ' . $db->quote($buscar).'%');
+        }
 
         $db->setQuery($query,$limitstart, $limit);
         

@@ -60,9 +60,9 @@ const store =
             },
             async GUARDAR_FORMULARIO ({ commit },datos){
                 commit(CARGANDO,true)         
-                var datopost = 'json='+JSON.stringify(datos.formulario);
-                // console.log(datos.formulario.idempresa);
-                let resp = await request('../?option=com_mrnegociosverde&task=savedatosempresa&format=json',datopost)   
+                var datopost = 'json='+encodeURIComponent(JSON.stringify(datos.formulario));
+                // console.log(datopost); return;
+                let resp = await request('../?option=com_mrnegociosverde&task=savedatosempresa&format=json',datopost)
                 // console.log(resp);
                 // return resp
                 if(resp.ok){

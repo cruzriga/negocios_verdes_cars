@@ -147,19 +147,20 @@ class MrNegociosVerdeController extends JControllerLegacy {
     {
         $app = JFactory::getApplication();
         $rawDataPost = $app->input->getArray($_POST);
+        // $tempData = html_entity_decode($rawDataPost['json']);
         $Itemid = json_decode($rawDataPost['json']);
         $db = JFactory::getDBO();
-        // print_r( $Itemid );
-        if (!empty($Itemid->idempresa)) {
+        if (!empty($Itemid->idempresa) && !empty($Itemid)) {
             $Itemid->idtiposubcategoria = empty($Itemid->idtiposubcategoria)?null:$Itemid->idtiposubcategoria;
             $Itemid->idsubcategoria = empty($Itemid->idsubcategoria)?null:$Itemid->idsubcategoria;
             $updateNulls = true;
             $result = $db->updateObject('#__negocios_v_empresas', $Itemid , 'idempresa', $updateNulls);
-        }else{
+        }elseif(!empty($Itemid)){
             $result = $db->insertObject('#__negocios_v_empresas', $Itemid);
             $ultimoid = $db->insertid();
             echo $ultimoid;
         }
+        echo false;
     }
     public function addproductos(Type $var = null)
     {
@@ -186,9 +187,11 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $input = $app->input;
         $pagina = $input->get("pagina", 0, "int");
         $numList = $input->get("numlist", 15, "int");
-        $empresas= $model->getEmpresas($pagina,$numList);
+        $buscar = $input->get("buscar", '', "string");
+        $empresas= $model->getEmpresas($pagina,$numList,$buscar);
+        if (empty($empresas)){ echo false;die;}
         foreach ($empresas as $key => $value) {
-            $categoria          = $model->getCategorias($value->idcategoria);
+            $categoria          = $model->getCategorias($value->idcategoria)[0];
             $subcategoria       = [];
             $tiposubcategoria   = [];
             $productos          = $model->getProductos($value->idempresa);
@@ -206,7 +209,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
             unset($value->idsubcategoria);
             unset($value->idtiposubcategoria);
 
-            $empresas[$key]->categoria = $categoria[0];
+            $empresas[$key]->categoria = $categoria;
             $empresas[$key]->subcategoria = $subcategoria;
             $empresas[$key]->tiposubcategoria = $tiposubcategoria;
             $empresas[$key]->productos = $productos;

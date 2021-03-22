@@ -174,7 +174,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
     }
 
-    public function getEmpresas($pagina=0,$limite=15) {
+    public function getEmpresas($pagina=0,$limite=15,$buscar=null) {
         $app = JFactory::getApplication();
         $db = JFactory::getDbo();
         // $query = $db->getQuery(true);
@@ -188,7 +188,11 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
 			->where($db->quoteName('e.activo') . ' = ' . $db->quote('1'))
             ->order('e.nombreempresa DESC')
         ;
-
+        // $buscar='bbb';
+        if (!empty($buscar)) {
+            $query->where($db->quoteName('e.nombreempresa') . ' like ' . $db->quote($db->escape($buscar.'%')));
+        }
+        // print_r($query->__toString());
         $db->setQuery($query,$limitstart, $limit);
         $rows = $db->loadObjectList();
         if ($rows) {

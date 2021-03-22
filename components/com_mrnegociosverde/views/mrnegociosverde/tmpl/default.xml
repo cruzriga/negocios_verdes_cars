@@ -3,8 +3,8 @@
 	<layout title="Mr negocios verdes site">
 		<message>Mr negocios verdes site</message>
 	</layout>
-	<layout title="Mr negocios verdes site Inscripcion" addfieldpath="/registro">
-		<message>Mr negocios verdes site Inscripcion</message>
+	<layout title="COM_HELLOWORLD_HELLOWORLD_VIEW_DEFAULT_TITLE">
+		<message>COM_HELLOWORLD_HELLOWORLD_VIEW_DEFAULT_DESC</message>
 	</layout>
 	<!-- <fields name="request" addfieldpath="/administrator/components/com_helloworld/models/fields">
 		<fieldset name="request">

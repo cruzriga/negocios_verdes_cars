@@ -1907,6 +1907,40 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Card',
   props: {
@@ -1916,6 +1950,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
+      adic: 60,
+      cump: 80,
       expanded: false,
       lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
     };
@@ -1986,7 +2022,7 @@ __webpack_require__.r(__webpack_exports__);
   updated: function updated() {
     // console.log(this.urlImg)
     // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
-    console.log(this.urlImg);
+    // console.log(this.urlImg)
     this.url = this.urlImg != null ? 'http://' + document.location.host + '/' + this.urlImg : null; // var image = new Image()
     // // Notice: it's necessary to set "crossorigin" attribute before "src" attribute.
     // image.setAttribute('crossorigin', 'anonymous')
@@ -3189,7 +3225,7 @@ var anexarfile = [{
                 position: 'center'
               });
             } else {
-              console.log(submitResult);
+              // console.log(submitResult);
               app.$q.notify({
                 color: 'green-4',
                 textColor: 'white',
@@ -3374,6 +3410,13 @@ __webpack_require__.r(__webpack_exports__);
     this.AXIO_GET_EMPRESAS();
   },
   methods: {
+    buscar: function buscar() {
+      console.log(this.search);
+      var obj = {
+        buscar: this.search
+      };
+      this.$store.dispatch('listado/BUSCAR_EMPRESAS', obj);
+    },
     AXIO_GET_EMPRESAS: function AXIO_GET_EMPRESAS() {
       var obj = {
         pagina: this.pagina,
@@ -3659,7 +3702,7 @@ var store = {
               case 0:
                 commit = _ref3.commit;
                 commit(CARGANDO, true);
-                datopost = 'json=' + JSON.stringify(datos.formulario); // console.log(datos.formulario.idempresa);
+                datopost = 'json=' + encodeURIComponent(JSON.stringify(datos.formulario)); // console.log(datopost); return;
 
                 _context3.next = 5;
                 return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('../?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
@@ -3872,6 +3915,7 @@ var store = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CARGAR_EMPRESAS": () => (/* binding */ CARGAR_EMPRESAS),
+/* harmony export */   "BUSCAR_EMPRESAS": () => (/* binding */ BUSCAR_EMPRESAS),
 /* harmony export */   "EMPRESAS": () => (/* binding */ EMPRESAS),
 /* harmony export */   "CARGANDO": () => (/* binding */ CARGANDO),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
@@ -3896,12 +3940,18 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.default);
 var CARGAR_EMPRESAS = 'CARGAR_EMPRESAS';
+var BUSCAR_EMPRESAS = 'BUSCAR_EMPRESAS';
 var EMPRESAS = 'EMPRESAS';
 var CARGANDO = 'CARGANDO';
 var store = {
   namespaced: true,
   state: {
-    ListaEmpresas: [],
+    ListaEmpresas: {
+      data: {
+        pagina: 0,
+        empresas: []
+      }
+    },
     cargando: false
   },
   getters: {
@@ -3929,6 +3979,38 @@ var store = {
 
               case 4:
                 resp = _context.sent;
+                console.log(resp);
+
+                if (resp.ok) {
+                  if (resp.resp != null && resp.resp != '') {
+                    commit(EMPRESAS, resp.resp);
+                  }
+
+                  commit(CARGANDO, false);
+                }
+
+              case 7:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
+    BUSCAR_EMPRESAS: function BUSCAR_EMPRESAS(_ref2, datos) {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
+        var commit, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                commit = _ref2.commit;
+                commit(CARGANDO, true);
+                _context2.next = 4;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&buscar=' + datos.buscar);
+
+              case 4:
+                resp = _context2.sent;
 
                 // console.log(resp)
                 if (resp.ok) {
@@ -3938,10 +4020,10 @@ var store = {
 
               case 6:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee);
+        }, _callee2);
       }))();
     }
   }
@@ -4086,7 +4168,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".my-card[data-v-a5f338fa] {\n  width: 100%;\n  max-width: 300px;\n  height: 550px;\n}\n.img-def[data-v-a5f338fa] {\n  width: 90%;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".my-card[data-v-a5f338fa] {\n  width: 100%;\n  max-width: 300px;\n  height: 640px;\n}\n.img-def[data-v-a5f338fa] {\n  width: 90%;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -54645,6 +54727,95 @@ var render = function() {
                   "\n      "
               )
             ])
+          ]),
+          _vm._v(" "),
+          _c("q-card-section", { staticStyle: { "padding-top": "0" } }, [
+            _c(
+              "div",
+              { staticClass: "row", staticStyle: { "padding-left": "16px" } },
+              [
+                _c(
+                  "q-item-section",
+                  {
+                    staticStyle: { "align-items": "center" },
+                    attrs: { side: "", top: "" }
+                  },
+                  [
+                    _c("q-item-label", { attrs: { lines: "1" } }, [
+                      _c("span", { staticClass: "q-mt-xs text-weight-bold " }, [
+                        _vm._v("Cump")
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "q-item-label",
+                      { attrs: { lines: "1" } },
+                      [
+                        _c("q-knob", {
+                          attrs: {
+                            "show-value": "",
+                            size: "50px",
+                            color: "teal",
+                            "track-color": "grey-3",
+                            readonly: ""
+                          },
+                          model: {
+                            value: _vm.cump,
+                            callback: function($$v) {
+                              _vm.cump = $$v
+                            },
+                            expression: "cump"
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  ],
+                  1
+                ),
+                _vm._v(" "),
+                _c(
+                  "q-item-section",
+                  {
+                    staticStyle: { "align-items": "center" },
+                    attrs: { side: "", top: "" }
+                  },
+                  [
+                    _c("q-item-label", { attrs: { lines: "1" } }, [
+                      _c("span", { staticClass: "q-mt-xs text-weight-bold " }, [
+                        _vm._v("Adic")
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "q-item-label",
+                      { attrs: { lines: "1" } },
+                      [
+                        _c("q-knob", {
+                          attrs: {
+                            "show-value": "",
+                            size: "50px",
+                            color: "teal",
+                            "track-color": "grey-3",
+                            readonly: ""
+                          },
+                          model: {
+                            value: _vm.adic,
+                            callback: function($$v) {
+                              _vm.adic = $$v
+                            },
+                            expression: "adic"
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  ],
+                  1
+                )
+              ],
+              1
+            )
           ])
         ],
         1
@@ -54711,7 +54882,7 @@ var render = function() {
               src:
                 _vm.urlImg != null
                   ? _vm.url
-                  : "https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
+                  : "img:./../media/iconospng/192_831617imagenlogo.jpeg"
             },
             slot: "initial"
           })
@@ -56624,6 +56795,17 @@ var render = function() {
                   dense: "",
                   standout: "bg-primary",
                   placeholder: "Buscar"
+                },
+                on: {
+                  keyup: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+                    ) {
+                      return null
+                    }
+                    return _vm.buscar($event)
+                  }
                 },
                 scopedSlots: _vm._u([
                   {

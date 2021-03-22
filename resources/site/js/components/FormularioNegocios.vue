@@ -1102,7 +1102,7 @@ export default {
                 position:'center'
               })
             }else{
-              console.log(submitResult);
+              // console.log(submitResult);
                 app.$q.notify({
                   color: 'green-4',
                   textColor: 'white',
