@@ -9,6 +9,7 @@ export const CATEGORIAS = 'CATEGORIAS'
 export const GUARDAR_FORMULARIO = 'GUARDAR_FORMULARIO'
 export const GUARDAR_DOCUMENTOS = 'GUARDAR_DOCUMENTOS'
 export const GUARDAR_PRODUCTOS = 'GUARDAR_PRODUCTOS'
+export const CARGAR_EMPRESAS = 'CARGAR_EMPRESAS'
 export const GUARDAR_FILE = 'GUARDAR_FILE'
 export const GUARDAR_DOC = 'GUARDAR_DOC'
 export const CARGANDO = 'CARGANDO'
@@ -54,8 +55,8 @@ const store =
                 if(resp.ok){
                     return resp;
                 }
-                return resp;
                 commit(CARGANDO,false)
+                return resp;
             },
             async GUARDAR_FORMULARIO ({ commit },datos){
                 commit(CARGANDO,true)         
@@ -121,7 +122,16 @@ const store =
                     return resp
                 }
                 commit(CARGANDO,false)
-            }
+            },
+            async CARGAR_EMPRESAS ({ commit },datos){
+                commit(CARGANDO,true)
+                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
+                // console.log(resp)
+                if(resp.ok){
+                    commit(EMPRESAS,resp.resp)
+                    commit(CARGANDO,false)
+                }
+            },
         }
     };
 export default store

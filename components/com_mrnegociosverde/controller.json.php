@@ -173,4 +173,59 @@ class MrNegociosVerdeController extends JControllerLegacy {
         }
         // echo ($ultimoid);
     }
+    function round_up($number, $precision = 0)
+    {
+        $fig = (int) str_pad('1', $precision, '0');
+        return (ceil($number * $fig) / $fig);
+    }
+    public function getEmpresasSite()
+    {
+        $app = JFactory::getApplication();
+
+        $model= $this->getModel('mrnegociosverde');
+        $input = $app->input;
+        $pagina = $input->get("pagina", 0, "int");
+        $numList = $input->get("numlist", 15, "int");
+        $empresas= $model->getEmpresas($pagina,$numList);
+        foreach ($empresas as $key => $value) {
+            $categoria          = $model->getCategorias($value->idcategoria);
+            $subcategoria       = [];
+            $tiposubcategoria   = [];
+            $productos          = $model->getProductos($value->idempresa);
+            // $documentos         = $model->getDocumentos($value->idempresa);
+            $total              = $model->contarEmpresaQuery();
+            
+            
+            if ($value->idsubcategoria!=null) {
+                $subcategoria = $model->getSubCategorias($value->idcategoria,$value->idsubcategoria)[0];
+            }
+            if ($value->idtiposubcategoria!=null) {
+                $tiposubcategoria = $model->getTipoSubCategorias($value->idsubcategoria,$value->idtiposubcategoria)[0];
+            }
+            unset($value->idcategoria);
+            unset($value->idsubcategoria);
+            unset($value->idtiposubcategoria);
+
+            $empresas[$key]->categoria = $categoria[0];
+            $empresas[$key]->subcategoria = $subcategoria;
+            $empresas[$key]->tiposubcategoria = $tiposubcategoria;
+            $empresas[$key]->productos = $productos;
+            // $empresas[$key]->documentos = $documentos;
+        }
+        $app->enqueueMessage("Enqueued notice", "notice");
+        $app->enqueueMessage("Enqueued warning", "warning");
+        $datos = new \stdClass();
+        $datos->total = round($this->round_up($total->total/$numList), 0, PHP_ROUND_HALF_EVEN);
+        $datos->pagina = $pagina;
+        $datos->numList = $numList;
+        $datos->empresas = $empresas;
+        try 
+        {   
+            echo new JResponseJson($datos, "It worked!");
+        }
+        catch (Exception $e)
+        {
+            echo new JResponseJson($e);
+        }
+    }
 }

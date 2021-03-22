@@ -1,7 +1,5 @@
 <template>
-  <layout>
     <router-view />
-  </layout>
 </template>
 
 <script>
@@ -15,6 +13,7 @@ export default {
   #app-site-container{
     height: calc(100vh - 100px);
     width: 100%;
+    height: 100%;
   }
   #sp-main-body{
     padding:0 !important;

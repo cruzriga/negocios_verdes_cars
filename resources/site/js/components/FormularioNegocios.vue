@@ -14,12 +14,12 @@
               <!-- <div class="text-subtitle2">by John Doe</div> -->
           </q-card-section>
           <q-separator />
-          <q-card-section>     
+          <q-card-section> 
             <div class="row justify-center items-center">
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Nombre</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <q-input v-model="formulario.nombreempresa.data" label="Nombre De la Empresa" type="text" counter maxlength="200" :rules="formulario.nombreempresa.rules">
                   </q-input>
                   <!-- <q-input v-model="formulario.nombre.data" label="Nombre" counter maxlength="180" :dense="dense">
@@ -30,7 +30,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Descripcion</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <q-input v-model="formulario.representantelegal.data" label="Representante Legal" type="text" counter maxlength="200" :rules="formulario.representantelegal.rules">
                   </q-input>
               </div>
@@ -39,7 +39,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Descripcion</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <q-input v-model="formulario.descripcion.data" label="Descripcion" type="textarea" counter maxlength="500" :rules="formulario.descripcion.rules">
                   </q-input>
               </div>
@@ -48,7 +48,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Telefono</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <q-input v-model="formulario.telefono.data" label="Telefono" counter maxlength="12" :dense="dense" :rules="formulario.telefono.rules">
                   <template v-slot:prepend>
                       <q-icon name="call" />
@@ -60,7 +60,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Descripcion</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <!-- <q-input v-model="formulario.municipio.data" label="Municipio" type="text" counter maxlength="200" :rules="formulario.municipio.rules">
                   </q-input> -->
                    <!-- <q-select
@@ -110,7 +110,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Direccion</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <q-input v-model="formulario.direccion.data" label="Direccion" type="text" counter maxlength="200" :dense="dense" :rules="formulario.direccion.rules">
                   <template v-slot:prepend>
                       <q-icon name="location_on" />
@@ -122,7 +122,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Twitter</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <q-input v-model="formulario.email.data" label="Email" :dense="dense" :rules="formulario.email.rules">
                     <template v-slot:prepend>
                         <!-- <q-icon name="fab fa-twitter-square" /> -->
@@ -135,7 +135,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Twitter</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <q-input v-model="formulario.twitter.data" label="Twitter" :dense="dense" :rules="formulario.twitter.rules">
                     <template v-slot:prepend>
                         <!-- <q-icon name="fab fa-twitter-square" /> -->
@@ -148,7 +148,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Facebook</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <q-input v-model="formulario.facebook.data" label="Facebook" :dense="dense" :rules="formulario.facebook.rules">
                   <template v-slot:prepend>
                       <!-- <q-icon name="facebook" /> -->
@@ -161,7 +161,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">Instragram</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                   <q-input v-model="formulario.instagram.data" label="Instagram" :dense="dense" :rules="formulario.instagram.rules">
                   <template v-slot:prepend>
                       <!-- <q-icon name="fab fa-instagram" /> -->
@@ -174,7 +174,7 @@
               <!-- <div class="col-12 col-md-3">
                   <div class="text-subtitle2">YouTube</div>
               </div> -->
-              <div class="col-12 col-md-9">
+              <div class="col-12 col-md-9" style="width: 100%;">
                 <q-input v-model="formulario.linkvideo.data" label="Link Video YouTube" :dense="dense" :rules="formulario.twitter.rules">
                 <template v-slot:prepend>
                     <!-- <q-icon name="ondemand_video" /> -->
@@ -187,7 +187,7 @@
         </q-card>
         <q-card class="my-card q-ma-md">
           <q-card-section>
-            <div class="text-h6">Imagens de la Empresa</div>
+            <div class="text-h6">Logo</div>
             <!-- <div class="text-subtitle2">by John Doe</div> -->
           </q-card-section>
           <q-separator />
@@ -210,7 +210,7 @@
         <q-card class="my-card q-ma-md"></q-card>
         <q-card class="my-card q-ma-md">
           <q-card-section>
-              <div class="text-h6">Categoria</div>
+              <div class="text-h6">Clasificación de los Negocios Verdes</div>
               <!-- <div class="text-subtitle2">by John Doe</div> -->
           </q-card-section>
           <q-separator />
@@ -857,17 +857,17 @@ export default {
           rules: [ val => val && val != null || 'Campo vacio']
         },
         subcategoria: {
-          nombre: 'subcategoria',
+          nombre: 'Sectores',
           type: null,
           data: null,
-          label: 'Sub Categoria',
+          label: 'Sectores',
           rules: [ val => val && val.length > 0 || 'Campo vacio']
         },
         tiposubcategoria: {
-          nombre: 'tipesubcategoria',
+          nombre: 'Subsectores',
           type: null,
           data: null,
-          label: 'Tipo Sub Categoria'
+          label: 'Subsectores'
         },
         productos: [
           {

@@ -3343,19 +3343,19 @@ var anexarfile = [{
           }]
         },
         subcategoria: {
-          nombre: 'subcategoria',
+          nombre: 'Sectores',
           type: null,
           data: null,
-          label: 'Sub Categoria',
+          label: 'Sectores',
           rules: [function (val) {
             return val && val.length > 0 || 'Campo vacio';
           }]
         },
         tiposubcategoria: {
-          nombre: 'tipesubcategoria',
+          nombre: 'Subsectores',
           type: null,
           data: null,
-          label: 'Tipo Sub Categoria'
+          label: 'Subsectores'
         },
         productos: [{
           idproducto: null,
@@ -3991,6 +3991,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "GUARDAR_FORMULARIO": () => (/* binding */ GUARDAR_FORMULARIO),
 /* harmony export */   "GUARDAR_DOCUMENTOS": () => (/* binding */ GUARDAR_DOCUMENTOS),
 /* harmony export */   "GUARDAR_PRODUCTOS": () => (/* binding */ GUARDAR_PRODUCTOS),
+/* harmony export */   "CARGAR_EMPRESAS": () => (/* binding */ CARGAR_EMPRESAS),
 /* harmony export */   "GUARDAR_FILE": () => (/* binding */ GUARDAR_FILE),
 /* harmony export */   "GUARDAR_DOC": () => (/* binding */ GUARDAR_DOC),
 /* harmony export */   "CARGANDO": () => (/* binding */ CARGANDO),
@@ -4020,6 +4021,7 @@ var CATEGORIAS = 'CATEGORIAS';
 var GUARDAR_FORMULARIO = 'GUARDAR_FORMULARIO';
 var GUARDAR_DOCUMENTOS = 'GUARDAR_DOCUMENTOS';
 var GUARDAR_PRODUCTOS = 'GUARDAR_PRODUCTOS';
+var CARGAR_EMPRESAS = 'CARGAR_EMPRESAS';
 var GUARDAR_FILE = 'GUARDAR_FILE';
 var GUARDAR_DOC = 'GUARDAR_DOC';
 var CARGANDO = 'CARGANDO';
@@ -4099,6 +4101,7 @@ var store = {
                 return _context2.abrupt("return", resp);
 
               case 8:
+                commit(CARGANDO, false);
                 return _context2.abrupt("return", resp);
 
               case 10:
@@ -4287,6 +4290,35 @@ var store = {
             }
           }
         }, _callee5);
+      }))();
+    },
+    CARGAR_EMPRESAS: function CARGAR_EMPRESAS(_ref6, datos) {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
+        var commit, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                commit = _ref6.commit;
+                commit(CARGANDO, true);
+                _context6.next = 4;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
+
+              case 4:
+                resp = _context6.sent;
+
+                // console.log(resp)
+                if (resp.ok) {
+                  commit(EMPRESAS, resp.resp);
+                  commit(CARGANDO, false);
+                }
+
+              case 6:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6);
       }))();
     }
   }
@@ -55850,7 +55882,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -55884,7 +55919,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -55918,7 +55956,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -55952,7 +55993,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -55993,7 +56037,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-select", {
                               attrs: {
@@ -56109,7 +56156,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -56157,7 +56207,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -56196,7 +56249,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -56240,7 +56296,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -56284,7 +56343,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -56332,7 +56394,10 @@ var render = function() {
                       [
                         _c(
                           "div",
-                          { staticClass: "col-12 col-md-9" },
+                          {
+                            staticClass: "col-12 col-md-9",
+                            staticStyle: { width: "100%" }
+                          },
                           [
                             _c("q-input", {
                               attrs: {
@@ -56383,9 +56448,7 @@ var render = function() {
                 { staticClass: "my-card q-ma-md" },
                 [
                   _c("q-card-section", [
-                    _c("div", { staticClass: "text-h6" }, [
-                      _vm._v("Imagens de la Empresa")
-                    ])
+                    _c("div", { staticClass: "text-h6" }, [_vm._v("Logo")])
                   ]),
                   _vm._v(" "),
                   _c("q-separator"),
@@ -56420,7 +56483,9 @@ var render = function() {
                 { staticClass: "my-card q-ma-md" },
                 [
                   _c("q-card-section", [
-                    _c("div", { staticClass: "text-h6" }, [_vm._v("Categoria")])
+                    _c("div", { staticClass: "text-h6" }, [
+                      _vm._v("Clasificación de los Negocios Verdes")
+                    ])
                   ]),
                   _vm._v(" "),
                   _c("q-separator"),

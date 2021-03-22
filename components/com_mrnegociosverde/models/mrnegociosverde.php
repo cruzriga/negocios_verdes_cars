@@ -54,29 +54,31 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
 		return JTable::getInstance($type, $prefix, $config);
 	}
 
-	public function getCategorias(Type $var = null)
+	public function getCategorias( $idcategoria = null)
 	{
 		# code...
-		$categorias = new stdClass();
+		// $categorias = new stdClass();
 		
 		$db = JFactory::getDbo(); 
         $query = $db->getQuery(true);
 		$query
             ->select('*')
-            ->from($db->quoteName('#__negocios_v_categorias','a'))
-            // ->group($db->quoteName('a.idcategoria'))
-            ->order('a.nombre DESC')
+            ->from($db->quoteName('#__negocios_v_categorias','c'))
+            // ->group($db->quoteName('c.idcategoria'))
+            ->order('c.nombre DESC')
         ;
+        if ($idcategoria!=null) {
+            $query->where($db->quoteName('c.idcategoria') . ' = ' . $db->quote($idcategoria));
+        }
 		$db->setQuery($query); 
-        $rows = $db->loadObjectList();
-		
+        $rows = $db->loadObjectList();		
 		if ($rows) {
             return $rows;
         }
         return false;
 	}
 
-	public function getSubCategorias(Type $var = null)
+	public function getSubCategorias($idcategoria = null,$idsubcategoria = null)
 	{
 		# code...
 		$categorias = new stdClass();
@@ -85,10 +87,17 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         $query = $db->getQuery(true);
 		$query
             ->select('*')
-            ->from($db->quoteName('#__negocios_v_sub_categorias','a'))
-            // ->group($db->quoteName('a.idsubcategoria'))
-            ->order('a.nombre DESC')
+            ->from($db->quoteName('#__negocios_v_sub_categorias','sc'))
+            // ->group($db->quoteName('sc.idsubcategoria'))
+            ->order('sc.nombre DESC')
         ;
+        if ($idcategoria!=null) {
+            $query->where($db->quoteName('sc.idcategoria') . ' = ' . $db->quote($idcategoria));
+        }
+        if ($idsubcategoria!=null) {
+            $query->where($db->quoteName('sc.idsubcategoria') . ' = ' . $db->quote($idsubcategoria));
+        }
+
 		$db->setQuery($query); 
         $rows = $db->loadObjectList();				
 		
@@ -98,16 +107,22 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
 	}
 
-	public function getTipoSubCategorias(Type $var = null)
+	public function getTipoSubCategorias($idsubcategoria = null,$idtiposubcategoria = null)
 	{		
 		$db = JFactory::getDbo(); 
         $query = $db->getQuery(true);
 		$query
             ->select('*')
-            ->from($db->quoteName('#__negocios_v_tipo_sub_categorias','a'))
+            ->from($db->quoteName('#__negocios_v_tipo_sub_categorias','tsc'))
             // ->group($db->quoteName('a.idtiposubcategoria'))
-            ->order('a.nombre DESC')
+            ->order('tsc.nombre DESC')
         ;
+        if ($idsubcategoria!=null) {
+            $query->where($db->quoteName('tsc.idsubcategoria') . ' = ' . $db->quote($idsubcategoria));
+        }
+        if ($idtiposubcategoria!=null) {
+            $query->where($db->quoteName('tsc.idtiposubcategoria') . ' = ' . $db->quote($idtiposubcategoria));
+        }
 		$db->setQuery($query); 
         $rows = $db->loadObjectList();		
 		
@@ -117,26 +132,74 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
 	}
 
-    public function getEmpresas() {
+	public function getProductos($idempresa = null)
+    {
         $db = JFactory::getDbo(); 
         $query = $db->getQuery(true);
-        $query
-            ->select('*')
-            ->from($db->quoteName('#__negocios_v_empresas','a'))
-            ->group($db->quoteName('a.idempresa'))
-            ->order('a.idempresa DESC')
+        $query->select('*')
+            ->from($db->quoteName('#__negocios_v_productos','p'))
+            ->where($db->quoteName('p.activo') . ' = ' . $db->quote('1'))
+            ->order('p.nombre DESC')
         ;
-
+        if ($idempresa!=null) {
+            $query->where($db->quoteName('p.idempresa') . ' = ' . $db->quote($idempresa));
+        }
+        // print_r($query);
         $db->setQuery($query); 
         $rows = $db->loadObjectList();
         if ($rows) {
             foreach ($rows as $row) {
-                $main[] = $this->getMapObject($row);            
+                $main[] = $row;            
             }
             return $main;
         }
         return false;
     }
+	public function contarEmpresaQuery(Type $var = null)
+    {
+        $db = JFactory::getDbo();
+        $query = $db->getQuery(true)
+            ->select('count(*) as total')
+            ->from($db->quoteName('#__negocios_v_empresas','e'))
+            ->where($db->quoteName('e.isActivo') . ' = ' . $db->quote('1'))
+        ;
+        $db->setQuery($query);
+        $rows = $db->loadObjectList();
+        if ($rows) {
+            foreach ($rows as $row) {
+                $main[] = $row;            
+            }
+            return $row;
+        }
+        return false;
+    }
+
+    public function getEmpresas($pagina=0,$limite=15) {
+        $app = JFactory::getApplication();
+        $db = JFactory::getDbo();
+        // $query = $db->getQuery(true);
+        
+        $limit	= $app->getUserStateFromRequest('global.list.limit', 'limit', $limite, 'int'); //I guess getUserStateFromRequest is for session or different reasons
+        $limitstart	= JRequest::getVar('limitstart', $pagina, '', 'int');
+        $query = $db->getQuery(true)
+            ->select('*')
+            ->from($db->quoteName('#__negocios_v_empresas','e'))
+            ->where($db->quoteName('e.isActivo') . ' = ' . $db->quote('1'))
+			->where($db->quoteName('e.activo') . ' = ' . $db->quote('1'))
+            ->order('e.nombreempresa DESC')
+        ;
+
+        $db->setQuery($query,$limitstart, $limit);
+        $rows = $db->loadObjectList();
+        if ($rows) {
+            foreach ($rows as $row) {
+                $main[] = $row;            
+            }
+            return $main;
+        }
+        return false;
+    }
+
 	public function getDocument($idempresa=null,$ref=null) {
         $db = JFactory::getDbo(); 
         $query = $db->getQuery(true);

@@ -245,10 +245,10 @@ export default {
   methods: {
     nextPage(n){
       let obj = {
-      pagina: this.$store.state.admin.empresas.data.pagina+n,
-      numlist: this.$store.state.admin.empresas.data.numList
-    }
-    this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
+        pagina: this.$store.state.admin.empresas.data.pagina+n,
+        numlist: this.$store.state.admin.empresas.data.numList
+      }
+      this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
     },
     onToggleChange(value,evt){
       // console.log(value)
