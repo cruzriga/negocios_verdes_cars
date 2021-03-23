@@ -2,6 +2,8 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import listanegocios from "./pages/ListaNegocios";
 import registrar from "./pages/Registrar";
+import perfilnegocio from "./pages/PerfilNegocio";
+
 
 Vue.use(VueRouter);
 
@@ -32,6 +34,11 @@ const router = new VueRouter(
                      name: 'main'
                      },*/
                 ]
+            },
+            {
+                path: '/perfil/:idEmpresa',
+                name: 'perfil',
+                component: perfilnegocio, props:true
             }
         ]
     }

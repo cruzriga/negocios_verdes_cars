@@ -21,7 +21,7 @@
         <Card
           v-for="(value, index) in this.$store.state.listado.ListaEmpresas.data.empresas"
           v-bind:key="index"
-          v-bind:prop="value" />
+          v-bind:prop="value"/>
       <!-- {{this.$store.state.listado.ListaEmpresas.data}} -->
       </div>
     </template>

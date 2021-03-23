@@ -1,6 +1,6 @@
 <template>
   <div class="q-pa-md row items-start q-gutter-md">
-    <q-card class="my-card" flat bordered>
+    <q-card class="my-card" flat bordered @click="openPerfil(prop.idempresa,prop)">
       <div v-if="prop.imagenlogo != null">
         <div v-if="prop.imagenlogo != ''">
           <q-img
@@ -97,6 +97,11 @@ export default {
       cump : 80,
       expanded: false,
       lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
+    }
+  },
+  methods:{    
+    openPerfil (idEmpresa,empresa){
+      this.$router.push({name: 'perfil', params: {idEmpresa:idEmpresa,propperfil:empresa}});
     }
   }
 }

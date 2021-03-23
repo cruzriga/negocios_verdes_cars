@@ -1955,6 +1955,17 @@ __webpack_require__.r(__webpack_exports__);
       expanded: false,
       lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
     };
+  },
+  methods: {
+    openPerfil: function openPerfil(idEmpresa, empresa) {
+      this.$router.push({
+        name: 'perfil',
+        params: {
+          idEmpresa: idEmpresa,
+          propperfil: empresa
+        }
+      });
+    }
   }
 });
 
@@ -2100,8 +2111,6 @@ function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
-//
-//
 //
 //
 //
@@ -3438,6 +3447,208 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/PerfilNegocio.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/PerfilNegocio.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: 'Perfil',
+  props: {
+    propperfil: {
+      type: Object
+    }
+  },
+  data: function data() {
+    return {
+      idEmpresa: 0,
+      drawer: false
+    };
+  },
+  created: function created() {
+    this.idEmpresa = this.$route.params.idEmpresa;
+    console.log(this.propperfil);
+  },
+  methods: {
+    navigate: function navigate() {
+      this.$router.go(-1);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/Registrar.vue?vue&type=script&lang=js&":
 /*!****************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/Registrar.vue?vue&type=script&lang=js& ***!
@@ -3507,16 +3718,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
-/* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue-router */ "./node_modules/vue-router/dist/vue-router.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vue-router */ "./node_modules/vue-router/dist/vue-router.esm.js");
 /* harmony import */ var _pages_ListaNegocios__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./pages/ListaNegocios */ "./resources/site/js/pages/ListaNegocios.vue");
 /* harmony import */ var _pages_Registrar__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./pages/Registrar */ "./resources/site/js/pages/Registrar.vue");
+/* harmony import */ var _pages_PerfilNegocio__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pages/PerfilNegocio */ "./resources/site/js/pages/PerfilNegocio.vue");
 
 
 
 
-vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vue_router__WEBPACK_IMPORTED_MODULE_3__.default);
-var router = new vue_router__WEBPACK_IMPORTED_MODULE_3__.default({
+
+vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vue_router__WEBPACK_IMPORTED_MODULE_4__.default);
+var router = new vue_router__WEBPACK_IMPORTED_MODULE_4__.default({
   routes: [{
     path: '*',
     redirect: '/'
@@ -3542,6 +3755,11 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_3__.default({
        name: 'main'
        },*/
     ]
+  }, {
+    path: '/perfil/:idEmpresa',
+    name: 'perfil',
+    component: _pages_PerfilNegocio__WEBPACK_IMPORTED_MODULE_2__.default,
+    props: true
   }]
 });
 router.beforeEach(function (to, from, next) {
@@ -54277,6 +54495,45 @@ component.options.__file = "resources/site/js/pages/ListaNegocios.vue"
 
 /***/ }),
 
+/***/ "./resources/site/js/pages/PerfilNegocio.vue":
+/*!***************************************************!*\
+  !*** ./resources/site/js/pages/PerfilNegocio.vue ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _PerfilNegocio_vue_vue_type_template_id_693207ed_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./PerfilNegocio.vue?vue&type=template&id=693207ed&scoped=true& */ "./resources/site/js/pages/PerfilNegocio.vue?vue&type=template&id=693207ed&scoped=true&");
+/* harmony import */ var _PerfilNegocio_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./PerfilNegocio.vue?vue&type=script&lang=js& */ "./resources/site/js/pages/PerfilNegocio.vue?vue&type=script&lang=js&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__.default)(
+  _PerfilNegocio_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
+  _PerfilNegocio_vue_vue_type_template_id_693207ed_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
+  _PerfilNegocio_vue_vue_type_template_id_693207ed_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "693207ed",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/site/js/pages/PerfilNegocio.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ }),
+
 /***/ "./resources/site/js/pages/Registrar.vue":
 /*!***********************************************!*\
   !*** ./resources/site/js/pages/Registrar.vue ***!
@@ -54409,6 +54666,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ListaNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./ListaNegocios.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/ListaNegocios.vue?vue&type=script&lang=js&");
  /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ListaNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
+
+/***/ }),
+
+/***/ "./resources/site/js/pages/PerfilNegocio.vue?vue&type=script&lang=js&":
+/*!****************************************************************************!*\
+  !*** ./resources/site/js/pages/PerfilNegocio.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PerfilNegocio_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PerfilNegocio.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/PerfilNegocio.vue?vue&type=script&lang=js&");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PerfilNegocio_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
 
 /***/ }),
 
@@ -54595,6 +54868,23 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/site/js/pages/PerfilNegocio.vue?vue&type=template&id=693207ed&scoped=true&":
+/*!**********************************************************************************************!*\
+  !*** ./resources/site/js/pages/PerfilNegocio.vue?vue&type=template&id=693207ed&scoped=true& ***!
+  \**********************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PerfilNegocio_vue_vue_type_template_id_693207ed_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PerfilNegocio_vue_vue_type_template_id_693207ed_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_PerfilNegocio_vue_vue_type_template_id_693207ed_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PerfilNegocio.vue?vue&type=template&id=693207ed&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/PerfilNegocio.vue?vue&type=template&id=693207ed&scoped=true&");
+
+
+/***/ }),
+
 /***/ "./resources/site/js/pages/Registrar.vue?vue&type=template&id=332c68bc&":
 /*!******************************************************************************!*\
   !*** ./resources/site/js/pages/Registrar.vue?vue&type=template&id=332c68bc& ***!
@@ -54634,7 +54924,15 @@ var render = function() {
     [
       _c(
         "q-card",
-        { staticClass: "my-card", attrs: { flat: "", bordered: "" } },
+        {
+          staticClass: "my-card",
+          attrs: { flat: "", bordered: "" },
+          on: {
+            click: function($event) {
+              return _vm.openPerfil(_vm.prop.idempresa, _vm.prop)
+            }
+          }
+        },
         [
           _vm.prop.imagenlogo != null
             ? _c("div", [
@@ -54882,7 +55180,7 @@ var render = function() {
               src:
                 _vm.urlImg != null
                   ? _vm.url
-                  : "img:./../media/iconospng/192_831617imagenlogo.jpeg"
+                  : "https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
             },
             slot: "initial"
           })
@@ -55899,126 +56197,121 @@ var render = function() {
                   _vm._v(" "),
                   _c(
                     "q-card-section",
-                    _vm._l(
-                      _vm.formulario.productos.filter(function(post) {
-                        return post.activo == 1
-                      }),
-                      function(applicant, counter) {
-                        return _c(
-                          "q-intersection",
-                          {
-                            key: counter,
-                            attrs: { transition: "scale", leave: "scale" }
-                          },
-                          [
-                            _c(
-                              "q-item",
-                              {
-                                staticClass: "row justify-center items-center"
-                              },
-                              [
-                                _c(
-                                  "q-item-section",
-                                  { attrs: { top: "" } },
-                                  [
-                                    _c(
-                                      "q-item-label",
-                                      { attrs: { lines: "1" } },
-                                      [
-                                        _c("q-input", {
-                                          attrs: {
-                                            label: "Nombrel del producto",
-                                            type: "text",
-                                            rules: [
-                                              function(val) {
-                                                return (
-                                                  (val && val.length > 0) ||
-                                                  "Campo vacio"
-                                                )
-                                              }
-                                            ]
-                                          },
-                                          model: {
-                                            value: applicant.nombre,
-                                            callback: function($$v) {
-                                              _vm.$set(applicant, "nombre", $$v)
-                                            },
-                                            expression: "applicant.nombre"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "q-item-label",
-                                      { attrs: { lines: "1" } },
-                                      [
-                                        _c("q-input", {
-                                          attrs: {
-                                            label: "Descripcion",
-                                            type: "text",
-                                            rules: [
-                                              function(val) {
-                                                return (
-                                                  (val && val.length > 0) ||
-                                                  "Campo vacio"
-                                                )
-                                              }
-                                            ]
-                                          },
-                                          model: {
-                                            value: applicant.descripcion,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                applicant,
-                                                "descripcion",
-                                                $$v
+                    [
+                      _vm._l(
+                        _vm.formulario.productos.filter(function(post) {
+                          return post.activo == 1
+                        }),
+                        function(applicant, counter) {
+                          return _c(
+                            "q-item",
+                            {
+                              key: counter,
+                              staticClass: "row justify-center items-center"
+                            },
+                            [
+                              _c(
+                                "q-item-section",
+                                { attrs: { top: "" } },
+                                [
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { lines: "1" } },
+                                    [
+                                      _c("q-input", {
+                                        attrs: {
+                                          label: "Nombrel del producto",
+                                          type: "text",
+                                          rules: [
+                                            function(val) {
+                                              return (
+                                                (val && val.length > 0) ||
+                                                "Campo vacio"
                                               )
-                                            },
-                                            expression: "applicant.descripcion"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                ),
-                                _vm._v(" "),
-                                _c(
-                                  "q-item-section",
-                                  { attrs: { top: "", side: "" } },
-                                  [
-                                    _c("q-icon", {
-                                      staticStyle: {
-                                        margin: "0px 5px 17px 5px"
-                                      },
-                                      attrs: {
-                                        size: "2rem",
-                                        color: "red",
-                                        name: "delete"
-                                      },
-                                      on: {
-                                        click: function($event) {
-                                          return _vm.deleteVisa(counter)
+                                            }
+                                          ]
+                                        },
+                                        model: {
+                                          value: applicant.nombre,
+                                          callback: function($$v) {
+                                            _vm.$set(applicant, "nombre", $$v)
+                                          },
+                                          expression: "applicant.nombre"
                                         }
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c("q-separator", { attrs: { spaced: "" } })
-                          ],
-                          1
-                        )
-                      }
-                    ),
-                    1
+                                      })
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { lines: "1" } },
+                                    [
+                                      _c("q-input", {
+                                        attrs: {
+                                          label: "Descripcion",
+                                          type: "text",
+                                          rules: [
+                                            function(val) {
+                                              return (
+                                                (val && val.length > 0) ||
+                                                "Campo vacio"
+                                              )
+                                            }
+                                          ]
+                                        },
+                                        model: {
+                                          value: applicant.descripcion,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              applicant,
+                                              "descripcion",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "applicant.descripcion"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "q-item-section",
+                                { attrs: { top: "", side: "" } },
+                                [
+                                  counter >= 1
+                                    ? _c("q-icon", {
+                                        staticStyle: {
+                                          margin: "0px 5px 17px 5px"
+                                        },
+                                        attrs: {
+                                          size: "2rem",
+                                          color: "red",
+                                          name: "delete"
+                                        },
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.deleteVisa(counter)
+                                          }
+                                        }
+                                      })
+                                    : _vm._e()
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        }
+                      ),
+                      _vm._v(" "),
+                      _c("q-separator", { attrs: { spaced: "" } })
+                    ],
+                    2
                   )
                 ],
                 1
@@ -56911,6 +57204,411 @@ var render = function() {
         : _vm._e()
     ],
     2
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/PerfilNegocio.vue?vue&type=template&id=693207ed&scoped=true&":
+/*!*************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/PerfilNegocio.vue?vue&type=template&id=693207ed&scoped=true& ***!
+  \*************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render),
+/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    { staticClass: "q-pa-md" },
+    [
+      _c(
+        "q-layout",
+        {
+          staticClass: "shadow-2 rounded-borders",
+          staticStyle: { height: "calc(100vh - 200px)" },
+          attrs: { view: "lHh Lpr lff", container: "" }
+        },
+        [
+          _c(
+            "q-header",
+            { staticClass: "bg-white text-primary" },
+            [
+              _c(
+                "q-toolbar",
+                [
+                  _c(
+                    "q-toolbar-title",
+                    { staticClass: "text-center", attrs: { size: "20px" } },
+                    [_vm._v(_vm._s(_vm.propperfil.nombreempresa))]
+                  ),
+                  _vm._v(" "),
+                  _c("q-icon", {
+                    staticStyle: { "font-size": "3em" },
+                    attrs: { name: "arrow_back" },
+                    on: {
+                      click: function($event) {
+                        return _vm.navigate()
+                      }
+                    }
+                  })
+                ],
+                1
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "q-drawer",
+            {
+              attrs: { "show-if-above": "", width: 250, breakpoint: 400 },
+              model: {
+                value: _vm.drawer,
+                callback: function($$v) {
+                  _vm.drawer = $$v
+                },
+                expression: "drawer"
+              }
+            },
+            [
+              _c(
+                "q-scroll-area",
+                {
+                  staticStyle: {
+                    height: "calc(100% - 250px)",
+                    "margin-top": "250px",
+                    "border-right": "1px solid #ddd"
+                  }
+                },
+                [
+                  _c("q-list", { attrs: { padding: "" } }, [
+                    _c("div", { staticClass: "column perfilempresa" }, [
+                      _c(
+                        "div",
+                        { staticClass: "col" },
+                        [
+                          _c(
+                            "q-item",
+                            [
+                              _c(
+                                "q-item-section",
+                                { staticClass: "icono", attrs: { avatar: "" } },
+                                [_c("q-icon", { attrs: { name: "face" } })],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c("q-item-section", { staticClass: "titulo" }, [
+                                _vm._v("Representante Legal")
+                              ])
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col" }, [
+                        _c("p", [
+                          _vm._v(_vm._s(_vm.propperfil.representantelegal))
+                        ])
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "column perfilempresa" }, [
+                      _c(
+                        "div",
+                        { staticClass: "col" },
+                        [
+                          _c(
+                            "q-item",
+                            [
+                              _c(
+                                "q-item-section",
+                                { staticClass: "icono", attrs: { avatar: "" } },
+                                [_c("q-icon", { attrs: { name: "call" } })],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c("q-item-section", { staticClass: "titulo" }, [
+                                _vm._v("Telefono")
+                              ])
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col" }, [
+                        _c("p", [_vm._v(_vm._s(_vm.propperfil.telefono))])
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "column perfilempresa" }, [
+                      _c(
+                        "div",
+                        { staticClass: "col" },
+                        [
+                          _c(
+                            "q-item",
+                            [
+                              _c(
+                                "q-item-section",
+                                { staticClass: "icono", attrs: { avatar: "" } },
+                                [_c("q-icon", { attrs: { name: "explore" } })],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c("q-item-section", { staticClass: "titulo" }, [
+                                _vm._v("Municipio")
+                              ])
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col" }, [
+                        _c("p", [_vm._v(_vm._s(_vm.propperfil.municipio))])
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "column perfilempresa" }, [
+                      _c(
+                        "div",
+                        { staticClass: "col" },
+                        [
+                          _c(
+                            "q-item",
+                            [
+                              _c(
+                                "q-item-section",
+                                { staticClass: "icono", attrs: { avatar: "" } },
+                                [
+                                  _c("q-icon", {
+                                    attrs: { name: "location_on" }
+                                  })
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c("q-item-section", { staticClass: "titulo" }, [
+                                _vm._v("Direccion")
+                              ])
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col" }, [
+                        _c("p", [_vm._v(_vm._s(_vm.propperfil.direccion))])
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "column perfilempresa" }, [
+                      _c(
+                        "div",
+                        { staticClass: "col" },
+                        [
+                          _c(
+                            "q-item",
+                            [
+                              _c(
+                                "q-item-section",
+                                { staticClass: "icono", attrs: { avatar: "" } },
+                                [_c("q-icon", { attrs: { name: "mail" } })],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c("q-item-section", { staticClass: "titulo" }, [
+                                _vm._v("Email")
+                              ])
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "col" }, [
+                        _c("p", [_vm._v(_vm._s(_vm.propperfil.email))])
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "row perfilempresa" }, [
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col",
+                          staticStyle: {
+                            display: "flex",
+                            "justify-content": "center",
+                            "align-items": "center"
+                          }
+                        },
+                        [
+                          _c("q-icon", {
+                            staticStyle: { "font-size": "2em" },
+                            attrs: {
+                              name: "img:./../media/iconssvg/gorjeo.svg"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col",
+                          staticStyle: {
+                            display: "flex",
+                            "justify-content": "center",
+                            "align-items": "center"
+                          }
+                        },
+                        [
+                          _c("q-icon", {
+                            staticStyle: { "font-size": "2em" },
+                            attrs: {
+                              name: "img:./../media/iconssvg/facebook.svg"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col",
+                          staticStyle: {
+                            display: "flex",
+                            "justify-content": "center",
+                            "align-items": "center"
+                          }
+                        },
+                        [
+                          _c("q-icon", {
+                            staticStyle: { "font-size": "2em" },
+                            attrs: {
+                              name: "img:./../media/iconssvg/instagram.svg"
+                            }
+                          })
+                        ],
+                        1
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        {
+                          staticClass: "col",
+                          staticStyle: {
+                            display: "flex",
+                            "justify-content": "center",
+                            "align-items": "center"
+                          }
+                        },
+                        [
+                          _c("q-icon", {
+                            staticStyle: { "font-size": "2em" },
+                            attrs: {
+                              name: "img:./../media/iconssvg/youtube.svg"
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ])
+                  ])
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("q-img", {
+                staticClass: "absolute-top",
+                staticStyle: { height: "250px" },
+                attrs: { src: _vm.propperfil.imagenlogo, ratio: 1 }
+              })
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "q-page-container",
+            [
+              _c("q-page", { attrs: { padding: "" } }, [
+                _c("p", [
+                  _vm._v(
+                    "\r\n            " +
+                      _vm._s(_vm.propperfil.descripcion) +
+                      "\r\n          "
+                  )
+                ]),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  { staticClass: "q-pa-md" },
+                  [
+                    _c("q-markup-table", { attrs: { separator: "cell" } }, [
+                      _c("thead", [
+                        _c("tr", [
+                          _c("th", { staticClass: "text-left" }, [
+                            _vm._v("Producto")
+                          ]),
+                          _vm._v(" "),
+                          _c("th", { staticClass: "text-left" }, [
+                            _vm._v("Descripcion")
+                          ])
+                        ])
+                      ]),
+                      _vm._v(" "),
+                      _c(
+                        "tbody",
+                        _vm._l(_vm.propperfil.productos, function(
+                          producto,
+                          count
+                        ) {
+                          return _c("tr", { key: count }, [
+                            _c("td", { staticClass: "text-left" }, [
+                              _vm._v(_vm._s(producto.nombre))
+                            ]),
+                            _vm._v(" "),
+                            _c("td", { staticClass: "text-left" }, [
+                              _vm._v(_vm._s(producto.descripcion))
+                            ])
+                          ])
+                        }),
+                        0
+                      )
+                    ])
+                  ],
+                  1
+                )
+              ])
+            ],
+            1
+          )
+        ],
+        1
+      )
+    ],
+    1
   )
 }
 var staticRenderFns = []

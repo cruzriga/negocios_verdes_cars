@@ -206,47 +206,75 @@
             </div>
                 <!-- <q-icon size="2rem" color="primary" @click="uploadimg" name="fas fa-plus-circle" /> -->
           </q-card-section>
-        </q-card>       
-        <q-card class="my-card q-ma-md"></q-card>
-        <q-card class="my-card q-ma-md">
-          <q-card-section>
-              <div class="text-h6">Clasificación de los Negocios Verdes</div>
-              <!-- <div class="text-subtitle2">by John Doe</div> -->
-          </q-card-section>
-          <q-separator />
-          <q-card-section>
-            <q-select
-              :name="formulario.categoria.nombre"
-              :label="formulario.categoria.label"
-              transition-show="flip-up"
-              transition-hide="flip-down"
-              v-model="formulario.categoria.data"
-              option-label="nombre"
-              option-value="idcategoria"
-              :options="this.$store.state.formulario.categoria!=null?this.$store.state.formulario.categoria.categorias:[]"
-              @input="onchange"
-              filled
-              :rules="formulario.categoria.rules"
-            >
-              <template v-if="formulario.categoria.data!=null" v-slot:append>
-                <q-icon name="cancel" @click.stop="nullselect" class="cursor-pointer" />
-              </template>
-            </q-select>
-            <q-intersection
-              transition-hide="jump-up"
-              transition="scale"
-              leave="scale"
-              >
-              <q-select v-if="formulario.categoria.data!=null"
-                :name="formulario.subcategoria.nombre"
-                :label="formulario.subcategoria.label"
+          </q-card>       
+          <q-card class="my-card q-ma-md"></q-card>
+          <q-card class="my-card q-ma-md">
+            <q-card-section>
+                <div class="text-h6">Clasificación de los Negocios Verdes</div>
+                <!-- <div class="text-subtitle2">by John Doe</div> -->
+            </q-card-section>
+            <q-separator />
+            <q-card-section>
+              <q-select
+                :name="formulario.categoria.nombre"
+                :label="formulario.categoria.label"
                 transition-show="flip-up"
-                transition-hide="flip-down"                
-                v-model="formulario.subcategoria.data"
+                transition-hide="flip-down"
+                v-model="formulario.categoria.data"
                 option-label="nombre"
-                option-value="idsubcategoria"
-                :options="this.$store.state.formulario.categoria!=null?this.$store.state.formulario.categoria.subcategorias.filter(post => { return post.idcategoria == formulario.categoria.data.idcategoria}):[]"               
+                option-value="idcategoria"
+                :options="this.$store.state.formulario.categoria!=null?this.$store.state.formulario.categoria.categorias:[]"
                 @input="onchange"
+                filled
+                :rules="formulario.categoria.rules"
+              >
+                <template v-if="formulario.categoria.data!=null" v-slot:append>
+                  <q-icon name="cancel" @click.stop="nullselect" class="cursor-pointer" />
+                </template>
+              </q-select>
+              <q-intersection
+                transition-hide="jump-up"
+                transition="scale"
+                leave="scale"
+                >
+                <q-select v-if="formulario.categoria.data!=null"
+                  :name="formulario.subcategoria.nombre"
+                  :label="formulario.subcategoria.label"
+                  transition-show="flip-up"
+                  transition-hide="flip-down"                
+                  v-model="formulario.subcategoria.data"
+                  option-label="nombre"
+                  option-value="idsubcategoria"
+                  :options="this.$store.state.formulario.categoria!=null?this.$store.state.formulario.categoria.subcategorias.filter(post => { return post.idcategoria == formulario.categoria.data.idcategoria}):[]"               
+                  @input="onchange"
+                  filled
+                >
+                <template v-slot:option="scope">
+                    <q-item
+                      v-bind="scope.itemProps"
+                      v-on="scope.itemEvents"
+                    >
+                      <!-- <q-item-section avatar>
+                        <q-icon :name="scope.opt.icon" />
+                      </q-item-section> -->
+                      <q-item-section>
+                        <q-item-label v-html="scope.opt.nombre" />
+                        <q-item-label caption>{{ formulario.categoria.data!=null?formulario.categoria.data.nombre:'' }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                </q-select>
+              </q-intersection>
+              <!-- <q-select v-if="formulario.subcategoria.data!=null && typeof this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}).length === 'undefined'" -->
+              <q-select v-if="formulario.subcategoria.data!=null && this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}).length >1 "
+                :name="formulario.tiposubcategoria.nombre"
+                :label="formulario.tiposubcategoria.label"
+                transition-show="flip-up"
+                transition-hide="flip-down"
+                v-model="formulario.tiposubcategoria.data"
+                option-label="nombre"
+                option-value="idtiposubcategoria"
+                :options="this.$store.state.formulario.categoria!=null?this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}):[]"
                 filled
               >
               <template v-slot:option="scope">
@@ -259,46 +287,18 @@
                     </q-item-section> -->
                     <q-item-section>
                       <q-item-label v-html="scope.opt.nombre" />
-                      <q-item-label caption>{{ formulario.categoria.data!=null?formulario.categoria.data.nombre:'' }}</q-item-label>
+                      <q-item-label caption>{{ formulario.categoria.data.nombre+' - '+formulario.subcategoria.data.nombre }}</q-item-label>
                     </q-item-section>
                   </q-item>
                 </template>
               </q-select>
-            </q-intersection>
-            <!-- <q-select v-if="formulario.subcategoria.data!=null && typeof this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}).length === 'undefined'" -->
-            <q-select v-if="formulario.subcategoria.data!=null && this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}).length >1 "
-              :name="formulario.tiposubcategoria.nombre"
-              :label="formulario.tiposubcategoria.label"
-              transition-show="flip-up"
-              transition-hide="flip-down"
-              v-model="formulario.tiposubcategoria.data"
-              option-label="nombre"
-              option-value="idtiposubcategoria"
-              :options="this.$store.state.formulario.categoria!=null?this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria}):[]"
-              filled
-            >
-            <template v-slot:option="scope">
-                <q-item
-                  v-bind="scope.itemProps"
-                  v-on="scope.itemEvents"
-                >
-                  <!-- <q-item-section avatar>
-                    <q-icon :name="scope.opt.icon" />
-                  </q-item-section> -->
-                  <q-item-section>
-                    <q-item-label v-html="scope.opt.nombre" />
-                    <q-item-label caption>{{ formulario.categoria.data.nombre+' - '+formulario.subcategoria.data.nombre }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
-          <!-- {{this.$store.state.formulario.categoria.tiposubcategorias}}
-          {{this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria})}} -->
-          </q-card-section>
-        </q-card>        
-        <q-card class="my-card q-ma-md">
-        </q-card>
-        <q-card class="my-card q-ma-md">
+            <!-- {{this.$store.state.formulario.categoria.tiposubcategorias}}
+            {{this.$store.state.formulario.categoria.tiposubcategorias.filter(post => { return post.idsubcategoria == formulario.subcategoria.data.idsubcategoria})}} -->
+            </q-card-section>
+          </q-card>        
+          <q-card class="my-card q-ma-md">
+          </q-card>
+          <q-card class="my-card q-ma-md">
             <q-card-section>
                 <div class="row justify-center items-center">
                 <div class="col-12 col-md-3">
@@ -315,12 +315,12 @@
             </div> -->
             <q-card-section>           
                 <!-- <q-separator spaced />  -->
-              <q-intersection
-                v-for="(applicant, counter) in formulario.productos.filter(post => { return post.activo == 1})" v-bind:key="counter"
-                transition="scale"
-                leave="scale"
-                >
-                 <q-item class="row justify-center items-center">
+              
+                <!-- Wrapping only one DOM element, defined by QBtn -->
+
+                <q-item
+                 v-for="(applicant, counter) in formulario.productos.filter(post => { return post.activo == 1})" v-bind:key="counter"
+                 class="row justify-center items-center">
                   <!-- <q-item-section avatar top>
                     <q-icon name="account_tree" color="black" size="34px" />
                   </q-item-section>
@@ -328,7 +328,6 @@
                   <q-item-section top class="col-2 gt-sm">
                     <q-item-label class="q-mt-sm">GitHub</q-item-label>
                   </q-item-section> -->
-
                   <q-item-section top>
                     <q-item-label lines="1">
                       <q-input v-model="applicant.nombre" label="Nombrel del producto" type="text" :rules="[ val => val && val.length > 0 || 'Campo vacio']">
@@ -341,16 +340,15 @@
                   </q-item-section>
 
                   <q-item-section top side>
-                      <q-icon style="margin: 0px 5px 17px 5px" size="2rem" color="red" @click="deleteVisa(counter)" name="delete" />
+                      <q-icon v-if="counter>=1" style="margin: 0px 5px 17px 5px" size="2rem" color="red" @click="deleteVisa(counter)" name="delete" />
                     <!-- <div class="text-grey-8 q-gutter-xs">
                       <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
                       <q-btn class="gt-xs" size="12px" flat dense round icon="done" />
                       <q-btn size="12px" flat dense round icon="more_vert" />
                     </div> -->
                   </q-item-section>
-                </q-item>      
-                <q-separator spaced />      
-              </q-intersection>
+                </q-item>
+                <q-separator spaced />
             </q-card-section>
           </q-card>
           <q-card class="my-card q-ma-md">

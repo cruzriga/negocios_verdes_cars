@@ -3083,8 +3083,6 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 //
 //
 //
-//
-//
  // import { mapState } from 'vuex'
 
 var optionsmunicipios = [{
@@ -55793,7 +55791,7 @@ var render = function() {
               src:
                 _vm.urlImg != null
                   ? _vm.url
-                  : "img:./../media/iconospng/192_831617imagenlogo.jpeg"
+                  : "https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
             },
             slot: "initial"
           })
@@ -56810,126 +56808,121 @@ var render = function() {
                   _vm._v(" "),
                   _c(
                     "q-card-section",
-                    _vm._l(
-                      _vm.formulario.productos.filter(function(post) {
-                        return post.activo == 1
-                      }),
-                      function(applicant, counter) {
-                        return _c(
-                          "q-intersection",
-                          {
-                            key: counter,
-                            attrs: { transition: "scale", leave: "scale" }
-                          },
-                          [
-                            _c(
-                              "q-item",
-                              {
-                                staticClass: "row justify-center items-center"
-                              },
-                              [
-                                _c(
-                                  "q-item-section",
-                                  { attrs: { top: "" } },
-                                  [
-                                    _c(
-                                      "q-item-label",
-                                      { attrs: { lines: "1" } },
-                                      [
-                                        _c("q-input", {
-                                          attrs: {
-                                            label: "Nombrel del producto",
-                                            type: "text",
-                                            rules: [
-                                              function(val) {
-                                                return (
-                                                  (val && val.length > 0) ||
-                                                  "Campo vacio"
-                                                )
-                                              }
-                                            ]
-                                          },
-                                          model: {
-                                            value: applicant.nombre,
-                                            callback: function($$v) {
-                                              _vm.$set(applicant, "nombre", $$v)
-                                            },
-                                            expression: "applicant.nombre"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "q-item-label",
-                                      { attrs: { lines: "1" } },
-                                      [
-                                        _c("q-input", {
-                                          attrs: {
-                                            label: "Descripcion",
-                                            type: "text",
-                                            rules: [
-                                              function(val) {
-                                                return (
-                                                  (val && val.length > 0) ||
-                                                  "Campo vacio"
-                                                )
-                                              }
-                                            ]
-                                          },
-                                          model: {
-                                            value: applicant.descripcion,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                applicant,
-                                                "descripcion",
-                                                $$v
+                    [
+                      _vm._l(
+                        _vm.formulario.productos.filter(function(post) {
+                          return post.activo == 1
+                        }),
+                        function(applicant, counter) {
+                          return _c(
+                            "q-item",
+                            {
+                              key: counter,
+                              staticClass: "row justify-center items-center"
+                            },
+                            [
+                              _c(
+                                "q-item-section",
+                                { attrs: { top: "" } },
+                                [
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { lines: "1" } },
+                                    [
+                                      _c("q-input", {
+                                        attrs: {
+                                          label: "Nombrel del producto",
+                                          type: "text",
+                                          rules: [
+                                            function(val) {
+                                              return (
+                                                (val && val.length > 0) ||
+                                                "Campo vacio"
                                               )
-                                            },
-                                            expression: "applicant.descripcion"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    )
-                                  ],
-                                  1
-                                ),
-                                _vm._v(" "),
-                                _c(
-                                  "q-item-section",
-                                  { attrs: { top: "", side: "" } },
-                                  [
-                                    _c("q-icon", {
-                                      staticStyle: {
-                                        margin: "0px 5px 17px 5px"
-                                      },
-                                      attrs: {
-                                        size: "2rem",
-                                        color: "red",
-                                        name: "delete"
-                                      },
-                                      on: {
-                                        click: function($event) {
-                                          return _vm.deleteVisa(counter)
+                                            }
+                                          ]
+                                        },
+                                        model: {
+                                          value: applicant.nombre,
+                                          callback: function($$v) {
+                                            _vm.$set(applicant, "nombre", $$v)
+                                          },
+                                          expression: "applicant.nombre"
                                         }
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c("q-separator", { attrs: { spaced: "" } })
-                          ],
-                          1
-                        )
-                      }
-                    ),
-                    1
+                                      })
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { lines: "1" } },
+                                    [
+                                      _c("q-input", {
+                                        attrs: {
+                                          label: "Descripcion",
+                                          type: "text",
+                                          rules: [
+                                            function(val) {
+                                              return (
+                                                (val && val.length > 0) ||
+                                                "Campo vacio"
+                                              )
+                                            }
+                                          ]
+                                        },
+                                        model: {
+                                          value: applicant.descripcion,
+                                          callback: function($$v) {
+                                            _vm.$set(
+                                              applicant,
+                                              "descripcion",
+                                              $$v
+                                            )
+                                          },
+                                          expression: "applicant.descripcion"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "q-item-section",
+                                { attrs: { top: "", side: "" } },
+                                [
+                                  counter >= 1
+                                    ? _c("q-icon", {
+                                        staticStyle: {
+                                          margin: "0px 5px 17px 5px"
+                                        },
+                                        attrs: {
+                                          size: "2rem",
+                                          color: "red",
+                                          name: "delete"
+                                        },
+                                        on: {
+                                          click: function($event) {
+                                            return _vm.deleteVisa(counter)
+                                          }
+                                        }
+                                      })
+                                    : _vm._e()
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        }
+                      ),
+                      _vm._v(" "),
+                      _c("q-separator", { attrs: { spaced: "" } })
+                    ],
+                    2
                   )
                 ],
                 1

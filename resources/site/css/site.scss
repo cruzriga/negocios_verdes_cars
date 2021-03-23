@@ -24,3 +24,35 @@
     }
   }
 }
+.q-layout-container{
+  .q-layout{
+    .row{  
+      margin-right: 0px !important;
+      margin-left: 0px !important;
+    }
+  }
+}
+.q-table{
+  th{    
+    font-weight: bold;
+    font-size: 15px;
+  }
+}
+.perfilempresa{
+  justify-content: center;
+  // align-items: center;
+  .col{
+    .icono{
+      padding: 0;
+      min-width: 30px;
+    }
+    p{
+      padding-left: 16px;
+    }
+    .titulo{
+      font-weight: bold;
+      font-size: 15px;
+    }
+  }
+
+}
