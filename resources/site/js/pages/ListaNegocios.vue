@@ -47,7 +47,7 @@ export default {
   },     
   methods: {
     buscar(){
-      console.log(this.search)
+
       let obj = {
         buscar: this.search
       }

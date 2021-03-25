@@ -3427,7 +3427,6 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     buscar: function buscar() {
-      console.log(this.search);
       var obj = {
         buscar: this.search
       };
