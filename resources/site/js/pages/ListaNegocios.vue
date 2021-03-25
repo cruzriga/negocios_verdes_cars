@@ -1,7 +1,7 @@
 <template>
     <!-- <div class="search-wrapper">
     </div> -->
-  <div class="q-gutter-lg">
+  <div class="q-gutter-lg" style="min-height: calc(100vh - 172px)">
     <q-item-label  header>
       <q-toolbar class="text-primary" style="height: 50px">
         <q-input @keyup.enter="buscar" class="GPL__toolbar-input" dense standout="bg-primary" v-model="search" placeholder="Buscar">
@@ -26,6 +26,7 @@
       </div>
     </template>
   </div>
+
 </template>
 
 <script>

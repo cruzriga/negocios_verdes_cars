@@ -917,7 +917,7 @@ textarea,
 textarea:not(#app-admin-container,.q-menu *) {
 	height: auto;
 }
-textarea:not(#app-admin-container,.q-menu *),
+textarea:not(#app-admin-container, .q-field__native, .q-menu *),
 input[type="text"]:not(#app-admin-container,.q-field__native, .q-menu *),
 input[type="password"]:not(#app-admin-container, .q-field__native .q-menu *),
 input[type="datetime"]:not(#app-admin-container, .q-field__native .q-menu *),
@@ -943,22 +943,22 @@ input[type="color"]:not(#app-admin-container, .q-field__native .q-menu *),
 	-o-transition: border linear .2s, box-shadow linear .2s;
 	transition: border linear .2s, box-shadow linear .2s;
 }
-textarea:not(#app-admin-container,.q-menu *):focus,
-input[type="text"]:not(#app-admin-container,.q-menu *):focus,
-input[type="password"]:not(#app-admin-container,.q-menu *):focus,
-input[type="datetime"]:not(#app-admin-container,.q-menu *):focus,
-input[type="datetime-local"]:not(#app-admin-container,.q-menu *):focus,
-input[type="date"]:not(#app-admin-container,.q-menu *):focus,
-input[type="month"]:not(#app-admin-container,.q-menu *):focus,
-input[type="time"]:not(#app-admin-container,.q-menu *):focus,
-input[type="week"]:not(#app-admin-container,.q-menu *):focus,
-input[type="number"]:not(#app-admin-container,.q-menu *):focus,
-input[type="email"]:not(#app-admin-container,.q-menu *):focus,
-input[type="url"]:not(#app-admin-container,.q-menu *):focus,
-input[type="search"]:not(#app-admin-container,.q-menu *):focus,
-input[type="tel"]:not(#app-admin-container,.q-menu *):focus,
-input[type="color"]:not(#app-admin-container,.q-menu *):focus,
-.uneditable-input:not(#app-admin-container,.q-menu *):focus {
+textarea:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="text"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="password"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="datetime"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="datetime-local"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="date"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="month"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="time"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="week"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="number"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="email"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="url"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="search"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="tel"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+input[type="color"]:not(#app-admin-container, .q-field__native, .q-menu *):focus,
+.uneditable-input:not(#app-admin-container, .q-field__native, .q-menu *):focus {
 	border-color: rgba(82,168,236,0.8);
 	outline: 0;
 	outline: thin dotted \9;

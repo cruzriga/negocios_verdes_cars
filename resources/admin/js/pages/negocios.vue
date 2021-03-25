@@ -66,7 +66,9 @@
               </div>
             </q-item-label>
             <q-item-label lines = "1" class = "q-mt-xs text-body2 text-weight-bold text-uppercase">
-              {{empresa.categoria.nombre}} > {{empresa.subcategoria.nombre}} > {{empresa.tiposubcategoria.nombre}}
+              <span v-if="empresa.categoria.nombre  != '' "> - {{empresa.categoria.nombre}}</span>
+              <span v-if="empresa.subcategoria.nombre  != '' "> - {{empresa.subcategoria.nombre}}</span>
+              <span v-if="empresa.tiposubcategoria.nombre  != '' "> - {{empresa.tiposubcategoria.nombre}}</span>
             </q-item-label>
           </q-item-section>
           <q-item-section side style="align-items: center;" top>

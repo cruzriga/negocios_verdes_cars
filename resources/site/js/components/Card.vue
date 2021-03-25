@@ -6,14 +6,13 @@
           <q-img
             class="rounded-borders"
             :src="prop.imagenlogo"
-            style="max-width: 300px; height: 300px;"
+            height="200px"
           />
         </div>
         <div v-else>
           <q-card-section horizontal class="flex flex-center">
             <q-img class="img-def"
               src="../assets/imagenes/def.png"
-              style="max-width: 300px; height: 300px;"
               contain
             />
           </q-card-section>
@@ -29,12 +28,12 @@
         </q-card-section>
       </div>
       <q-card-section>
-        <div class="text-green-10">{{prop.categoria.nombre}}</div>
-        <div class="text-green-7">{{prop.subcategoria.nombre}}</div>
-        <div class="text-green-5">{{prop.tiposubcategoria.nombre}}</div>
-        <div class="text-h5 q-mt-sm q-mb-xs">{{prop.nombreempresa}}</div>
-        <div class="text-caption text-grey">
-          {{prop.descripcion.substring(0,100)+"..."}}
+        <div class="text-green-10" v-show="false">{{prop.categoria.nombre}}</div>
+        <div class="text-green-7" v-show="false">{{prop.subcategoria.nombre}}</div>
+        <div class="text-green-5" v-show="false">{{prop.tiposubcategoria.nombre}}</div>
+        <div class="text-h5 q-mt-sm q-mb-xs ellipsis " >{{prop.nombreempresa}}</div>
+        <div class="text-caption text-grey ellipsis-3-lines" style="height: 60px">
+          {{prop.descripcion}}
         </div>
       </q-card-section>
       <q-card-section style="padding-top: 0;">
@@ -109,9 +108,7 @@ export default {
 
 <style lang="sass" scoped>
 .my-card
-  width: 100%
-  max-width: 300px
-  height: 640px
+  width: 320px
 .img-def
   width: 90%
 </style>

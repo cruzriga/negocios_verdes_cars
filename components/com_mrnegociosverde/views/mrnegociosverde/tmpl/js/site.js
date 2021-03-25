@@ -1940,7 +1940,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Card',
   props: {
@@ -3408,6 +3407,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'ListaEmpresas',
@@ -4671,7 +4671,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, ".my-card[data-v-a5f338fa] {\n  width: 100%;\n  max-width: 300px;\n  height: 640px;\n}\n.img-def[data-v-a5f338fa] {\n  width: 90%;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, ".my-card[data-v-a5f338fa] {\n  width: 320px;\n}\n.img-def[data-v-a5f338fa] {\n  width: 90%;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -55227,11 +55227,7 @@ var render = function() {
                       [
                         _c("q-img", {
                           staticClass: "rounded-borders",
-                          staticStyle: {
-                            "max-width": "300px",
-                            height: "300px"
-                          },
-                          attrs: { src: _vm.prop.imagenlogo }
+                          attrs: { src: _vm.prop.imagenlogo, height: "200px" }
                         })
                       ],
                       1
@@ -55248,10 +55244,6 @@ var render = function() {
                           [
                             _c("q-img", {
                               staticClass: "img-def",
-                              staticStyle: {
-                                "max-width": "300px",
-                                height: "300px"
-                              },
                               attrs: {
                                 src: "../assets/imagenes/def.png",
                                 contain: ""
@@ -55287,29 +55279,66 @@ var render = function() {
               ),
           _vm._v(" "),
           _c("q-card-section", [
-            _c("div", { staticClass: "text-green-10" }, [
-              _vm._v(_vm._s(_vm.prop.categoria.nombre))
-            ]),
+            _c(
+              "div",
+              {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: false,
+                    expression: "false"
+                  }
+                ],
+                staticClass: "text-green-10"
+              },
+              [_vm._v(_vm._s(_vm.prop.categoria.nombre))]
+            ),
             _vm._v(" "),
-            _c("div", { staticClass: "text-green-7" }, [
-              _vm._v(_vm._s(_vm.prop.subcategoria.nombre))
-            ]),
+            _c(
+              "div",
+              {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: false,
+                    expression: "false"
+                  }
+                ],
+                staticClass: "text-green-7"
+              },
+              [_vm._v(_vm._s(_vm.prop.subcategoria.nombre))]
+            ),
             _vm._v(" "),
-            _c("div", { staticClass: "text-green-5" }, [
-              _vm._v(_vm._s(_vm.prop.tiposubcategoria.nombre))
-            ]),
+            _c(
+              "div",
+              {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: false,
+                    expression: "false"
+                  }
+                ],
+                staticClass: "text-green-5"
+              },
+              [_vm._v(_vm._s(_vm.prop.tiposubcategoria.nombre))]
+            ),
             _vm._v(" "),
-            _c("div", { staticClass: "text-h5 q-mt-sm q-mb-xs" }, [
+            _c("div", { staticClass: "text-h5 q-mt-sm q-mb-xs ellipsis " }, [
               _vm._v(_vm._s(_vm.prop.nombreempresa))
             ]),
             _vm._v(" "),
-            _c("div", { staticClass: "text-caption text-grey" }, [
-              _vm._v(
-                "\n        " +
-                  _vm._s(_vm.prop.descripcion.substring(0, 100) + "...") +
-                  "\n      "
-              )
-            ])
+            _c(
+              "div",
+              {
+                staticClass: "text-caption text-grey ellipsis-3-lines",
+                staticStyle: { height: "60px" }
+              },
+              [_vm._v("\n        " + _vm._s(_vm.prop.descripcion) + "\n      ")]
+            )
           ]),
           _vm._v(" "),
           _c("q-card-section", { staticStyle: { "padding-top": "0" } }, [
@@ -57363,7 +57392,10 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
-    { staticClass: "q-gutter-lg" },
+    {
+      staticClass: "q-gutter-lg",
+      staticStyle: { "min-height": "calc(100vh - 172px)" }
+    },
     [
       _c(
         "q-item-label",
