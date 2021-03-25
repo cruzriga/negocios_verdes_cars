@@ -3418,7 +3418,7 @@ __webpack_require__.r(__webpack_exports__);
     return {
       items: [1],
       pagina: 0,
-      numlist: 15,
+      numlist: 50,
       search: ''
     };
   },
@@ -3465,6 +3465,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -55329,11 +55343,11 @@ var render = function() {
                             readonly: ""
                           },
                           model: {
-                            value: _vm.cump,
+                            value: _vm.prop.cumplimiento,
                             callback: function($$v) {
-                              _vm.cump = $$v
+                              _vm.$set(_vm.prop, "cumplimiento", $$v)
                             },
-                            expression: "cump"
+                            expression: "prop.cumplimiento"
                           }
                         })
                       ],
@@ -55369,11 +55383,11 @@ var render = function() {
                             readonly: ""
                           },
                           model: {
-                            value: _vm.adic,
+                            value: _vm.prop.adic,
                             callback: function($$v) {
-                              _vm.adic = $$v
+                              _vm.$set(_vm.prop, "adic", $$v)
                             },
-                            expression: "adic"
+                            expression: "prop.adic"
                           }
                         })
                       ],
@@ -58165,64 +58179,104 @@ var render = function() {
                 "q-page",
                 { attrs: { padding: "" } },
                 [
-                  _c(
-                    "div",
-                    { staticClass: "q-pa-md" },
-                    [
-                      _c(
-                        "q-carousel",
-                        {
-                          attrs: {
-                            swipeable: "",
-                            animated: "",
-                            thumbnails: "",
-                            infinite: ""
-                          },
-                          model: {
-                            value: _vm.slide,
-                            callback: function($$v) {
-                              _vm.slide = $$v
-                            },
-                            expression: "slide"
-                          }
-                        },
+                  _vm.propperfil.imgcarrusel
+                    ? _c(
+                        "div",
+                        { staticClass: "q-pa-md" },
                         [
-                          _c("q-carousel-slide", {
-                            attrs: {
-                              name: 1,
-                              "img-src":
-                                "https://cdn.quasar.dev/img/mountains.jpg"
-                            }
-                          }),
-                          _vm._v(" "),
-                          _c("q-carousel-slide", {
-                            attrs: {
-                              name: 2,
-                              "img-src":
-                                "https://cdn.quasar.dev/img/parallax1.jpg"
-                            }
-                          }),
-                          _vm._v(" "),
-                          _c("q-carousel-slide", {
-                            attrs: {
-                              name: 3,
-                              "img-src":
-                                "https://cdn.quasar.dev/img/parallax2.jpg"
-                            }
-                          }),
-                          _vm._v(" "),
-                          _c("q-carousel-slide", {
-                            attrs: {
-                              name: 4,
-                              "img-src": "https://cdn.quasar.dev/img/quasar.jpg"
-                            }
-                          })
+                          _c(
+                            "q-carousel",
+                            {
+                              attrs: {
+                                swipeable: "",
+                                animated: "",
+                                thumbnails: "",
+                                infinite: ""
+                              },
+                              model: {
+                                value: _vm.slide,
+                                callback: function($$v) {
+                                  _vm.slide = $$v
+                                },
+                                expression: "slide"
+                              }
+                            },
+                            _vm._l(_vm.propperfil.imgcarrusel, function(
+                              img,
+                              count
+                            ) {
+                              return _c("q-carousel-slide", {
+                                key: count,
+                                attrs: {
+                                  name: count,
+                                  "img-src": img.urldocumento
+                                }
+                              })
+                            }),
+                            1
+                          )
                         ],
                         1
                       )
-                    ],
-                    1
-                  ),
+                    : _c(
+                        "div",
+                        { staticClass: "q-pa-md" },
+                        [
+                          _c(
+                            "q-carousel",
+                            {
+                              attrs: {
+                                swipeable: "",
+                                animated: "",
+                                thumbnails: "",
+                                infinite: ""
+                              },
+                              model: {
+                                value: _vm.slide,
+                                callback: function($$v) {
+                                  _vm.slide = $$v
+                                },
+                                expression: "slide"
+                              }
+                            },
+                            [
+                              _c("q-carousel-slide", {
+                                attrs: {
+                                  name: 1,
+                                  "img-src":
+                                    "https://cdn.quasar.dev/img/mountains.jpg"
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("q-carousel-slide", {
+                                attrs: {
+                                  name: 2,
+                                  "img-src":
+                                    "https://cdn.quasar.dev/img/parallax1.jpg"
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("q-carousel-slide", {
+                                attrs: {
+                                  name: 3,
+                                  "img-src":
+                                    "https://cdn.quasar.dev/img/parallax2.jpg"
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("q-carousel-slide", {
+                                attrs: {
+                                  name: 4,
+                                  "img-src":
+                                    "https://cdn.quasar.dev/img/quasar.jpg"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      ),
                   _vm._v(" "),
                   _c("p", [
                     _vm._v(
@@ -58296,11 +58350,15 @@ var render = function() {
                                         readonly: ""
                                       },
                                       model: {
-                                        value: _vm.cump,
+                                        value: _vm.propperfil.cumplimiento,
                                         callback: function($$v) {
-                                          _vm.cump = $$v
+                                          _vm.$set(
+                                            _vm.propperfil,
+                                            "cumplimiento",
+                                            $$v
+                                          )
                                         },
-                                        expression: "cump"
+                                        expression: "propperfil.cumplimiento"
                                       }
                                     })
                                   ],
@@ -58340,11 +58398,11 @@ var render = function() {
                                         readonly: ""
                                       },
                                       model: {
-                                        value: _vm.adic,
+                                        value: _vm.propperfil.adic,
                                         callback: function($$v) {
-                                          _vm.adic = $$v
+                                          _vm.$set(_vm.propperfil, "adic", $$v)
                                         },
-                                        expression: "adic"
+                                        expression: "propperfil.adic"
                                       }
                                     })
                                   ],

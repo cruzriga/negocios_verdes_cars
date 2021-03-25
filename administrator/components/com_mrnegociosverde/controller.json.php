@@ -75,7 +75,9 @@ class MrNegociosVerdeController extends JControllerLegacy {
             $tiposubcategoria   = [];
             $productos          = $model->getProductos($value->idempresa);
             $documentos         = $model->getDocumentos($value->idempresa);
+            $imgcarrusel        = $model->getImgCarrusel($value->idempresa);
             $total              = $model->contarEmpresaQuery();
+            
             
             
             if ($value->idsubcategoria!=null) {
@@ -93,6 +95,8 @@ class MrNegociosVerdeController extends JControllerLegacy {
             $empresas[$key]->tiposubcategoria = $tiposubcategoria;
             $empresas[$key]->productos = $productos;
             $empresas[$key]->documentos = $documentos;
+            $empresas[$key]->imgcarrusel = $imgcarrusel;
+             
         }
         $app->enqueueMessage("Enqueued notice", "notice");
         $app->enqueueMessage("Enqueued warning", "warning");

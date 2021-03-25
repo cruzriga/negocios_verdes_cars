@@ -880,23 +880,23 @@ label {
 	display: block;
 	margin-bottom: 5px;
 }
-select:not(#app-admin-container *),
-textarea:not(#app-admin-container *),
-input[type="text"]:not(#app-admin-container *),
-input[type="password"]:not(#app-admin-container *),
-input[type="datetime"]:not(#app-admin-container *),
-input[type="datetime-local"]:not(#app-admin-container *),
-input[type="date"]:not(#app-admin-container *),
-input[type="month"]:not(#app-admin-container *),
-input[type="time"]:not(#app-admin-container *),
-input[type="week"]:not(#app-admin-container *),
-input[type="number"]:not(#app-admin-container *),
-input[type="email"]:not(#app-admin-container *),
-input[type="url"]:not(#app-admin-container *),
-input[type="search"]:not(#app-admin-container *),
-input[type="tel"]:not(#app-admin-container *),
-input[type="color"]:not(#app-admin-container *),
-.uneditable-input:not(#app-admin-container *) {
+select:not(#app-admin-container,.q-menu *),
+textarea:not(#app-admin-container,.q-menu *),
+input[type="text"]:not(#app-admin-container,.q-menu *),
+input[type="password"]:not(#app-admin-container,.q-menu *),
+input[type="datetime"]:not(#app-admin-container,.q-menu *),
+input[type="datetime-local"]:not(#app-admin-container,.q-menu *),
+input[type="date"]:not(#app-admin-container,.q-menu *),
+input[type="month"]:not(#app-admin-container,.q-menu *),
+input[type="time"]:not(#app-admin-container,.q-menu *),
+input[type="week"]:not(#app-admin-container,.q-menu *),
+input[type="number"]:not(#app-admin-container,.q-menu *),
+input[type="email"]:not(#app-admin-container,.q-menu *),
+input[type="url"]:not(#app-admin-container,.q-menu *),
+input[type="search"]:not(#app-admin-container,.q-menu *),
+input[type="tel"]:not(#app-admin-container,.q-menu *),
+input[type="color"]:not(#app-admin-container,.q-menu *),
+.uneditable-input:not(#app-admin-container,.q-menu *) {
 	display: inline-block;
 	height: 18px;
 	padding: 4px 6px;
@@ -914,25 +914,25 @@ textarea,
 .uneditable-input {
 	width: 206px;
 }
-textarea:not(#app-admin-container *) {
+textarea:not(#app-admin-container,.q-menu *) {
 	height: auto;
 }
-textarea:not(#app-admin-container *),
-input[type="text"]:not(#app-admin-container *),
-input[type="password"]:not(#app-admin-container *),
-input[type="datetime"]:not(#app-admin-container *),
-input[type="datetime-local"]:not(#app-admin-container *),
-input[type="date"]:not(#app-admin-container *),
-input[type="month"]:not(#app-admin-container *),
-input[type="time"]:not(#app-admin-container *),
-input[type="week"]:not(#app-admin-container *),
-input[type="number"]:not(#app-admin-container *),
-input[type="email"]:not(#app-admin-container *),
-input[type="url"]:not(#app-admin-container *),
-input[type="search"]:not(#app-admin-container *),
-input[type="tel"]:not(#app-admin-container *),
-input[type="color"]:not(#app-admin-container *),
-.uneditable-input:not(#app-admin-container *) {
+textarea:not(#app-admin-container,.q-menu *),
+input[type="text"]:not(#app-admin-container,.q-menu *),
+input[type="password"]:not(#app-admin-container,.q-menu *),
+input[type="datetime"]:not(#app-admin-container,.q-menu *),
+input[type="datetime-local"]:not(#app-admin-container,.q-menu *),
+input[type="date"]:not(#app-admin-container,.q-menu *),
+input[type="month"]:not(#app-admin-container,.q-menu *),
+input[type="time"]:not(#app-admin-container,.q-menu *),
+input[type="week"]:not(#app-admin-container,.q-menu *),
+input[type="number"]:not(#app-admin-container,.q-menu *),
+input[type="email"]:not(#app-admin-container,.q-menu *),
+input[type="url"]:not(#app-admin-container,.q-menu *),
+input[type="search"]:not(#app-admin-container,.q-menu *),
+input[type="tel"]:not(#app-admin-container,.q-menu *),
+input[type="color"]:not(#app-admin-container,.q-menu *),
+.uneditable-input:not(#app-admin-container,.q-menu *) {
 	background-color: #fff;
 	border: 1px solid #ccc;
 	-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
@@ -943,22 +943,22 @@ input[type="color"]:not(#app-admin-container *),
 	-o-transition: border linear .2s, box-shadow linear .2s;
 	transition: border linear .2s, box-shadow linear .2s;
 }
-textarea:not(#app-admin-container *):focus,
-input[type="text"]:not(#app-admin-container *):focus,
-input[type="password"]:not(#app-admin-container *):focus,
-input[type="datetime"]:not(#app-admin-container *):focus,
-input[type="datetime-local"]:not(#app-admin-container *):focus,
-input[type="date"]:not(#app-admin-container *):focus,
-input[type="month"]:not(#app-admin-container *):focus,
-input[type="time"]:not(#app-admin-container *):focus,
-input[type="week"]:not(#app-admin-container *):focus,
-input[type="number"]:not(#app-admin-container *):focus,
-input[type="email"]:not(#app-admin-container *):focus,
-input[type="url"]:not(#app-admin-container *):focus,
-input[type="search"]:not(#app-admin-container *):focus,
-input[type="tel"]:not(#app-admin-container *):focus,
-input[type="color"]:not(#app-admin-container *):focus,
-.uneditable-input:not(#app-admin-container *):focus {
+textarea:not(#app-admin-container,.q-menu *):focus,
+input[type="text"]:not(#app-admin-container,.q-menu *):focus,
+input[type="password"]:not(#app-admin-container,.q-menu *):focus,
+input[type="datetime"]:not(#app-admin-container,.q-menu *):focus,
+input[type="datetime-local"]:not(#app-admin-container,.q-menu *):focus,
+input[type="date"]:not(#app-admin-container,.q-menu *):focus,
+input[type="month"]:not(#app-admin-container,.q-menu *):focus,
+input[type="time"]:not(#app-admin-container,.q-menu *):focus,
+input[type="week"]:not(#app-admin-container,.q-menu *):focus,
+input[type="number"]:not(#app-admin-container,.q-menu *):focus,
+input[type="email"]:not(#app-admin-container,.q-menu *):focus,
+input[type="url"]:not(#app-admin-container,.q-menu *):focus,
+input[type="search"]:not(#app-admin-container,.q-menu *):focus,
+input[type="tel"]:not(#app-admin-container,.q-menu *):focus,
+input[type="color"]:not(#app-admin-container,.q-menu *):focus,
+.uneditable-input:not(#app-admin-container,.q-menu *):focus {
 	border-color: rgba(82,168,236,0.8);
 	outline: 0;
 	outline: thin dotted \9;

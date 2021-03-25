@@ -12277,3 +12277,7 @@ body.body--dark {
 .q-dialog.fullscreen .row {
   margin-left: 0px !important;
 }
+
+.q-menu.q-position-engine.q-popup-edit .row {
+  margin-left: 0px !important;
+}

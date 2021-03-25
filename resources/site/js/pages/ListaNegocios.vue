@@ -37,7 +37,7 @@ export default {
     return {
       items : [1],
       pagina:0,
-      numlist: 15,
+      numlist: 50,
       search:''
     }
   }, 

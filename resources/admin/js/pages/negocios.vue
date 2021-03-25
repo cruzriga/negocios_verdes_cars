@@ -65,14 +65,36 @@
             </q-item-label >
             <q-item-label lines = "1" >
               <q-knob
-                  v-model="cump"
+                  v-model="empresa.cumplimiento"
                   show-value
                   size="50px"
                   color="teal"
                   track-color="grey-3"
                   readonly
 
-              />
+              >
+              <div class="q-pa-md">
+                <div class="cursor-pointer">
+                  {{ empresa.cumplimiento }}
+                  <q-popup-edit v-model="empresa.cumplimiento" :validate="val => val > 0">
+                    <template v-slot="{ initialValue, value, emitValue, validate, set, cancel }">
+                      <q-input
+                        autofocus
+                        dense
+                        :value="empresa.cumplimiento"
+                        @input="emitValue"
+                      >
+                        <template v-slot:after>
+                          <q-btn flat dense color="negative" icon="cancel" @click.stop="cancel" />
+                          <q-btn @click="updatevalues('cumplimiento',empresa.cumplimiento,empresa.idempresa)" flat dense color="positive" icon="check_circle" @click.stop="set" :disable="validate(value) === false || initialValue === value" />
+                        </template>
+                      </q-input>
+                    </template>
+                  </q-popup-edit>
+                </div>
+              </div>
+
+              </q-knob>
             </q-item-label>
           </q-item-section>
 
@@ -82,23 +104,35 @@
             </q-item-label >
             <q-item-label lines = "1" >
               <q-knob
-                  v-model="adic"
+                  v-model="empresa.adic"
                   show-value
                   size="50px"
                   color="teal"
                   track-color="grey-3"
                   readonly
               >
-              <div class="cursor-pointer" >
-                {{ adic }}
-                <q-popup-edit v-model="labeladic" content-class="bg text">
-                  <q-input dark color="white" v-model="labeladic" dense autofocus counter>
-                    <template v-slot:append>
-                      <q-icon name="edit" />
+
+              <div class="q-pa-md">
+                <div class="cursor-pointer">
+                  {{ empresa.adic }}
+                  <q-popup-edit v-model="empresa.adic" :validate="val => val > 1">
+                    <template v-slot="{ initialValue, value, emitValue, validate, set, cancel }">
+                      <q-input
+                        autofocus
+                        dense
+                        :value="empresa.adic"
+                        @input="emitValue"
+                      >
+                        <template v-slot:after>
+                          <q-btn flat dense color="negative" icon="cancel" @click.stop="cancel" />
+                          <q-btn @click="updatevalues('adic',empresa.adic,empresa.idempresa)" flat dense color="positive" icon="check_circle" @click.stop="set" :disable="validate(value) === false || initialValue === value" />
+                        </template>
+                      </q-input>
                     </template>
-                  </q-input>
-                </q-popup-edit>
+                  </q-popup-edit>
+                </div>
               </div>
+
               </q-knob>
             </q-item-label>
           </q-item-section>
@@ -260,7 +294,7 @@ export default {
       adic: 60,
       cump : 80,
       pagina:0,
-      numlist: 15,
+      numlist: 50,
       labeladic:this.adic,
       labelcump:this.cump
     }
@@ -279,6 +313,46 @@ export default {
         numlist: this.$store.state.admin.empresas.data.numList
       }
       this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
+    },
+    updatevalues(campo,value,idempresa){
+        let formu = {
+            [campo]:value,
+            idempresa:idempresa
+        }
+          let obj = {
+            formulario: formu,
+            productos: null,
+            documentos: null,
+            imagenlogo: null
+        }
+
+        // console.log(obj);
+        // return;
+        let app = this;
+        return new Promise((resolve) => {
+            app.$store.dispatch('formulario/GUARDAR_FORMULARIO',obj).then(function(resp) {
+                if (!resp.ok) {             
+                app.$q.notify({
+                    color: 'negative',
+                    textColor: 'white',
+                    icon: 'cloud_done',
+                    message: 'Error ',                
+                    position:'center'
+                })
+                }else{
+                // console.log(submitResult);
+                    app.$q.notify({
+                    color: 'green-4',
+                    textColor: 'white',
+                    icon: 'cloud_done',
+                    message: 'Formulario Enviado',
+                    position:'center'
+                    })
+                }
+                app.$store.commit('formulario/CARGANDO',false);
+                resolve(resp)
+            })
+        })
     },
     onToggleChange(value,evt){
       // console.log(value)
@@ -332,7 +406,7 @@ export default {
       this.$router.push({name: 'formulario', params: {prop:empresa}});
     },
     openModalImg(idempresa){
-      this.$router.push({name: 'imgcarrusel', params: {idempresa:idempresa.idempresa}});
+      this.$router.push({name: 'imgcarrusel', params: {idempresa:idempresa.idempresa,imgCarrusel:idempresa.imgcarrusel}});
       // this.$refs.modalimg.dialog=true
       // console.log(this.$refs.modalimg.dialog);
     }

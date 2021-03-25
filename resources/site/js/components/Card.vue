@@ -45,7 +45,7 @@
             </q-item-label >
             <q-item-label lines = "1" >
               <q-knob
-                  v-model="cump"
+                  v-model="prop.cumplimiento"
                   show-value
                   size="50px"
                   color="teal"
@@ -60,7 +60,7 @@
             </q-item-label >
             <q-item-label lines = "1" >
               <q-knob
-                  v-model="adic"
+                  v-model="prop.adic"
                   show-value
                   size="50px"
                   color="teal"

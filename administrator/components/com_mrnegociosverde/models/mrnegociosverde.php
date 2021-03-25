@@ -177,6 +177,30 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         }
         return false;
 	}
+    public function getImgCarrusel($idempresa = null)
+	{		
+		$db = JFactory::getDbo(); 
+        $query = $db->getQuery(true);
+		$query
+            ->select('*')
+            ->from($db->quoteName('#__negocios_v_documentos','d'))
+            ->where($db->quoteName('d.ref') . ' like "img%" ')
+            // ->group($db->quoteName('a.idtiposubcategoria'))
+            // ->order('d.nombre DESC')
+            
+        ;
+        // print_r($query->__toString());
+        if ($idempresa!=null) {
+            $query->where($db->quoteName('d.idempresa') . ' = ' . $db->quote($idempresa));
+        }
+		$db->setQuery($query); 
+        $rows = $db->loadObjectList();		
+		
+		if ($rows) {
+            return $rows;
+        }
+        return false;
+	}
 
     public function getEmpresas($pagina=0,$limite=15,$buscar=null) {
         $app = JFactory::getApplication();

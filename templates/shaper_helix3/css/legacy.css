@@ -214,22 +214,22 @@ textarea:not(#app-site-container *),
 textarea {
   height: auto;
 }
-textarea:not(#app-site-container *),
-input[type="text"]:not(#app-site-container *),
-input[type="password"]:not(#app-site-container *),
-input[type="datetime"]:not(#app-site-container *),
-input[type="datetime-local"]:not(#app-site-container *),
-input[type="date"]:not(#app-site-container *),
-input[type="month"]:not(#app-site-container *),
-input[type="time"]:not(#app-site-container *),
-input[type="week"]:not(#app-site-container *),
-input[type="number"]:not(#app-site-container *),
-input[type="email"]:not(#app-site-container *),
-input[type="url"]:not(#app-site-container *),
-input[type="search"]:not(#app-site-container *),
-input[type="tel"]:not(#app-site-container *),
-input[type="color"]:not(#app-site-container *),
-.uneditable-input:not(#app-site-container *) {
+textarea:not(#app-site-container,.q-field__control *),
+input[type="text"]:not(#app-site-container,.q-field__control *),
+input[type="password"]:not(#app-site-container,.q-field__control *),
+input[type="datetime"]:not(#app-site-container,.q-field__control *),
+input[type="datetime-local"]:not(#app-site-container,.q-field__control *),
+input[type="date"]:not(#app-site-container,.q-field__control *),
+input[type="month"]:not(#app-site-container,.q-field__control *),
+input[type="time"]:not(#app-site-container,.q-field__control *),
+input[type="week"]:not(#app-site-container,.q-field__control *),
+input[type="number"]:not(#app-site-container,.q-field__control *),
+input[type="email"]:not(#app-site-container,.q-field__control *),
+input[type="url"]:not(#app-site-container,.q-field__control *),
+input[type="search"]:not(#app-site-container,.q-field__control *),
+input[type="tel"]:not(#app-site-container,.q-field__control *),
+input[type="color"]:not(#app-site-container,.q-field__control *),
+.uneditable-input:not(#app-site-container,.q-field__control *) {
   background-color: #fff;
   border: 1px solid #ccc;
   -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
@@ -240,22 +240,22 @@ input[type="color"]:not(#app-site-container *),
   -o-transition: border linear .2s, box-shadow linear .2s;
   transition: border linear .2s, box-shadow linear .2s;
 }
-textarea:focus,
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="datetime"]:focus,
-input[type="datetime-local"]:focus,
-input[type="date"]:focus,
-input[type="month"]:focus,
-input[type="time"]:focus,
-input[type="week"]:focus,
-input[type="number"]:focus,
-input[type="email"]:focus,
-input[type="url"]:focus,
-input[type="search"]:focus,
-input[type="tel"]:focus,
-input[type="color"]:focus,
-.uneditable-input:focus {
+textarea:focus:not(#app-site-container,.q-field__control *),
+input[type="text"]:focus:not(#app-site-container,.q-field__control *),
+input[type="password"]:focus:not(#app-site-container,.q-field__control *),
+input[type="datetime"]:focus:not(#app-site-container,.q-field__control *),
+input[type="datetime-local"]:focus:not(#app-site-container,.q-field__control *),
+input[type="date"]:focus:not(#app-site-container,.q-field__control *),
+input[type="month"]:focus:not(#app-site-container,.q-field__control *),
+input[type="time"]:focus:not(#app-site-container,.q-field__control *),
+input[type="week"]:focus:not(#app-site-container,.q-field__control *),
+input[type="number"]:focus:not(#app-site-container,.q-field__control *),
+input[type="email"]:focus:not(#app-site-container,.q-field__control *),
+input[type="url"]:focus:not(#app-site-container,.q-field__control *),
+input[type="search"]:focus:not(#app-site-container,.q-field__control *),
+input[type="tel"]:focus:not(#app-site-container,.q-field__control *),
+input[type="color"]:focus:not(#app-site-container,.q-field__control *),
+.uneditable-input:focus:not(#app-site-container,.q-field__control *) {
   border-color: rgba(82,168,236,0.8);
   outline: 0;
   outline: thin dotted \9;
@@ -270,13 +270,13 @@ input[type="checkbox"] {
   margin-top: 1px \9;
   line-height: normal;
 }
-input[type="file"],
-input[type="image"],
-input[type="submit"],
-input[type="reset"],
-input[type="button"],
-input[type="radio"],
-input[type="checkbox"] {
+input[type="file"]:not(#app-site-container,.q-field__control *),
+input[type="image"]:not(#app-site-container,.q-field__control *),
+input[type="submit"]:not(#app-site-container,.q-field__control *),
+input[type="reset"]:not(#app-site-container,.q-field__control *),
+input[type="button"]:not(#app-site-container,.q-field__control *),
+input[type="radio"]:not(#app-site-container,.q-field__control *),
+input[type="checkbox"]:not(#app-site-container,.q-field__control *) {
   width: auto;
 }
 select,

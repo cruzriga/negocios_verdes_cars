@@ -310,7 +310,21 @@
 
       <q-page-container>
         <q-page padding>
-          <div class="q-pa-md">
+          <div v-if="propperfil.imgcarrusel" class="q-pa-md">
+            <q-carousel
+              swipeable
+              animated
+              v-model="slide"
+              thumbnails
+              infinite
+            >
+              <q-carousel-slide  v-for="(img , count) in propperfil.imgcarrusel" v-bind:key="count"  :name="count" :img-src="img.urldocumento" />
+              <!-- <q-carousel-slide :name="2" img-src="https://cdn.quasar.dev/img/parallax1.jpg" />
+              <q-carousel-slide :name="3" img-src="https://cdn.quasar.dev/img/parallax2.jpg" />
+              <q-carousel-slide :name="4" img-src="https://cdn.quasar.dev/img/quasar.jpg" /> -->
+            </q-carousel>
+          </div>
+          <div v-else class="q-pa-md">
             <q-carousel
               swipeable
               animated
@@ -348,7 +362,7 @@
                   </q-item-label >
                   <q-item-label lines = "1" >
                     <q-knob
-                      v-model="cump"
+                      v-model="propperfil.cumplimiento"
                       show-value
                       size="150px"
                       color="teal"
@@ -363,7 +377,7 @@
                   </q-item-label >
                   <q-item-label lines = "1" >
                     <q-knob
-                      v-model="adic"
+                      v-model="propperfil.adic"
                       show-value
                       size="150px"
                       color="teal"

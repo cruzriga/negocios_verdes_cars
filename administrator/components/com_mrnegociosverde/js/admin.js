@@ -2067,6 +2067,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'FormSite',
@@ -2148,30 +2152,20 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
+var imgref = [{
+  name: 'img1Carrusel',
+  imgurl: null
+}, {
+  name: 'img2Carrusel',
+  imgurl: null
+}, {
+  name: 'img3Carrusel',
+  imgurl: null
+}, {
+  name: 'img4Carrusel',
+  imgurl: null
+}];
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'PaginaImg',
   components: {
@@ -2179,41 +2173,74 @@ __webpack_require__.r(__webpack_exports__);
   },
   props: {
     idempresa: {
-      type: Number // default: () => {}
+      type: String // default: () => {}
 
-    }
+    },
+    imgCarrusel: null
   },
   data: function data() {
     return {
-      tab: 'img1',
+      imgref: imgref,
+      tab: 'img1Carrusel',
       dialog: false,
-      maximizedToggle: true
+      maximizedToggle: true,
+      url: null
     };
   },
-  methods: {
-    upload: function upload(carrusel) {
-      var _this = this;
+  created: function created() {},
+  beforeMount: function beforeMount() {
+    var _this = this;
 
-      // console.log(this.$refs[carrusel].croppa)
+    // imgCarrusel
+    // console.log(this.imgCarrusel)
+    if (this.imgCarrusel) {
+      this.imgCarrusel.forEach(function (element) {
+        // console.log(element)
+        var index = _this.imgref.map(function (item) {
+          return item.name;
+        }).indexOf(element.ref);
+
+        _this.imgref[index].imgurl = element.urldocumento;
+      }); // console.log(this.imgref);
+    } // this.imgref.forEach(([key, value]) => {
+    //     // var removeIndex = this.imgref.map(function(item) { return item.name; }).indexOf(file[0].lastModified);
+    //     console.log(key+' : '+value)
+    // })
+
+  },
+  methods: {
+    navigate: function navigate() {
+      this.$router.go(-1);
+    },
+    upload: function upload(carrusel) {
+      var _this2 = this;
+
+      // console.log(carrusel)
+      // console.log(this.$refs)
+      // console.log(this.$refs[carrusel][0].croppa)
       // return
       // console.log(carrusel)
-      if (!this.croppa.hasImage()) {
-        alert('No Imagen');
+      if (!this.$refs[carrusel][0].croppa.hasImage() || this.idempresa == null) {
+        this.$q.notify({
+          color: 'negative',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: 'Error ',
+          position: 'center'
+        });
         return;
       }
 
       var app = this;
-      this.$refs[carrusel].croppa.generateBlob(function (blob) {
-        console.log(blob);
-        return;
+      this.$refs[carrusel][0].croppa.generateBlob(function (blob) {
         var fd = new FormData();
-        fd.append('img', blob, carrusel + 'imgCarrusel,' + carrusel + 'imgCarrusel.jpg');
+        fd.append('img', blob, carrusel + ',' + carrusel + '.jpg');
         var obj = {
-          idempresa: _this.idempresa,
+          idempresa: _this2.idempresa,
           file: fd
-        };
-        console.log(obj);
-        return;
+        }; // console.log(carrusel,carrusel+'.jpg');
+        // return
+
         return new Promise(function (resolve) {
           app.$store.dispatch('formulario/GUARDAR_FILE', obj).then(function (resp) {
             // app.onReset()            
@@ -2236,8 +2263,8 @@ __webpack_require__.r(__webpack_exports__);
               });
             }
 
-            app.$store.commit('formulario/CARGANDO', false);
-            app.$router.go(-1);
+            app.$store.commit('formulario/CARGANDO', false); // app.$router.go(-1);
+
             resolve(resp);
           });
         });
@@ -2260,6 +2287,42 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _components_Modal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../components/Modal */ "./resources/admin/js/components/Modal.vue");
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2523,7 +2586,7 @@ __webpack_require__.r(__webpack_exports__);
       adic: 60,
       cump: 80,
       pagina: 0,
-      numlist: 15,
+      numlist: 50,
       labeladic: this.adic,
       labelcump: this.cump
     };
@@ -2542,6 +2605,45 @@ __webpack_require__.r(__webpack_exports__);
         numlist: this.$store.state.admin.empresas.data.numList
       };
       this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
+    },
+    updatevalues: function updatevalues(campo, value, idempresa) {
+      var _formu;
+
+      var formu = (_formu = {}, _defineProperty(_formu, campo, value), _defineProperty(_formu, "idempresa", idempresa), _formu);
+      var obj = {
+        formulario: formu,
+        productos: null,
+        documentos: null,
+        imagenlogo: null
+      }; // console.log(obj);
+      // return;
+
+      var app = this;
+      return new Promise(function (resolve) {
+        app.$store.dispatch('formulario/GUARDAR_FORMULARIO', obj).then(function (resp) {
+          if (!resp.ok) {
+            app.$q.notify({
+              color: 'negative',
+              textColor: 'white',
+              icon: 'cloud_done',
+              message: 'Error ',
+              position: 'center'
+            });
+          } else {
+            // console.log(submitResult);
+            app.$q.notify({
+              color: 'green-4',
+              textColor: 'white',
+              icon: 'cloud_done',
+              message: 'Formulario Enviado',
+              position: 'center'
+            });
+          }
+
+          app.$store.commit('formulario/CARGANDO', false);
+          resolve(resp);
+        });
+      });
     },
     onToggleChange: function onToggleChange(value, evt) {
       // console.log(value)
@@ -2602,7 +2704,8 @@ __webpack_require__.r(__webpack_exports__);
       this.$router.push({
         name: 'imgcarrusel',
         params: {
-          idempresa: idempresa.idempresa
+          idempresa: idempresa.idempresa,
+          imgCarrusel: idempresa.imgcarrusel
         }
       }); // this.$refs.modalimg.dialog=true
       // console.log(this.$refs.modalimg.dialog);
@@ -4684,7 +4787,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -55714,16 +55817,26 @@ var render = function() {
         "div",
         { attrs: { id: "app-site-container" } },
         [
-          _c("q-btn", {
-            staticClass: "q-px-xl q-py-xs",
-            staticStyle: { "margin-left": "15px" },
-            attrs: { size: "22px", color: "primary", label: "Atras" },
-            on: {
-              click: function($event) {
-                return _vm.navigate()
+          _c(
+            "q-btn",
+            {
+              staticStyle: { "margin-left": "15px" },
+              attrs: { outline: "", color: "primary" },
+              on: {
+                click: function($event) {
+                  return _vm.navigate()
+                }
               }
-            }
-          }),
+            },
+            [
+              _c("q-icon", {
+                attrs: { left: "", size: "4em", name: "arrow_back" }
+              }),
+              _vm._v(" "),
+              _c("div", [_vm._v("Atras")])
+            ],
+            1
+          ),
           _vm._v(" "),
           _c("FormularioNegocios", {
             attrs: { propformulario: _vm.prop, thisadminroute: this.$router }
@@ -55779,15 +55892,12 @@ var render = function() {
             expression: "tab"
           }
         },
-        [
-          _c("q-tab", { attrs: { name: "img1", label: "Imagen 1" } }),
-          _vm._v(" "),
-          _c("q-tab", { attrs: { name: "img2", label: "Imagen 2" } }),
-          _vm._v(" "),
-          _c("q-tab", { attrs: { name: "img3", label: "Imagen 3" } }),
-          _vm._v(" "),
-          _c("q-tab", { attrs: { name: "img4", label: "Imagen 4" } })
-        ],
+        _vm._l(_vm.imgref, function(img, count) {
+          return _c("q-tab", {
+            key: count,
+            attrs: { name: img.name, label: "Imagen " + [count + 1] }
+          })
+        }),
         1
       ),
       _vm._v(" "),
@@ -55805,11 +55915,31 @@ var render = function() {
             expression: "tab"
           }
         },
-        [
-          _c(
+        _vm._l(_vm.imgref, function(img, count) {
+          return _c(
             "q-tab-panel",
-            { attrs: { name: "img1" } },
+            { key: count, attrs: { name: img.name } },
             [
+              _c(
+                "q-btn",
+                {
+                  attrs: { outline: "", color: "primary" },
+                  on: {
+                    click: function($event) {
+                      return _vm.navigate()
+                    }
+                  }
+                },
+                [
+                  _c("q-icon", {
+                    attrs: { left: "", size: "3em", name: "arrow_back" }
+                  }),
+                  _vm._v(" "),
+                  _c("div", [_vm._v("Atras")])
+                ],
+                1
+              ),
+              _vm._v(" "),
               _c(
                 "q-btn",
                 {
@@ -55832,112 +55962,19 @@ var render = function() {
               ),
               _vm._v(" "),
               _c("Img", {
-                ref: "img1",
-                attrs: { moveimg: true, width: 700, height: 350 }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "q-tab-panel",
-            { attrs: { name: "img2" } },
-            [
-              _c(
-                "q-btn",
-                {
-                  staticStyle: { margin: "10px" },
-                  attrs: { outline: "", color: "primary" },
-                  on: {
-                    click: function($event) {
-                      return _vm.upload(_vm.tab)
-                    }
-                  }
-                },
-                [
-                  _c("q-icon", {
-                    attrs: { left: "", size: "3em", name: "publish" }
-                  }),
-                  _vm._v(" "),
-                  _c("div", [_vm._v("Subir Imagen")])
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c("Img", {
-                ref: "img2",
-                attrs: { moveimg: true, width: 700, height: 350 }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "q-tab-panel",
-            { attrs: { name: "img3" } },
-            [
-              _c(
-                "q-btn",
-                {
-                  staticStyle: { margin: "10px" },
-                  attrs: { outline: "", color: "primary" },
-                  on: {
-                    click: function($event) {
-                      return _vm.upload(_vm.tab)
-                    }
-                  }
-                },
-                [
-                  _c("q-icon", {
-                    attrs: { left: "", size: "3em", name: "publish" }
-                  }),
-                  _vm._v(" "),
-                  _c("div", [_vm._v("Subir Imagen")])
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c("Img", {
-                ref: "img3",
-                attrs: { moveimg: true, width: 700, height: 350 }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "q-tab-panel",
-            { attrs: { name: "img4" } },
-            [
-              _c(
-                "q-btn",
-                {
-                  staticStyle: { margin: "10px" },
-                  attrs: { outline: "", color: "primary" },
-                  on: {
-                    click: function($event) {
-                      return _vm.upload(_vm.tab)
-                    }
-                  }
-                },
-                [
-                  _c("q-icon", {
-                    attrs: { left: "", size: "3em", name: "publish" }
-                  }),
-                  _vm._v(" "),
-                  _c("div", [_vm._v("Subir Imagen")])
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c("Img", {
-                ref: "img4",
-                attrs: { moveimg: true, width: 700, height: 350 }
+                ref: img.name,
+                refInFor: true,
+                attrs: {
+                  urlImg: img.imgurl,
+                  moveimg: true,
+                  width: 700,
+                  height: 350
+                }
               })
             ],
             1
           )
-        ],
+        }),
         1
       )
     ],
@@ -56260,22 +56297,164 @@ var render = function() {
                               "q-item-label",
                               { attrs: { lines: "1" } },
                               [
-                                _c("q-knob", {
-                                  attrs: {
-                                    "show-value": "",
-                                    size: "50px",
-                                    color: "teal",
-                                    "track-color": "grey-3",
-                                    readonly: ""
-                                  },
-                                  model: {
-                                    value: _vm.cump,
-                                    callback: function($$v) {
-                                      _vm.cump = $$v
+                                _c(
+                                  "q-knob",
+                                  {
+                                    attrs: {
+                                      "show-value": "",
+                                      size: "50px",
+                                      color: "teal",
+                                      "track-color": "grey-3",
+                                      readonly: ""
                                     },
-                                    expression: "cump"
-                                  }
-                                })
+                                    model: {
+                                      value: empresa.cumplimiento,
+                                      callback: function($$v) {
+                                        _vm.$set(empresa, "cumplimiento", $$v)
+                                      },
+                                      expression: "empresa.cumplimiento"
+                                    }
+                                  },
+                                  [
+                                    _c("div", { staticClass: "q-pa-md" }, [
+                                      _c(
+                                        "div",
+                                        { staticClass: "cursor-pointer" },
+                                        [
+                                          _vm._v(
+                                            "\n                " +
+                                              _vm._s(empresa.cumplimiento) +
+                                              "\n                "
+                                          ),
+                                          _c("q-popup-edit", {
+                                            attrs: {
+                                              validate: function(val) {
+                                                return val > 0
+                                              }
+                                            },
+                                            scopedSlots: _vm._u(
+                                              [
+                                                {
+                                                  key: "default",
+                                                  fn: function(ref) {
+                                                    var initialValue =
+                                                      ref.initialValue
+                                                    var value = ref.value
+                                                    var emitValue =
+                                                      ref.emitValue
+                                                    var validate = ref.validate
+                                                    var set = ref.set
+                                                    var cancel = ref.cancel
+                                                    return [
+                                                      _c("q-input", {
+                                                        attrs: {
+                                                          autofocus: "",
+                                                          dense: "",
+                                                          value:
+                                                            empresa.cumplimiento
+                                                        },
+                                                        on: {
+                                                          input: emitValue
+                                                        },
+                                                        scopedSlots: _vm._u(
+                                                          [
+                                                            {
+                                                              key: "after",
+                                                              fn: function() {
+                                                                return [
+                                                                  _c("q-btn", {
+                                                                    attrs: {
+                                                                      flat: "",
+                                                                      dense: "",
+                                                                      color:
+                                                                        "negative",
+                                                                      icon:
+                                                                        "cancel"
+                                                                    },
+                                                                    on: {
+                                                                      click: function(
+                                                                        $event
+                                                                      ) {
+                                                                        $event.stopPropagation()
+                                                                        return cancel(
+                                                                          $event
+                                                                        )
+                                                                      }
+                                                                    }
+                                                                  }),
+                                                                  _vm._v(" "),
+                                                                  _c("q-btn", {
+                                                                    attrs: {
+                                                                      flat: "",
+                                                                      dense: "",
+                                                                      color:
+                                                                        "positive",
+                                                                      icon:
+                                                                        "check_circle",
+                                                                      disable:
+                                                                        validate(
+                                                                          value
+                                                                        ) ===
+                                                                          false ||
+                                                                        initialValue ===
+                                                                          value
+                                                                    },
+                                                                    on: {
+                                                                      click: [
+                                                                        function(
+                                                                          $event
+                                                                        ) {
+                                                                          return _vm.updatevalues(
+                                                                            "cumplimiento",
+                                                                            empresa.cumplimiento,
+                                                                            empresa.idempresa
+                                                                          )
+                                                                        },
+                                                                        function(
+                                                                          $event
+                                                                        ) {
+                                                                          $event.stopPropagation()
+                                                                          return set(
+                                                                            $event
+                                                                          )
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  })
+                                                                ]
+                                                              },
+                                                              proxy: true
+                                                            }
+                                                          ],
+                                                          null,
+                                                          true
+                                                        )
+                                                      })
+                                                    ]
+                                                  }
+                                                }
+                                              ],
+                                              null,
+                                              true
+                                            ),
+                                            model: {
+                                              value: empresa.cumplimiento,
+                                              callback: function($$v) {
+                                                _vm.$set(
+                                                  empresa,
+                                                  "cumplimiento",
+                                                  $$v
+                                                )
+                                              },
+                                              expression: "empresa.cumplimiento"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ])
+                                  ]
+                                )
                               ],
                               1
                             )
@@ -56313,79 +56492,146 @@ var render = function() {
                                       readonly: ""
                                     },
                                     model: {
-                                      value: _vm.adic,
+                                      value: empresa.adic,
                                       callback: function($$v) {
-                                        _vm.adic = $$v
+                                        _vm.$set(empresa, "adic", $$v)
                                       },
-                                      expression: "adic"
+                                      expression: "empresa.adic"
                                     }
                                   },
                                   [
-                                    _c(
-                                      "div",
-                                      { staticClass: "cursor-pointer" },
-                                      [
-                                        _vm._v(
-                                          "\n              " +
-                                            _vm._s(_vm.adic) +
-                                            "\n              "
-                                        ),
-                                        _c(
-                                          "q-popup-edit",
-                                          {
+                                    _c("div", { staticClass: "q-pa-md" }, [
+                                      _c(
+                                        "div",
+                                        { staticClass: "cursor-pointer" },
+                                        [
+                                          _vm._v(
+                                            "\n                " +
+                                              _vm._s(empresa.adic) +
+                                              "\n                "
+                                          ),
+                                          _c("q-popup-edit", {
                                             attrs: {
-                                              "content-class": "bg text"
-                                            },
-                                            model: {
-                                              value: _vm.labeladic,
-                                              callback: function($$v) {
-                                                _vm.labeladic = $$v
-                                              },
-                                              expression: "labeladic"
-                                            }
-                                          },
-                                          [
-                                            _c("q-input", {
-                                              attrs: {
-                                                dark: "",
-                                                color: "white",
-                                                dense: "",
-                                                autofocus: "",
-                                                counter: ""
-                                              },
-                                              scopedSlots: _vm._u(
-                                                [
-                                                  {
-                                                    key: "append",
-                                                    fn: function() {
-                                                      return [
-                                                        _c("q-icon", {
-                                                          attrs: {
-                                                            name: "edit"
-                                                          }
-                                                        })
-                                                      ]
-                                                    },
-                                                    proxy: true
-                                                  }
-                                                ],
-                                                null,
-                                                true
-                                              ),
-                                              model: {
-                                                value: _vm.labeladic,
-                                                callback: function($$v) {
-                                                  _vm.labeladic = $$v
-                                                },
-                                                expression: "labeladic"
+                                              validate: function(val) {
+                                                return val > 1
                                               }
-                                            })
-                                          ],
-                                          1
-                                        )
-                                      ],
-                                      1
-                                    )
+                                            },
+                                            scopedSlots: _vm._u(
+                                              [
+                                                {
+                                                  key: "default",
+                                                  fn: function(ref) {
+                                                    var initialValue =
+                                                      ref.initialValue
+                                                    var value = ref.value
+                                                    var emitValue =
+                                                      ref.emitValue
+                                                    var validate = ref.validate
+                                                    var set = ref.set
+                                                    var cancel = ref.cancel
+                                                    return [
+                                                      _c("q-input", {
+                                                        attrs: {
+                                                          autofocus: "",
+                                                          dense: "",
+                                                          value: empresa.adic
+                                                        },
+                                                        on: {
+                                                          input: emitValue
+                                                        },
+                                                        scopedSlots: _vm._u(
+                                                          [
+                                                            {
+                                                              key: "after",
+                                                              fn: function() {
+                                                                return [
+                                                                  _c("q-btn", {
+                                                                    attrs: {
+                                                                      flat: "",
+                                                                      dense: "",
+                                                                      color:
+                                                                        "negative",
+                                                                      icon:
+                                                                        "cancel"
+                                                                    },
+                                                                    on: {
+                                                                      click: function(
+                                                                        $event
+                                                                      ) {
+                                                                        $event.stopPropagation()
+                                                                        return cancel(
+                                                                          $event
+                                                                        )
+                                                                      }
+                                                                    }
+                                                                  }),
+                                                                  _vm._v(" "),
+                                                                  _c("q-btn", {
+                                                                    attrs: {
+                                                                      flat: "",
+                                                                      dense: "",
+                                                                      color:
+                                                                        "positive",
+                                                                      icon:
+                                                                        "check_circle",
+                                                                      disable:
+                                                                        validate(
+                                                                          value
+                                                                        ) ===
+                                                                          false ||
+                                                                        initialValue ===
+                                                                          value
+                                                                    },
+                                                                    on: {
+                                                                      click: [
+                                                                        function(
+                                                                          $event
+                                                                        ) {
+                                                                          return _vm.updatevalues(
+                                                                            "adic",
+                                                                            empresa.adic,
+                                                                            empresa.idempresa
+                                                                          )
+                                                                        },
+                                                                        function(
+                                                                          $event
+                                                                        ) {
+                                                                          $event.stopPropagation()
+                                                                          return set(
+                                                                            $event
+                                                                          )
+                                                                        }
+                                                                      ]
+                                                                    }
+                                                                  })
+                                                                ]
+                                                              },
+                                                              proxy: true
+                                                            }
+                                                          ],
+                                                          null,
+                                                          true
+                                                        )
+                                                      })
+                                                    ]
+                                                  }
+                                                }
+                                              ],
+                                              null,
+                                              true
+                                            ),
+                                            model: {
+                                              value: empresa.adic,
+                                              callback: function($$v) {
+                                                _vm.$set(empresa, "adic", $$v)
+                                              },
+                                              expression: "empresa.adic"
+                                            }
+                                          })
+                                        ],
+                                        1
+                                      )
+                                    ])
                                   ]
                                 )
                               ],
