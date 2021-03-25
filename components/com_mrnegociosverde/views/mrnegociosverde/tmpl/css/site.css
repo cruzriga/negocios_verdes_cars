@@ -12284,6 +12284,17 @@ body.body--dark {
 .perfilempresa {
   justify-content: center;
 }
+.perfilempresa .q-item {
+  min-height: 0px;
+}
+.perfilempresa .q-item.q-item-type.row {
+  padding: 0;
+}
+.perfilempresa .q-item.q-item-type.row .q-item__section.column.icono {
+  padding: 0;
+  min-width: 17px;
+  height: 14 !important;
+}
 .perfilempresa .col .icono {
   padding: 0;
   min-width: 30px;
@@ -12294,4 +12305,5 @@ body.body--dark {
 .perfilempresa .col .titulo {
   font-weight: bold;
   font-size: 15px;
+  height: 14;
 }

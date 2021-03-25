@@ -5,6 +5,7 @@ import categorias from "./pages/categorias";
 import archivos from "./pages/archivos";
 
 import formulario from "./pages/formulario";
+import imgcarrusel from "./pages/imagenesCarrusel";
 
 Vue.use(VueRouter);
 
@@ -48,6 +49,16 @@ const router = new VueRouter(
             },
             {
                 path: '/formulario', name: 'formulario', component: formulario, props:true,
+                children: [
+                    /* {
+                     path: '/',
+                     component: Business,
+                     name: 'main'
+                     },*/
+                ]
+            },
+            {
+                path: '/imgcarrusel', name: 'imgcarrusel', component: imgcarrusel, props:true,
                 children: [
                     /* {
                      path: '/',

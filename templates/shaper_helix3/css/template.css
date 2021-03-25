@@ -53,8 +53,8 @@ textarea.form-control {
   content: attr(data-icon);
   speak: none;
 }
-[class^="icon-"],
-[class*=" icon-"] {
+[class^="icon-"]:not(#app-site-container *),
+[class*=" icon-"]:not(#app-site-container *) {
   display: inline-block;
   width: 14px;
   height: 14px;

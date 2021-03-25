@@ -8,16 +8,20 @@
         placeholder="Seleccione Imagen"
         canvas-color="#eeeeee"
         :placeholder-font-size="19"
-        :show-remove-button="true"
-        remove-button-color="black"
         :show-loading="true"
         :loading-size="50"
-        :disable-drag-and-drop="true"
-        accept=".jpeg,.png">
+        :disable-drag-and-drop="false"
+        :disable-drag-to-move="moveimg!=true?false:moveimg"
+        accept=".jpeg,.png"
+        initial-size="cover"
+        initial-position="center"
+        :show-remove-button="true"
+        remove-button-color="black"
+        :remove-button-size="40">
         <img crossOrigin="anonymous" :src="urlImg!=null?url:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'" slot="initial">
     </croppa>
     <!-- :initial-image="urlImg!=null?urlImg:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'"-->
-    <input color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal">
+    <input v-if="!moveimg" color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal">
     <!-- <q-slider @input ="onSliderChange" v-model="sliderVal" :min="sliderMin" :max="sliderMax" step="0.001"/> -->
     <!-- <button @click="croppa.zoomIn()">zoom in</button>
     <button @click="croppa.zoomOut()">zoom out</button> -->
@@ -32,10 +36,13 @@ export default {
             type: String
         },
         width: {
-            type: String
+            type: Number
         },
         height: {
-            type: String
+            type: Number
+        },
+        moveimg: {
+            type: Boolean
         }
     },
     data() {

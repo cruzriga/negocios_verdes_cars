@@ -88,7 +88,18 @@
                   color="teal"
                   track-color="grey-3"
                   readonly
-              />
+              >
+              <div class="cursor-pointer" >
+                {{ adic }}
+                <q-popup-edit v-model="labeladic" content-class="bg text">
+                  <q-input dark color="white" v-model="labeladic" dense autofocus counter>
+                    <template v-slot:append>
+                      <q-icon name="edit" />
+                    </template>
+                  </q-input>
+                </q-popup-edit>
+              </div>
+              </q-knob>
             </q-item-label>
           </q-item-section>
 
@@ -103,18 +114,32 @@
             </q-item-label>
           </q-item-section>
 
-          <q-item-section side style="align-items: center;">
+          <!-- <q-item-section side style="align-items: center;">
             <q-item-label lines = "1" >            
                 <q-icon  @click="openFormulario(empresa)" name="edit" class="text-primary" style="font-size: 32px;" />
             </q-item-label>
-          </q-item-section>
+          </q-item-section> -->
 
-          <q-item-section top side>
+          <!-- <q-item-section top side>
             <div class = "text-grey-8 q-gutter-xs">
               <q-btn v-if="false" class = "gt-xs" size = "12px" flat dense round icon = "delete"/>
               <q-btn v-if="false" class = "gt-xs" size = "12px" flat dense round icon = "mode"/>
               <q-btn size = "12px" flat dense round icon = "more_vert"/>
             </div>
+          </q-item-section> -->
+          <q-item-section top side>
+            <q-btn class="more_vert" ound flat icon="more_vert">
+              <q-menu auto-close :offset="[110, 0]">
+                <q-list style="min-width: 150px">
+                  <q-item clickable @click="openFormulario(empresa)">
+                    <q-item-section>Editar</q-item-section>
+                  </q-item>
+                  <q-item clickable @click="openModalImg(empresa)">
+                    <q-item-section>Insertar Imagen</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
           </q-item-section>
         </q-item>
       </div>
@@ -215,12 +240,15 @@
     <q-inner-loading :showing="this.$store.state.admin.cargando">
       <q-spinner-hourglass size="5.5em" color="green" />
     </q-inner-loading>
+    <ModalImg ref="modalimg"/>
   </q-page>
 </template>
 
 <script>
+import ModalImg from './../components/Modal'
 export default {
   name: 'Negocios',
+  components:{ ModalImg },
   data(){
     return {
       debug: false,
@@ -232,7 +260,9 @@ export default {
       adic: 60,
       cump : 80,
       pagina:0,
-      numlist: 15
+      numlist: 15,
+      labeladic:this.adic,
+      labelcump:this.cump
     }
   },
   beforeMount () {
@@ -300,6 +330,11 @@ export default {
     },
     openFormulario (empresa){
       this.$router.push({name: 'formulario', params: {prop:empresa}});
+    },
+    openModalImg(idempresa){
+      this.$router.push({name: 'imgcarrusel', params: {idempresa:idempresa.idempresa}});
+      // this.$refs.modalimg.dialog=true
+      // console.log(this.$refs.modalimg.dialog);
     }
   }
 }

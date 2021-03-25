@@ -6233,8 +6233,8 @@ div.modal.jviewport-width100 {
 	content: attr(data-icon);
 	speak: none;
 }
-[class^="icon-"],
-[class*=" icon-"] {
+[class^="icon-"]:not(#app-admin-container *),
+[class*=" icon-"]:not(#app-admin-container *) {
 	display: inline-block;
 	width: 14px;
 	height: 14px;

@@ -40,6 +40,24 @@
 }
 .perfilempresa{
   justify-content: center;
+  .q-item{
+    min-height: 0px;
+    &.q-item-type{
+      &.row{
+        padding: 0;
+        .q-item__section {
+          &.column {
+            &.icono{
+              padding: 0;
+              min-width: 17px;
+              height: 14 !important;
+            }
+          }
+        }
+      }
+    }
+  }
+  
   // align-items: center;
   .col{
     .icono{
@@ -52,6 +70,7 @@
     .titulo{
       font-weight: bold;
       font-size: 15px;
+      height: 14;
     }
   }
 

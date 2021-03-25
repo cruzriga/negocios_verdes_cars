@@ -2008,6 +2008,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'EmpresaAvatar',
   props: {
@@ -2015,10 +2019,13 @@ __webpack_require__.r(__webpack_exports__);
       type: String
     },
     width: {
-      type: String
+      type: Number
     },
     height: {
-      type: String
+      type: Number
+    },
+    moveimg: {
+      type: Boolean
     }
   },
   data: function data() {
@@ -3623,6 +3630,266 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Perfil',
   props: {
@@ -3632,6 +3899,10 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
+      slide: 1,
+      autoplay: true,
+      adic: 60,
+      cump: 80,
       idEmpresa: 0,
       drawer: false
     };
@@ -55157,12 +55428,16 @@ var render = function() {
             placeholder: "Seleccione Imagen",
             "canvas-color": "#eeeeee",
             "placeholder-font-size": 19,
-            "show-remove-button": true,
-            "remove-button-color": "black",
             "show-loading": true,
             "loading-size": 50,
-            "disable-drag-and-drop": true,
-            accept: ".jpeg,.png"
+            "disable-drag-and-drop": false,
+            "disable-drag-to-move": _vm.moveimg != true ? false : _vm.moveimg,
+            accept: ".jpeg,.png",
+            "initial-size": "cover",
+            "initial-position": "center",
+            "show-remove-button": true,
+            "remove-button-color": "black",
+            "remove-button-size": 40
           },
           model: {
             value: _vm.croppa,
@@ -55187,30 +55462,32 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      _c("input", {
-        directives: [
-          {
-            name: "model",
-            rawName: "v-model",
-            value: _vm.sliderVal,
-            expression: "sliderVal"
-          }
-        ],
-        attrs: {
-          color: "primary",
-          type: "range",
-          min: _vm.sliderMin,
-          max: _vm.sliderMax,
-          step: ".001"
-        },
-        domProps: { value: _vm.sliderVal },
-        on: {
-          input: _vm.onSliderChange,
-          __r: function($event) {
-            _vm.sliderVal = $event.target.value
-          }
-        }
-      })
+      !_vm.moveimg
+        ? _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.sliderVal,
+                expression: "sliderVal"
+              }
+            ],
+            attrs: {
+              color: "primary",
+              type: "range",
+              min: _vm.sliderMin,
+              max: _vm.sliderMax,
+              step: ".001"
+            },
+            domProps: { value: _vm.sliderVal },
+            on: {
+              input: _vm.onSliderChange,
+              __r: function($event) {
+                _vm.sliderVal = $event.target.value
+              }
+            }
+          })
+        : _vm._e()
     ],
     1
   )
@@ -57243,26 +57520,48 @@ var render = function() {
         [
           _c(
             "q-header",
-            { staticClass: "bg-white text-primary" },
+            {
+              staticClass: "bg-white text-primary",
+              staticStyle: { "padding-bottom": "12px", "padding-top": "12px" }
+            },
             [
               _c(
                 "q-toolbar",
                 [
                   _c(
                     "q-toolbar-title",
-                    { staticClass: "text-center", attrs: { size: "20px" } },
+                    {
+                      staticStyle: {
+                        "padding-left": "14px",
+                        color: "#000000",
+                        "font-weight": "bolder",
+                        "font-size": "30px",
+                        height: "29px"
+                      },
+                      attrs: { size: "30px" }
+                    },
                     [_vm._v(_vm._s(_vm.propperfil.nombreempresa))]
                   ),
                   _vm._v(" "),
-                  _c("q-icon", {
-                    staticStyle: { "font-size": "3em" },
-                    attrs: { name: "arrow_back" },
-                    on: {
-                      click: function($event) {
-                        return _vm.navigate()
+                  _c(
+                    "q-btn",
+                    {
+                      attrs: { outline: "", color: "primary" },
+                      on: {
+                        click: function($event) {
+                          return _vm.navigate()
+                        }
                       }
-                    }
-                  })
+                    },
+                    [
+                      _c("q-icon", {
+                        attrs: { left: "", size: "3em", name: "arrow_back" }
+                      }),
+                      _vm._v(" "),
+                      _c("div", [_vm._v("Atras")])
+                    ],
+                    1
+                  )
                 ],
                 1
               )
@@ -57293,249 +57592,559 @@ var render = function() {
                   }
                 },
                 [
-                  _c("q-list", { attrs: { padding: "" } }, [
-                    _c("div", { staticClass: "column perfilempresa" }, [
+                  _c(
+                    "q-list",
+                    { attrs: { padding: "" } },
+                    [
                       _c(
-                        "div",
-                        { staticClass: "col" },
+                        "q-list",
                         [
                           _c(
                             "q-item",
                             [
                               _c(
                                 "q-item-section",
-                                { staticClass: "icono", attrs: { avatar: "" } },
-                                [_c("q-icon", { attrs: { name: "face" } })],
-                                1
-                              ),
-                              _vm._v(" "),
-                              _c("q-item-section", { staticClass: "titulo" }, [
-                                _vm._v("Representante Legal")
-                              ])
-                            ],
-                            1
-                          )
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "col" }, [
-                        _c("p", [
-                          _vm._v(_vm._s(_vm.propperfil.representantelegal))
-                        ])
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "column perfilempresa" }, [
-                      _c(
-                        "div",
-                        { staticClass: "col" },
-                        [
-                          _c(
-                            "q-item",
-                            [
-                              _c(
-                                "q-item-section",
-                                { staticClass: "icono", attrs: { avatar: "" } },
-                                [_c("q-icon", { attrs: { name: "call" } })],
-                                1
-                              ),
-                              _vm._v(" "),
-                              _c("q-item-section", { staticClass: "titulo" }, [
-                                _vm._v("Telefono")
-                              ])
-                            ],
-                            1
-                          )
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "col" }, [
-                        _c("p", [_vm._v(_vm._s(_vm.propperfil.telefono))])
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "column perfilempresa" }, [
-                      _c(
-                        "div",
-                        { staticClass: "col" },
-                        [
-                          _c(
-                            "q-item",
-                            [
-                              _c(
-                                "q-item-section",
-                                { staticClass: "icono", attrs: { avatar: "" } },
-                                [_c("q-icon", { attrs: { name: "explore" } })],
-                                1
-                              ),
-                              _vm._v(" "),
-                              _c("q-item-section", { staticClass: "titulo" }, [
-                                _vm._v("Municipio")
-                              ])
-                            ],
-                            1
-                          )
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "col" }, [
-                        _c("p", [_vm._v(_vm._s(_vm.propperfil.municipio))])
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "column perfilempresa" }, [
-                      _c(
-                        "div",
-                        { staticClass: "col" },
-                        [
-                          _c(
-                            "q-item",
-                            [
-                              _c(
-                                "q-item-section",
-                                { staticClass: "icono", attrs: { avatar: "" } },
+                                { staticClass: "perfilempresa" },
                                 [
-                                  _c("q-icon", {
-                                    attrs: { name: "location_on" }
-                                  })
+                                  _c("q-item-label", [
+                                    _vm._v(
+                                      _vm._s(_vm.propperfil.representantelegal)
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { caption: "" } },
+                                    [
+                                      _c(
+                                        "q-item",
+                                        [
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "icono",
+                                              staticStyle: { height: "14px" },
+                                              attrs: { avatar: "" }
+                                            },
+                                            [
+                                              _c("q-icon", {
+                                                staticStyle: {
+                                                  "font-size": "14px"
+                                                },
+                                                attrs: { name: "face" }
+                                              })
+                                            ],
+                                            1
+                                          ),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "titulo",
+                                              staticStyle: { height: "14px" }
+                                            },
+                                            [_vm._v("Representante Legal")]
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
                                 ],
                                 1
-                              ),
-                              _vm._v(" "),
-                              _c("q-item-section", { staticClass: "titulo" }, [
-                                _vm._v("Direccion")
-                              ])
+                              )
                             ],
                             1
-                          )
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "col" }, [
-                        _c("p", [_vm._v(_vm._s(_vm.propperfil.direccion))])
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "column perfilempresa" }, [
-                      _c(
-                        "div",
-                        { staticClass: "col" },
-                        [
+                          ),
+                          _vm._v(" "),
+                          _c("q-separator", {
+                            attrs: { spaced: "", inset: "" }
+                          }),
+                          _vm._v(" "),
                           _c(
                             "q-item",
                             [
                               _c(
                                 "q-item-section",
-                                { staticClass: "icono", attrs: { avatar: "" } },
-                                [_c("q-icon", { attrs: { name: "mail" } })],
+                                { staticClass: "perfilempresa" },
+                                [
+                                  _c("q-item-label", [
+                                    _vm._v(_vm._s(_vm.propperfil.telefono))
+                                  ]),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { caption: "" } },
+                                    [
+                                      _c(
+                                        "q-item",
+                                        [
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "icono",
+                                              staticStyle: { height: "14px" },
+                                              attrs: { avatar: "" }
+                                            },
+                                            [
+                                              _c("q-icon", {
+                                                staticStyle: {
+                                                  "font-size": "14px"
+                                                },
+                                                attrs: { name: "call" }
+                                              })
+                                            ],
+                                            1
+                                          ),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "titulo",
+                                              staticStyle: { height: "14px" }
+                                            },
+                                            [_vm._v("Telefono")]
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
                                 1
-                              ),
-                              _vm._v(" "),
-                              _c("q-item-section", { staticClass: "titulo" }, [
-                                _vm._v("Email")
-                              ])
+                              )
                             ],
                             1
-                          )
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c("div", { staticClass: "col" }, [
-                        _c("p", [_vm._v(_vm._s(_vm.propperfil.email))])
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "row perfilempresa" }, [
-                      _c(
-                        "div",
-                        {
-                          staticClass: "col",
-                          staticStyle: {
-                            display: "flex",
-                            "justify-content": "center",
-                            "align-items": "center"
-                          }
-                        },
-                        [
-                          _c("q-icon", {
-                            staticStyle: { "font-size": "2em" },
-                            attrs: {
-                              name: "img:./../media/iconssvg/gorjeo.svg"
-                            }
-                          })
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        {
-                          staticClass: "col",
-                          staticStyle: {
-                            display: "flex",
-                            "justify-content": "center",
-                            "align-items": "center"
-                          }
-                        },
-                        [
-                          _c("q-icon", {
-                            staticStyle: { "font-size": "2em" },
-                            attrs: {
-                              name: "img:./../media/iconssvg/facebook.svg"
-                            }
-                          })
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        {
-                          staticClass: "col",
-                          staticStyle: {
-                            display: "flex",
-                            "justify-content": "center",
-                            "align-items": "center"
-                          }
-                        },
-                        [
-                          _c("q-icon", {
-                            staticStyle: { "font-size": "2em" },
-                            attrs: {
-                              name: "img:./../media/iconssvg/instagram.svg"
-                            }
-                          })
-                        ],
-                        1
-                      ),
-                      _vm._v(" "),
-                      _c(
-                        "div",
-                        {
-                          staticClass: "col",
-                          staticStyle: {
-                            display: "flex",
-                            "justify-content": "center",
-                            "align-items": "center"
-                          }
-                        },
-                        [
-                          _c("q-icon", {
-                            staticStyle: { "font-size": "2em" },
-                            attrs: {
-                              name: "img:./../media/iconssvg/youtube.svg"
-                            }
+                          ),
+                          _vm._v(" "),
+                          _c("q-separator", {
+                            attrs: { spaced: "", inset: "" }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "q-item",
+                            [
+                              _c(
+                                "q-item-section",
+                                { staticClass: "perfilempresa" },
+                                [
+                                  _c("q-item-label", [
+                                    _vm._v(_vm._s(_vm.propperfil.municipio))
+                                  ]),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { caption: "" } },
+                                    [
+                                      _c(
+                                        "q-item",
+                                        [
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "icono",
+                                              staticStyle: { height: "14px" },
+                                              attrs: { avatar: "" }
+                                            },
+                                            [
+                                              _c("q-icon", {
+                                                staticStyle: {
+                                                  "font-size": "14px"
+                                                },
+                                                attrs: { name: "explore" }
+                                              })
+                                            ],
+                                            1
+                                          ),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "titulo",
+                                              staticStyle: { height: "14px" }
+                                            },
+                                            [_vm._v("Municipio")]
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c("q-separator", {
+                            attrs: { spaced: "", inset: "" }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "q-item",
+                            [
+                              _c(
+                                "q-item-section",
+                                { staticClass: "perfilempresa" },
+                                [
+                                  _c("q-item-label", [
+                                    _vm._v(_vm._s(_vm.propperfil.direccion))
+                                  ]),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { caption: "" } },
+                                    [
+                                      _c(
+                                        "q-item",
+                                        [
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "icono",
+                                              staticStyle: { height: "14px" },
+                                              attrs: { avatar: "" }
+                                            },
+                                            [
+                                              _c("q-icon", {
+                                                staticStyle: {
+                                                  "font-size": "14px"
+                                                },
+                                                attrs: { name: "location_on" }
+                                              })
+                                            ],
+                                            1
+                                          ),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "titulo",
+                                              staticStyle: { height: "14px" }
+                                            },
+                                            [_vm._v("Direccion")]
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c("q-separator", {
+                            attrs: { spaced: "", inset: "" }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "q-item",
+                            [
+                              _c(
+                                "q-item-section",
+                                { staticClass: "perfilempresa" },
+                                [
+                                  _c("q-item-label", [
+                                    _vm._v(_vm._s(_vm.propperfil.email))
+                                  ]),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item-label",
+                                    { attrs: { caption: "" } },
+                                    [
+                                      _c(
+                                        "q-item",
+                                        [
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "icono",
+                                              staticStyle: { height: "14px" },
+                                              attrs: { avatar: "" }
+                                            },
+                                            [
+                                              _c("q-icon", {
+                                                staticStyle: {
+                                                  "font-size": "14px"
+                                                },
+                                                attrs: { name: "mail" }
+                                              })
+                                            ],
+                                            1
+                                          ),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-section",
+                                            {
+                                              staticClass: "titulo",
+                                              staticStyle: { height: "14px" }
+                                            },
+                                            [_vm._v("Email")]
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _vm.propperfil.twitter
+                            ? _c(
+                                "div",
+                                [
+                                  _c("q-separator", {
+                                    attrs: { spaced: "", inset: "" }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item",
+                                    [
+                                      _c(
+                                        "q-item-section",
+                                        { staticClass: "perfilempresa" },
+                                        [
+                                          _c("q-item-label", [
+                                            _vm._v(
+                                              _vm._s(_vm.propperfil.twitter)
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-label",
+                                            { attrs: { caption: "" } },
+                                            [
+                                              _c(
+                                                "q-item",
+                                                [
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "icono",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      },
+                                                      attrs: { avatar: "" }
+                                                    },
+                                                    [
+                                                      _c("q-icon", {
+                                                        staticStyle: {
+                                                          "font-size": "14px"
+                                                        },
+                                                        attrs: {
+                                                          name:
+                                                            "img:./../media/iconssvg/gorjeo.svg"
+                                                        }
+                                                      })
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "titulo",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      }
+                                                    },
+                                                    [_vm._v("Twitter")]
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.propperfil.facebook
+                            ? _c(
+                                "div",
+                                [
+                                  _c("q-separator", {
+                                    attrs: { spaced: "", inset: "" }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item",
+                                    [
+                                      _c(
+                                        "q-item-section",
+                                        { staticClass: "perfilempresa" },
+                                        [
+                                          _c("q-item-label", [
+                                            _vm._v(
+                                              _vm._s(_vm.propperfil.facebook)
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-label",
+                                            { attrs: { caption: "" } },
+                                            [
+                                              _c(
+                                                "q-item",
+                                                [
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "icono",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      },
+                                                      attrs: { avatar: "" }
+                                                    },
+                                                    [
+                                                      _c("q-icon", {
+                                                        staticStyle: {
+                                                          "font-size": "14px"
+                                                        },
+                                                        attrs: {
+                                                          name:
+                                                            "img:./../media/iconssvg/facebook.svg"
+                                                        }
+                                                      })
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "titulo",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      }
+                                                    },
+                                                    [_vm._v("Facebook")]
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _vm.propperfil.instagram
+                            ? _c(
+                                "div",
+                                [
+                                  _c("q-separator", {
+                                    attrs: { spaced: "", inset: "" }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item",
+                                    [
+                                      _c(
+                                        "q-item-section",
+                                        { staticClass: "perfilempresa" },
+                                        [
+                                          _c("q-item-label", [
+                                            _vm._v(
+                                              _vm._s(_vm.propperfil.instagram)
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-label",
+                                            { attrs: { caption: "" } },
+                                            [
+                                              _c(
+                                                "q-item",
+                                                [
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "icono",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      },
+                                                      attrs: { avatar: "" }
+                                                    },
+                                                    [
+                                                      _c("q-icon", {
+                                                        staticStyle: {
+                                                          "font-size": "14px"
+                                                        },
+                                                        attrs: {
+                                                          name:
+                                                            "img:./../media/iconssvg/instagram.svg"
+                                                        }
+                                                      })
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "titulo",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      }
+                                                    },
+                                                    [_vm._v("Instagram")]
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            : _vm._e(),
+                          _vm._v(" "),
+                          _c("q-separator", {
+                            attrs: { spaced: "", inset: "" }
                           })
                         ],
                         1
                       )
-                    ])
-                  ])
+                    ],
+                    1
+                  )
                 ],
                 1
               ),
@@ -57552,55 +58161,271 @@ var render = function() {
           _c(
             "q-page-container",
             [
-              _c("q-page", { attrs: { padding: "" } }, [
-                _c("p", [
-                  _vm._v(
-                    "\r\n            " +
-                      _vm._s(_vm.propperfil.descripcion) +
-                      "\r\n          "
-                  )
-                ]),
-                _vm._v(" "),
-                _c(
-                  "div",
-                  { staticClass: "q-pa-md" },
-                  [
-                    _c("q-markup-table", { attrs: { separator: "cell" } }, [
-                      _c("thead", [
-                        _c("tr", [
-                          _c("th", { staticClass: "text-left" }, [
-                            _vm._v("Producto")
-                          ]),
+              _c(
+                "q-page",
+                { attrs: { padding: "" } },
+                [
+                  _c(
+                    "div",
+                    { staticClass: "q-pa-md" },
+                    [
+                      _c(
+                        "q-carousel",
+                        {
+                          attrs: {
+                            swipeable: "",
+                            animated: "",
+                            thumbnails: "",
+                            infinite: ""
+                          },
+                          model: {
+                            value: _vm.slide,
+                            callback: function($$v) {
+                              _vm.slide = $$v
+                            },
+                            expression: "slide"
+                          }
+                        },
+                        [
+                          _c("q-carousel-slide", {
+                            attrs: {
+                              name: 1,
+                              "img-src":
+                                "https://cdn.quasar.dev/img/mountains.jpg"
+                            }
+                          }),
                           _vm._v(" "),
-                          _c("th", { staticClass: "text-left" }, [
-                            _vm._v("Descripcion")
-                          ])
-                        ])
+                          _c("q-carousel-slide", {
+                            attrs: {
+                              name: 2,
+                              "img-src":
+                                "https://cdn.quasar.dev/img/parallax1.jpg"
+                            }
+                          }),
+                          _vm._v(" "),
+                          _c("q-carousel-slide", {
+                            attrs: {
+                              name: 3,
+                              "img-src":
+                                "https://cdn.quasar.dev/img/parallax2.jpg"
+                            }
+                          }),
+                          _vm._v(" "),
+                          _c("q-carousel-slide", {
+                            attrs: {
+                              name: 4,
+                              "img-src": "https://cdn.quasar.dev/img/quasar.jpg"
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c("p", [
+                    _vm._v(
+                      "\r\n            " +
+                        _vm._s(_vm.propperfil.descripcion) +
+                        "\r\n          "
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "row" }, [
+                    _c("div", { staticClass: "col-6" }, [
+                      _c("div", { staticClass: "q-video" }, [
+                        _c("iframe", {
+                          attrs: {
+                            width: "400",
+                            height: "250",
+                            src:
+                              "https://www.youtube.com/embed/rfD-UKuod18?rel=0",
+                            frameborder: "0",
+                            allowfullscreen: ""
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      {
+                        staticClass: "col-6",
+                        staticStyle: {
+                          padding: "16px",
+                          "justify-content": "center",
+                          display: "flex"
+                        }
+                      },
+                      [
+                        _c(
+                          "div",
+                          {
+                            staticClass: "row",
+                            staticStyle: { "padding-left": "16px" }
+                          },
+                          [
+                            _c(
+                              "q-item-section",
+                              {
+                                staticStyle: { "align-items": "center" },
+                                attrs: { side: "", top: "" }
+                              },
+                              [
+                                _c("q-item-label", { attrs: { lines: "1" } }, [
+                                  _c(
+                                    "span",
+                                    {
+                                      staticClass: "q-mt-xs text-weight-bold "
+                                    },
+                                    [_vm._v("Cump")]
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c(
+                                  "q-item-label",
+                                  { attrs: { lines: "1" } },
+                                  [
+                                    _c("q-knob", {
+                                      attrs: {
+                                        "show-value": "",
+                                        size: "150px",
+                                        color: "teal",
+                                        "track-color": "grey-3",
+                                        readonly: ""
+                                      },
+                                      model: {
+                                        value: _vm.cump,
+                                        callback: function($$v) {
+                                          _vm.cump = $$v
+                                        },
+                                        expression: "cump"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "q-item-section",
+                              {
+                                staticStyle: { "align-items": "center" },
+                                attrs: { side: "", top: "" }
+                              },
+                              [
+                                _c("q-item-label", { attrs: { lines: "1" } }, [
+                                  _c(
+                                    "span",
+                                    {
+                                      staticClass: "q-mt-xs text-weight-bold "
+                                    },
+                                    [_vm._v("Adic")]
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c(
+                                  "q-item-label",
+                                  { attrs: { lines: "1" } },
+                                  [
+                                    _c("q-knob", {
+                                      attrs: {
+                                        "show-value": "",
+                                        size: "150px",
+                                        color: "teal",
+                                        "track-color": "grey-3",
+                                        readonly: ""
+                                      },
+                                      model: {
+                                        value: _vm.adic,
+                                        callback: function($$v) {
+                                          _vm.adic = $$v
+                                        },
+                                        expression: "adic"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
+                          ],
+                          1
+                        )
+                      ]
+                    )
+                  ]),
+                  _vm._v(" "),
+                  _c(
+                    "q-list",
+                    { attrs: { bordered: "", padding: "" } },
+                    [
+                      _c("q-item-label", { attrs: { header: "" } }, [
+                        _vm._v("Productos")
                       ]),
                       _vm._v(" "),
-                      _c(
-                        "tbody",
-                        _vm._l(_vm.propperfil.productos, function(
-                          producto,
-                          count
-                        ) {
-                          return _c("tr", { key: count }, [
-                            _c("td", { staticClass: "text-left" }, [
-                              _vm._v(_vm._s(producto.nombre))
-                            ]),
+                      _c("q-separator", { attrs: { spaced: "" } }),
+                      _vm._v(" "),
+                      _vm._l(_vm.propperfil.productos, function(
+                        producto,
+                        count
+                      ) {
+                        return _c(
+                          "div",
+                          { key: count },
+                          [
+                            _c(
+                              "q-item",
+                              [
+                                _c(
+                                  "q-item-section",
+                                  [
+                                    _c("q-item-label", [
+                                      _vm._v(_vm._s(producto.nombre))
+                                    ]),
+                                    _vm._v(" "),
+                                    _c(
+                                      "q-item-label",
+                                      { attrs: { caption: "" } },
+                                      [_vm._v(_vm._s(producto.descripcion))]
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c(
+                                  "q-item-section",
+                                  { attrs: { side: "", top: "" } },
+                                  [
+                                    _c(
+                                      "q-item-label",
+                                      { attrs: { caption: "" } },
+                                      [_vm._v("5 min ago")]
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            ),
                             _vm._v(" "),
-                            _c("td", { staticClass: "text-left" }, [
-                              _vm._v(_vm._s(producto.descripcion))
-                            ])
-                          ])
-                        }),
-                        0
-                      )
-                    ])
-                  ],
-                  1
-                )
-              ])
+                            _vm.propperfil.productos.length != count + 1
+                              ? _c("q-separator", { attrs: { spaced: "" } })
+                              : _vm._e()
+                          ],
+                          1
+                        )
+                      })
+                    ],
+                    2
+                  )
+                ],
+                1
+              )
             ],
             1
           )

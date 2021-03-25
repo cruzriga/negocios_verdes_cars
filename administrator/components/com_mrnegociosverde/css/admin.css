@@ -12265,3 +12265,15 @@ body.body--dark {
   margin-left: 10px !important;
   margin-right: 10px !important;
 }
+
+.q-menu.q-position-engine .q-item.q-item-type.row {
+  margin-left: 0 !important;
+}
+
+.q-btn.q-btn-item.non-selectable .q-btn__wrapper.row {
+  margin-left: 0px !important;
+}
+
+.q-dialog.fullscreen .row {
+  margin-left: 0px !important;
+}

@@ -9,8 +9,8 @@
           </q-toolbar-title>
           <q-tabs>
             <q-route-tab to="/" icon="eco" name="Negocios" label="Negocios" />
-            <q-route-tab to="/categorias" icon="list" name="Categorias" label="Categorias" />
-            <q-route-tab to="/archivos" icon="attach_file" name="Archivos" label="Archivos" />
+            <!-- <q-route-tab to="/categorias" icon="list" name="Categorias" label="Categorias" />
+            <q-route-tab to="/archivos" icon="attach_file" name="Archivos" label="Archivos" /> -->
           </q-tabs>
         </q-toolbar>
 
