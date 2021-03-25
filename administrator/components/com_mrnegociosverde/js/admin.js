@@ -2498,77 +2498,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
@@ -4787,7 +4716,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -56174,8 +56103,10 @@ var render = function() {
                                     "q-mt-xs text-body2 text-weight-bold text-uppercase"
                                 },
                                 [_vm._v(_vm._s(empresa.nombreempresa))]
-                              ),
-                              _vm._v(" "),
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c("q-item-label", { attrs: { lines: "1" } }, [
                               _c(
                                 "span",
                                 { staticClass: "text-grey-8" },
@@ -56210,6 +56141,7 @@ var render = function() {
                               [
                                 _c(
                                   "div",
+                                  { staticClass: "q-pr-xs" },
                                   [
                                     _c("q-icon", { attrs: { name: "face" } }),
                                     _vm._v(
@@ -56223,32 +56155,47 @@ var render = function() {
                                 _vm._v(" "),
                                 _c(
                                   "div",
+                                  { staticClass: "q-pr-xs" },
                                   [
-                                    _vm._v("| "),
+                                    _vm._v("\n              | "),
                                     _c("q-icon", {
                                       attrs: { name: "gps_fixed" }
                                     }),
-                                    _vm._v(" " + _vm._s(empresa.municipio))
+                                    _vm._v(
+                                      " " +
+                                        _vm._s(empresa.municipio) +
+                                        "\n            "
+                                    )
                                   ],
                                   1
                                 ),
                                 _vm._v(" "),
                                 _c(
                                   "div",
+                                  { staticClass: "q-pr-xs" },
                                   [
-                                    _vm._v("| "),
+                                    _vm._v("\n              | "),
                                     _c("q-icon", { attrs: { name: "phone" } }),
-                                    _vm._v(" " + _vm._s(empresa.telefono))
+                                    _vm._v(
+                                      " " +
+                                        _vm._s(empresa.telefono) +
+                                        "\n            "
+                                    )
                                   ],
                                   1
                                 ),
                                 _vm._v(" "),
                                 _c(
                                   "div",
+                                  { staticClass: "q-pr-xs" },
                                   [
-                                    _vm._v("| "),
+                                    _vm._v("\n              | "),
                                     _c("q-icon", { attrs: { name: "mail" } }),
-                                    _vm._v(" " + _vm._s(empresa.email))
+                                    _vm._v(
+                                      " " +
+                                        _vm._s(empresa.email) +
+                                        "\n            "
+                                    )
                                   ],
                                   1
                                 )
@@ -56641,40 +56588,9 @@ var render = function() {
                           1
                         ),
                         _vm._v(" "),
-                        _c(
-                          "q-item-section",
-                          {
-                            staticStyle: { "align-items": "center" },
-                            attrs: { side: "", top: "" }
-                          },
-                          [
-                            _c("q-item-label", { attrs: { lines: "1" } }, [
-                              _c(
-                                "span",
-                                { staticClass: "q-mt-xs text-weight-bold " },
-                                [_vm._v("Interpretación")]
-                              )
-                            ]),
-                            _vm._v(" "),
-                            _c(
-                              "q-item-label",
-                              { attrs: { lines: "1" } },
-                              [
-                                _c(
-                                  "q-chip",
-                                  { staticClass: "text-uppercase" },
-                                  [
-                                    _vm._v(
-                                      "\n              AVANZADO\n            "
-                                    )
-                                  ]
-                                )
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        ),
+                         false
+                          ? 0
+                          : _vm._e(),
                         _vm._v(" "),
                         _c(
                           "q-item-section",
