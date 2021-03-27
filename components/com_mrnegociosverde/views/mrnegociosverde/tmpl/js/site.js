@@ -3427,11 +3427,28 @@ __webpack_require__.r(__webpack_exports__);
       };
       this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
     },
-    nextPage: function nextPage(n) {// let obj = {
-      //   pagina: this.$store.state.listado.ListaEmpresas.data.pagina+n,
-      //   numlist: this.$store.state.listado.ListaEmpresas.data.numList
-      // }
-      // this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
+    backPage: function backPage(n) {
+      var actual = this.$store.state.admin.empresas.data.pagina + 1;
+
+      if (actual != 1) {
+        var obj = {
+          pagina: this.$store.state.admin.empresas.data.pagina + n,
+          numlist: this.$store.state.admin.empresas.data.numList
+        };
+        this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
+      }
+    },
+    nextPage: function nextPage(n) {
+      var actual = this.$store.state.admin.empresas.data.pagina + 1;
+      var total = this.$store.state.admin.empresas.data.total;
+
+      if (actual != total) {
+        var obj = {
+          pagina: this.$store.state.admin.empresas.data.pagina + n,
+          numlist: this.$store.state.admin.empresas.data.numList
+        };
+        this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
+      }
     },
     navigate: function navigate() {
       this.$router.go(-1);
@@ -55382,48 +55399,32 @@ var render = function() {
   return _c(
     "div",
     [
-      _c(
-        "croppa",
-        {
-          attrs: {
-            width: _vm.width != null ? _vm.width : 250,
-            height: _vm.height != null ? _vm.height : 250,
-            placeholder: "Seleccione Imagen",
-            "canvas-color": "#eeeeee",
-            "placeholder-font-size": 19,
-            "show-loading": true,
-            "loading-size": 50,
-            "disable-drag-and-drop": false,
-            "disable-drag-to-move": _vm.moveimg != true ? false : _vm.moveimg,
-            accept: ".jpeg,.png",
-            "initial-size": "cover",
-            "initial-position": "center",
-            "show-remove-button": true,
-            "remove-button-color": "black",
-            "remove-button-size": 40
-          },
-          model: {
-            value: _vm.croppa,
-            callback: function($$v) {
-              _vm.croppa = $$v
-            },
-            expression: "croppa"
-          }
+      _c("croppa", {
+        attrs: {
+          width: _vm.width != null ? _vm.width : 250,
+          height: _vm.height != null ? _vm.height : 250,
+          placeholder: "Seleccione Imagen",
+          "canvas-color": "#eeeeee",
+          "placeholder-font-size": 19,
+          "show-loading": true,
+          "loading-size": 50,
+          "disable-drag-and-drop": false,
+          "disable-drag-to-move": _vm.moveimg != true ? false : _vm.moveimg,
+          accept: ".jpeg,.png",
+          "initial-size": "cover",
+          "initial-position": "center",
+          "show-remove-button": true,
+          "remove-button-color": "black",
+          "remove-button-size": 40
         },
-        [
-          _c("img", {
-            attrs: {
-              slot: "initial",
-              crossOrigin: "anonymous",
-              src:
-                _vm.urlImg != null
-                  ? _vm.url
-                  : "https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
-            },
-            slot: "initial"
-          })
-        ]
-      ),
+        model: {
+          value: _vm.croppa,
+          callback: function($$v) {
+            _vm.croppa = $$v
+          },
+          expression: "croppa"
+        }
+      }),
       _vm._v(" "),
       !_vm.moveimg
         ? _c("input", {
@@ -57397,7 +57398,7 @@ var render = function() {
                     },
                     on: {
                       click: function($event) {
-                        return _vm.nextPage(-1)
+                        return _vm.backPage(-1)
                       }
                     }
                   }),

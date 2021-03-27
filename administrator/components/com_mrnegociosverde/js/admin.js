@@ -2504,12 +2504,28 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
   },
   methods: {
+    backPage: function backPage(n) {
+      var actual = this.$store.state.admin.empresas.data.pagina + 1;
+
+      if (actual != 1) {
+        var obj = {
+          pagina: this.$store.state.admin.empresas.data.pagina + n,
+          numlist: this.$store.state.admin.empresas.data.numList
+        };
+        this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
+      }
+    },
     nextPage: function nextPage(n) {
-      var obj = {
-        pagina: this.$store.state.admin.empresas.data.pagina + n,
-        numlist: this.$store.state.admin.empresas.data.numList
-      };
-      this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
+      var actual = this.$store.state.admin.empresas.data.pagina + 1;
+      var total = this.$store.state.admin.empresas.data.total;
+
+      if (actual != total) {
+        var obj = {
+          pagina: this.$store.state.admin.empresas.data.pagina + n,
+          numlist: this.$store.state.admin.empresas.data.numList
+        };
+        this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
+      }
     },
     updatevalues: function updatevalues(campo, value, idempresa) {
       var _formu;
@@ -4692,7 +4708,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -55993,7 +56009,7 @@ var render = function() {
                         },
                         on: {
                           click: function($event) {
-                            return _vm.nextPage(-1)
+                            return _vm.backPage(-1)
                           }
                         }
                       }),
@@ -56103,7 +56119,7 @@ var render = function() {
                                   _c("q-icon", {
                                     attrs: { name: "date_range" }
                                   }),
-                                  _vm._v(" 00 / 00 / 0000 00:00 MM")
+                                  _vm._v(_vm._s(empresa.fechaCreacion))
                                 ],
                                 1
                               )
@@ -56798,48 +56814,32 @@ var render = function() {
   return _c(
     "div",
     [
-      _c(
-        "croppa",
-        {
-          attrs: {
-            width: _vm.width != null ? _vm.width : 250,
-            height: _vm.height != null ? _vm.height : 250,
-            placeholder: "Seleccione Imagen",
-            "canvas-color": "#eeeeee",
-            "placeholder-font-size": 19,
-            "show-loading": true,
-            "loading-size": 50,
-            "disable-drag-and-drop": false,
-            "disable-drag-to-move": _vm.moveimg != true ? false : _vm.moveimg,
-            accept: ".jpeg,.png",
-            "initial-size": "cover",
-            "initial-position": "center",
-            "show-remove-button": true,
-            "remove-button-color": "black",
-            "remove-button-size": 40
-          },
-          model: {
-            value: _vm.croppa,
-            callback: function($$v) {
-              _vm.croppa = $$v
-            },
-            expression: "croppa"
-          }
+      _c("croppa", {
+        attrs: {
+          width: _vm.width != null ? _vm.width : 250,
+          height: _vm.height != null ? _vm.height : 250,
+          placeholder: "Seleccione Imagen",
+          "canvas-color": "#eeeeee",
+          "placeholder-font-size": 19,
+          "show-loading": true,
+          "loading-size": 50,
+          "disable-drag-and-drop": false,
+          "disable-drag-to-move": _vm.moveimg != true ? false : _vm.moveimg,
+          accept: ".jpeg,.png",
+          "initial-size": "cover",
+          "initial-position": "center",
+          "show-remove-button": true,
+          "remove-button-color": "black",
+          "remove-button-size": 40
         },
-        [
-          _c("img", {
-            attrs: {
-              slot: "initial",
-              crossOrigin: "anonymous",
-              src:
-                _vm.urlImg != null
-                  ? _vm.url
-                  : "https://zhanziyang.github.io/vue-croppa/static/500.jpeg"
-            },
-            slot: "initial"
-          })
-        ]
-      ),
+        model: {
+          value: _vm.croppa,
+          callback: function($$v) {
+            _vm.croppa = $$v
+          },
+          expression: "croppa"
+        }
+      }),
       _vm._v(" "),
       !_vm.moveimg
         ? _c("input", {

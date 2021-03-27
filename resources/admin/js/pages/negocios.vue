@@ -11,7 +11,7 @@
           </q-input>
           <q-space/>
           <div>
-             <span class="q-mr-md"> {{this.$store.state.admin.empresas.data.pagina+1}} - {{this.$store.state.admin.empresas.data.total}} </span> <q-btn @click="nextPage(-1)" flat round dense icon="arrow_back_ios" class=""/> <q-btn @click="nextPage(1)" flat round dense icon="arrow_forward_ios" />
+             <span class="q-mr-md"> {{this.$store.state.admin.empresas.data.pagina+1}} - {{this.$store.state.admin.empresas.data.total}} </span> <q-btn @click="backPage(-1)" flat round dense icon="arrow_back_ios" class=""/> <q-btn @click="nextPage(1)" flat round dense icon="arrow_forward_ios" />
           </div>
         </q-toolbar>
       </q-item-label>
@@ -37,7 +37,7 @@
             <q-item-label lines = "1">
               <span class = "q-mt-xs text-body2 text-weight-bold text-uppercase">{{empresa.nombreempresa}}</span>
             </q-item-label>
-            <q-item-label lines="1">  <span class = "text-grey-8"> <q-icon name="date_range"/> 00 / 00 / 0000 00:00 MM</span></q-item-label>
+            <q-item-label lines="1">  <span class = "text-grey-8"> <q-icon name="date_range"/>{{empresa.fechaCreacion}}</span></q-item-label>
             <q-item-label caption lines = "1">
               {{empresa.descripcion}}             
             </q-item-label>
@@ -226,12 +226,26 @@ export default {
     this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
   },
   methods: {
-    nextPage(n){
-      let obj = {
-        pagina: this.$store.state.admin.empresas.data.pagina+n,
-        numlist: this.$store.state.admin.empresas.data.numList
+    backPage(n){
+      let actual = this.$store.state.admin.empresas.data.pagina+1
+      if(actual!=1){
+        let obj = {
+          pagina: this.$store.state.admin.empresas.data.pagina+n,
+          numlist: this.$store.state.admin.empresas.data.numList
+        }
+        this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
       }
-      this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
+    },
+    nextPage(n){
+      let actual = this.$store.state.admin.empresas.data.pagina+1
+      let total = this.$store.state.admin.empresas.data.total
+      if(actual!=total){
+        let obj = {
+          pagina: this.$store.state.admin.empresas.data.pagina+n,
+          numlist: this.$store.state.admin.empresas.data.numList
+        }
+        this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
+      }
     },
     updatevalues(campo,value,idempresa){
         let formu = {

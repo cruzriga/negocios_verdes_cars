@@ -12,7 +12,7 @@
         </q-input>
         <q-space/>
         <div>
-            <span class="q-mr-md"> {{this.$store.state.listado.ListaEmpresas.data.pagina+1}} - {{this.$store.state.listado.ListaEmpresas.data.total}} </span> <q-btn @click="nextPage(-1)" flat round dense icon="arrow_back_ios" class=""/> <q-btn @click="nextPage(1)" flat round dense icon="arrow_forward_ios" />
+            <span class="q-mr-md"> {{this.$store.state.listado.ListaEmpresas.data.pagina+1}} - {{this.$store.state.listado.ListaEmpresas.data.total}} </span> <q-btn @click="backPage(-1)" flat round dense icon="arrow_back_ios" class=""/> <q-btn @click="nextPage(1)" flat round dense icon="arrow_forward_ios" />
         </div>
       </q-toolbar>
     </q-item-label>
@@ -61,12 +61,26 @@ export default {
       }
       this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
     },
+    backPage(n){
+      let actual = this.$store.state.admin.empresas.data.pagina+1
+      if(actual!=1){
+        let obj = {
+          pagina: this.$store.state.admin.empresas.data.pagina+n,
+          numlist: this.$store.state.admin.empresas.data.numList
+        }
+        this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
+      }
+    },
     nextPage(n){
-      // let obj = {
-      //   pagina: this.$store.state.listado.ListaEmpresas.data.pagina+n,
-      //   numlist: this.$store.state.listado.ListaEmpresas.data.numList
-      // }
-      // this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
+      let actual = this.$store.state.admin.empresas.data.pagina+1
+      let total = this.$store.state.admin.empresas.data.total
+      if(actual!=total){
+        let obj = {
+          pagina: this.$store.state.admin.empresas.data.pagina+n,
+          numlist: this.$store.state.admin.empresas.data.numList
+        }
+        this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
+      }
     },
     navigate() {
       this.$router.go(-1);
