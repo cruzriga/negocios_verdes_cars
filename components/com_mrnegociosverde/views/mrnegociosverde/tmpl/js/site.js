@@ -3773,6 +3773,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Perfil',
   props: {
@@ -3785,7 +3786,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     return {
       tab: 'mails',
       splitterModel: 250,
-      slide: 1,
+      slide: 0,
       autoplay: true,
       idEmpresa: 0,
       drawer: false,
@@ -58229,7 +58230,8 @@ var render = function() {
                                   swipeable: "",
                                   animated: "",
                                   thumbnails: "",
-                                  infinite: ""
+                                  infinite: "",
+                                  autoplay: _vm.autoplay
                                 },
                                 model: {
                                   value: _vm.slide,
@@ -58242,7 +58244,7 @@ var render = function() {
                               [
                                 _c("q-carousel-slide", {
                                   attrs: {
-                                    name: 1,
+                                    name: 0,
                                     "img-src":
                                       "https://cdn.quasar.dev/img/mountains.jpg"
                                   }
@@ -58250,7 +58252,7 @@ var render = function() {
                                 _vm._v(" "),
                                 _c("q-carousel-slide", {
                                   attrs: {
-                                    name: 2,
+                                    name: 1,
                                     "img-src":
                                       "https://cdn.quasar.dev/img/parallax1.jpg"
                                   }
@@ -58258,7 +58260,7 @@ var render = function() {
                                 _vm._v(" "),
                                 _c("q-carousel-slide", {
                                   attrs: {
-                                    name: 3,
+                                    name: 2,
                                     "img-src":
                                       "https://cdn.quasar.dev/img/parallax2.jpg"
                                   }
@@ -58266,7 +58268,7 @@ var render = function() {
                                 _vm._v(" "),
                                 _c("q-carousel-slide", {
                                   attrs: {
-                                    name: 4,
+                                    name: 3,
                                     "img-src":
                                       "https://cdn.quasar.dev/img/quasar.jpg"
                                   }

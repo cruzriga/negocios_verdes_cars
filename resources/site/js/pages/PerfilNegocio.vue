@@ -192,11 +192,12 @@
                 v-model="slide"
                 thumbnails
                 infinite
+                :autoplay="autoplay"
             >
-              <q-carousel-slide :name="1" img-src="https://cdn.quasar.dev/img/mountains.jpg" />
-              <q-carousel-slide :name="2" img-src="https://cdn.quasar.dev/img/parallax1.jpg" />
-              <q-carousel-slide :name="3" img-src="https://cdn.quasar.dev/img/parallax2.jpg" />
-              <q-carousel-slide :name="4" img-src="https://cdn.quasar.dev/img/quasar.jpg" />
+              <q-carousel-slide :name="0" img-src="https://cdn.quasar.dev/img/mountains.jpg" />
+              <q-carousel-slide :name="1" img-src="https://cdn.quasar.dev/img/parallax1.jpg" />
+              <q-carousel-slide :name="2" img-src="https://cdn.quasar.dev/img/parallax2.jpg" />
+              <q-carousel-slide :name="3" img-src="https://cdn.quasar.dev/img/quasar.jpg" />
             </q-carousel>
           </div>
           <p>
@@ -309,7 +310,7 @@ export default {
     return {
       tab              : 'mails',
       splitterModel    : 250,
-      slide            : 1,
+      slide            : 0,
       autoplay         : true,
       idEmpresa        : 0,
       drawer           : false,
