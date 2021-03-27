@@ -131,7 +131,7 @@ const store =
                     commit(EMPRESAS,resp.resp)
                     commit(CARGANDO,false)
                 }
-            },
+            }
         }
     };
 export default store

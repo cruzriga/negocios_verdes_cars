@@ -19,16 +19,16 @@
             <q-tab-panels v-model="tab" animated >
                 <q-tab-panel v-for="(img , count) in imgref" v-bind:key="count" :name="img.name">
                     <!-- <div class="text-h6">Imagen 1</div> -->
-                    <q-btn v-on:click="navigate()" outline color="primary" >
+                    <q-btn v-on:click="navigate()" outline color="primary" style="margin:10px">
                         <q-icon left size="3em" name="arrow_back" />
                         <div>Atras</div>
                     </q-btn>
-                    <q-btn v-on:click="upload(tab)" outline color="primary" style="margin:10px">
+                    <!-- <q-btn v-on:click="upload(tab)" outline color="primary" style="margin:10px">
                         <q-icon left size="3em" name="publish" />
                         <div>Subir Imagen</div>
-                    </q-btn>
+                    </q-btn> -->
                     <!-- {{idempresa}} -->
-                    <Img :ref="img.name" v-bind:urlImg="img.imgurl" v-bind:moveimg="true" v-bind:width="700" v-bind:height="350"/>
+                    <Img @removeimgFromComponentCroopa="removeimg(tab)" @newimgFromComponentCroopa="newimg(tab)" :ref="img.name" v-bind:urlImg="img.imgurl" v-bind:moveimg="true" v-bind:width="700" v-bind:height="350"/>
                 </q-tab-panel>
             </q-tab-panels>
         </q-card>
@@ -89,16 +89,68 @@ export default {
     }
   },
   methods: {
+    removeimg(carrusel){
+      if (carrusel!=null || this.idempresa != null) {
+        let obj = {
+          idempresa: this.idempresa,
+          ref     : carrusel
+        }
+        let app = this;
+        return new Promise((resolve) => {
+          app.$store.dispatch('admin/REMOVER_IMG_CARRUSEL', obj).then(function (resp) {
+            // app.onReset()
+            if (!resp.ok) {
+              app.$q.notify({
+                              color    : 'negative',
+                              textColor: 'white',
+                              icon     : 'cloud_done',
+                              message  : 'Error ',
+                              position : 'center'
+                            })
+            } else {
+              // console.log(submitResult);
+              app.$q.notify({
+                              color    : 'green-4',
+                              textColor: 'white',
+                              icon     : 'cloud_done',
+                              message  : 'Formulario Enviado',
+                              position : 'center'
+                            })
+            }
+            app.$store.commit('formulario/CARGANDO', false);           
+
+            resolve(resp)
+          })
+        })
+      }
+      this.$q.notify({
+          color    : 'negative',
+          textColor: 'white',
+          icon     : 'cloud_done',
+          message  : 'Error No Elimino',
+          position : 'center'
+        })
+    },
+    newimg(carrusel){
+      const interval = setInterval(() => {
+        if (this.$refs[carrusel][0].croppa.hasImage()) {
+          // this.loaddoc();          
+          this.upload(carrusel);
+          clearInterval(interval)
+        }
+      }, 500)
+    },
     navigate() {
       this.$router.go(-1);
     },
     upload(carrusel) {
+      // console.log(this.$refs[carrusel][0]);
       if (!this.$refs[carrusel][0].croppa.hasImage() || this.idempresa == null) {
         this.$q.notify({
                          color    : 'negative',
                          textColor: 'white',
                          icon     : 'cloud_done',
-                         message  : 'Error ',
+                         message  : 'Error No Img',
                          position : 'center'
                        })
         return

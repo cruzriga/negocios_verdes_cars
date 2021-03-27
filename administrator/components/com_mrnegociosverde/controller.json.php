@@ -137,4 +137,28 @@ class MrNegociosVerdeController extends JControllerLegacy {
             echo new JResponseJson($e);
         }
     }
+    public function removeImgCarrusel(Type $var = null)
+    {
+        $db = JFactory::getDbo();
+        $app = JFactory::getApplication(); 
+        $rawDataPost = $app->input->getArray($_POST);
+        $item = json_decode($rawDataPost['json']);
+        
+        $query = $db->getQuery(true);
+
+        // Fields to update.
+        $fields = array(
+            $db->quoteName('activo') . ' = 0'
+        );
+        $conditions = array(
+            $db->quoteName('idempresa') . ' = '.$db->quote($item->idempresa), 
+            $db->quoteName('ref') . ' = ' .$db->quote($item->ref)
+        );
+
+        $query->update($db->quoteName('#__negocios_v_documentos'))->set($fields)->where($conditions);
+        // print_r($query->__toString());
+        $db->setQuery($query);
+
+        $result = $db->execute();
+    }
 }

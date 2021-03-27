@@ -19,6 +19,8 @@
         :zoom-speed="10"
         remove-button-color="black"
         :remove-button-size="40"
+        @new-image="newimg"
+        @image-remove="removeimg"
         >
         <img v-if="urlImg!=null" crossOrigin="anonymous" :src="url" slot="initial">
     </croppa>
@@ -82,7 +84,13 @@ export default {
     },
     beforeMount() {
     },
-    methods: {
+    methods: {        
+        removeimg() {
+            this.$emit("removeimgFromComponentCroopa");
+        },
+        newimg() {
+            this.$emit("newimgFromComponentCroopa");
+        },
         onNewImage() {
             this.sliderVal = this.croppa.scaleRatio
             this.sliderMin = this.croppa.scaleRatio / 2

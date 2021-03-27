@@ -128,7 +128,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
                                 $result = $db->insertObject('#__negocios_v_documentos', $item); 
                             }else{
                                 $query = $db->getQuery(true);
-                                $query = 'UPDATE #__negocios_v_documentos SET urldocumento' . ' = "' .$item->urldocumento.'",'. 'size' . ' ='.$item->size.','. 'name' . ' ="'.$item->name.'",'. 'ext' . ' ="'.$item->ext.'" WHERE idempresa='.$item->idempresa.' and '.'ref="'.$item->ref.'"' ;
+                                $query = 'UPDATE #__negocios_v_documentos SET urldocumento' . ' = "' .$item->urldocumento.'",'. 'size' . ' ='.$item->size.','. 'name' . ' ="'.$item->name.'",'. 'ext' . ' ="'.$item->ext.'",'. 'activo' . ' =1 WHERE idempresa='.$item->idempresa.' and '.'ref="'.$item->ref.'"' ;
                                 $db->setQuery( $query );
                                 $result = $db->execute();
                             }

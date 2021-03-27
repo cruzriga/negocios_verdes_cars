@@ -2004,6 +2004,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'EmpresaAvatar',
   props: {
@@ -2048,6 +2050,12 @@ __webpack_require__.r(__webpack_exports__);
   },
   beforeMount: function beforeMount() {},
   methods: {
+    removeimg: function removeimg() {
+      this.$emit("removeimgFromComponentCroopa");
+    },
+    newimg: function newimg() {
+      this.$emit("newimgFromComponentCroopa");
+    },
     onNewImage: function onNewImage() {
       this.sliderVal = this.croppa.scaleRatio;
       this.sliderMin = this.croppa.scaleRatio / 2;
@@ -55420,6 +55428,7 @@ var render = function() {
             "remove-button-color": "black",
             "remove-button-size": 40
           },
+          on: { "new-image": _vm.newimg, "image-remove": _vm.removeimg },
           model: {
             value: _vm.croppa,
             callback: function($$v) {

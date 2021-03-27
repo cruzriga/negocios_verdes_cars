@@ -4,6 +4,7 @@ import { request } from './../util';
 
 Vue.use(Vuex);
 export const CARGAR_EMPRESAS = 'CARGAR_EMPRESAS'
+export const REMOVER_IMG_CARRUSEL = 'REMOVER_IMG_CARRUSEL'
 export const CAMBIAR_ESTADO_EMPRESA = 'CAMBIAR_ESTADO_EMPRESA'
 export const EMPRESAS = 'EMPRESAS'
 export const CARGANDO = 'CARGANDO'
@@ -51,7 +52,16 @@ const store =
                 if(resp.ok){
                     return resp;
                 }
+            },
+            async REMOVER_IMG_CARRUSEL ({ commit },datos){
+                commit(CARGANDO,true)
+                var datopost = 'json='+encodeURIComponent(JSON.stringify(datos));
+                let resp = await request('index.php?option=com_mrnegociosverde&task=removeImgCarrusel&format=json',datopost)
+                if(resp.ok){
+                    return resp;
+                }
             }
+            
         }
     };
 export default store

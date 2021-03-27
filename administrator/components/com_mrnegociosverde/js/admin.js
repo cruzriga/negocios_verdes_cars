@@ -2205,18 +2205,74 @@ var imgref = [{
     }
   },
   methods: {
+    removeimg: function removeimg(carrusel) {
+      if (carrusel != null || this.idempresa != null) {
+        var obj = {
+          idempresa: this.idempresa,
+          ref: carrusel
+        };
+        var app = this;
+        return new Promise(function (resolve) {
+          app.$store.dispatch('admin/REMOVER_IMG_CARRUSEL', obj).then(function (resp) {
+            // app.onReset()
+            if (!resp.ok) {
+              app.$q.notify({
+                color: 'negative',
+                textColor: 'white',
+                icon: 'cloud_done',
+                message: 'Error ',
+                position: 'center'
+              });
+            } else {
+              // console.log(submitResult);
+              app.$q.notify({
+                color: 'green-4',
+                textColor: 'white',
+                icon: 'cloud_done',
+                message: 'Formulario Enviado',
+                position: 'center'
+              });
+            }
+
+            app.$store.commit('formulario/CARGANDO', false);
+            resolve(resp);
+          });
+        });
+      }
+
+      this.$q.notify({
+        color: 'negative',
+        textColor: 'white',
+        icon: 'cloud_done',
+        message: 'Error No Elimino',
+        position: 'center'
+      });
+    },
+    newimg: function newimg(carrusel) {
+      var _this2 = this;
+
+      var interval = setInterval(function () {
+        if (_this2.$refs[carrusel][0].croppa.hasImage()) {
+          // this.loaddoc();          
+          _this2.upload(carrusel);
+
+          clearInterval(interval);
+        }
+      }, 500);
+    },
     navigate: function navigate() {
       this.$router.go(-1);
     },
     upload: function upload(carrusel) {
-      var _this2 = this;
+      var _this3 = this;
 
+      // console.log(this.$refs[carrusel][0]);
       if (!this.$refs[carrusel][0].croppa.hasImage() || this.idempresa == null) {
         this.$q.notify({
           color: 'negative',
           textColor: 'white',
           icon: 'cloud_done',
-          message: 'Error ',
+          message: 'Error No Img',
           position: 'center'
         });
         return;
@@ -2227,7 +2283,7 @@ var imgref = [{
         var fd = new FormData();
         fd.append('img', blob, carrusel + ',' + carrusel + '.jpg');
         var obj = {
-          idempresa: _this2.idempresa,
+          idempresa: _this3.idempresa,
           file: fd
         }; // console.log(carrusel,carrusel+'.jpg');
         // return
@@ -2687,6 +2743,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'EmpresaAvatar',
   props: {
@@ -2731,6 +2789,12 @@ __webpack_require__.r(__webpack_exports__);
   },
   beforeMount: function beforeMount() {},
   methods: {
+    removeimg: function removeimg() {
+      this.$emit("removeimgFromComponentCroopa");
+    },
+    newimg: function newimg() {
+      this.$emit("newimgFromComponentCroopa");
+    },
     onNewImage: function onNewImage() {
       this.sliderVal = this.croppa.scaleRatio;
       this.sliderMin = this.croppa.scaleRatio / 2;
@@ -4103,6 +4167,7 @@ router.afterEach(function (to, from) {});
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "CARGAR_EMPRESAS": () => (/* binding */ CARGAR_EMPRESAS),
+/* harmony export */   "REMOVER_IMG_CARRUSEL": () => (/* binding */ REMOVER_IMG_CARRUSEL),
 /* harmony export */   "CAMBIAR_ESTADO_EMPRESA": () => (/* binding */ CAMBIAR_ESTADO_EMPRESA),
 /* harmony export */   "EMPRESAS": () => (/* binding */ EMPRESAS),
 /* harmony export */   "CARGANDO": () => (/* binding */ CARGANDO),
@@ -4128,6 +4193,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.default);
 var CARGAR_EMPRESAS = 'CARGAR_EMPRESAS';
+var REMOVER_IMG_CARRUSEL = 'REMOVER_IMG_CARRUSEL';
 var CAMBIAR_ESTADO_EMPRESA = 'CAMBIAR_ESTADO_EMPRESA';
 var EMPRESAS = 'EMPRESAS';
 var CARGANDO = 'CARGANDO';
@@ -4211,6 +4277,37 @@ var store = {
             }
           }
         }, _callee2);
+      }))();
+    },
+    REMOVER_IMG_CARRUSEL: function REMOVER_IMG_CARRUSEL(_ref3, datos) {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
+        var commit, datopost, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
+          while (1) {
+            switch (_context3.prev = _context3.next) {
+              case 0:
+                commit = _ref3.commit;
+                commit(CARGANDO, true);
+                datopost = 'json=' + encodeURIComponent(JSON.stringify(datos));
+                _context3.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=removeImgCarrusel&format=json', datopost);
+
+              case 5:
+                resp = _context3.sent;
+
+                if (!resp.ok) {
+                  _context3.next = 8;
+                  break;
+                }
+
+                return _context3.abrupt("return", resp);
+
+              case 8:
+              case "end":
+                return _context3.stop();
+            }
+          }
+        }, _callee3);
       }))();
     }
   }
@@ -55847,6 +55944,7 @@ var render = function() {
               _c(
                 "q-btn",
                 {
+                  staticStyle: { margin: "10px" },
                   attrs: { outline: "", color: "primary" },
                   on: {
                     click: function($event) {
@@ -55864,27 +55962,6 @@ var render = function() {
                 1
               ),
               _vm._v(" "),
-              _c(
-                "q-btn",
-                {
-                  staticStyle: { margin: "10px" },
-                  attrs: { outline: "", color: "primary" },
-                  on: {
-                    click: function($event) {
-                      return _vm.upload(_vm.tab)
-                    }
-                  }
-                },
-                [
-                  _c("q-icon", {
-                    attrs: { left: "", size: "3em", name: "publish" }
-                  }),
-                  _vm._v(" "),
-                  _c("div", [_vm._v("Subir Imagen")])
-                ],
-                1
-              ),
-              _vm._v(" "),
               _c("Img", {
                 ref: img.name,
                 refInFor: true,
@@ -55893,6 +55970,14 @@ var render = function() {
                   moveimg: true,
                   width: 700,
                   height: 350
+                },
+                on: {
+                  removeimgFromComponentCroopa: function($event) {
+                    return _vm.removeimg(_vm.tab)
+                  },
+                  newimgFromComponentCroopa: function($event) {
+                    return _vm.newimg(_vm.tab)
+                  }
                 }
               })
             ],
@@ -56838,6 +56923,7 @@ var render = function() {
             "remove-button-color": "black",
             "remove-button-size": 40
           },
+          on: { "new-image": _vm.newimg, "image-remove": _vm.removeimg },
           model: {
             value: _vm.croppa,
             callback: function($$v) {
