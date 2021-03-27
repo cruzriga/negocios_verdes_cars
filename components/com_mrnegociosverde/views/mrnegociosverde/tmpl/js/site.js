@@ -3751,6 +3751,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Perfil',
   props: {
@@ -55158,7 +55165,7 @@ var render = function() {
                       [
                         _c("q-img", {
                           attrs: {
-                            src: "/images/logo-negocios-verdes-header.png"
+                            src: "images/logo-negocios-verdes-header.png"
                           }
                         })
                       ],
@@ -57473,8 +57480,34 @@ var render = function() {
             fn: function() {
               return [
                 _c("q-img", {
-                  staticStyle: { height: "250px" },
-                  attrs: { src: _vm.propperfilmutable.imagenlogo, ratio: 1 }
+                  staticStyle: { height: "250px", "max-width": "250px" },
+                  attrs: { src: _vm.propperfilmutable.imagenlogo },
+                  scopedSlots: _vm._u([
+                    {
+                      key: "error",
+                      fn: function() {
+                        return [
+                          _c(
+                            "div",
+                            {
+                              staticClass:
+                                "absolute-full flex flex-center bg-white text-white"
+                            },
+                            [
+                              _c("q-img", {
+                                attrs: {
+                                  src:
+                                    "../images/logo-negocios-verdes-header.png"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      },
+                      proxy: true
+                    }
+                  ])
                 }),
                 _vm._v(" "),
                 _c(

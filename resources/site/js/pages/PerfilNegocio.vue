@@ -7,10 +7,17 @@
     >
 
       <template v-slot:before>
-        <q-img style="height: 250px"
-               :src="propperfilmutable.imagenlogo"
-               :ratio="1"
-        />
+        <q-img
+            :src="propperfilmutable.imagenlogo"
+            style="height: 250px; max-width: 250px"
+        >
+          <template v-slot:error>
+            <div class="absolute-full flex flex-center bg-white text-white">
+              <q-img src="../images/logo-negocios-verdes-header.png"/>
+            </div>
+          </template>
+        </q-img>
+
         <q-list padding>
           <q-list>
             <q-item>
