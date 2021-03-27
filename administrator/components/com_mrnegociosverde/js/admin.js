@@ -2150,8 +2150,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
 
 var imgref = [{
   name: 'img1Carrusel',
@@ -2191,8 +2189,6 @@ var imgref = [{
   beforeMount: function beforeMount() {
     var _this = this;
 
-    // imgCarrusel
-    // console.log(this.imgCarrusel)
     if (this.imgCarrusel) {
       this.imgCarrusel.forEach(function (element) {
         // console.log(element)
@@ -2201,12 +2197,8 @@ var imgref = [{
         }).indexOf(element.ref);
 
         _this.imgref[index].imgurl = element.urldocumento;
-      }); // console.log(this.imgref);
-    } // this.imgref.forEach(([key, value]) => {
-    //     // var removeIndex = this.imgref.map(function(item) { return item.name; }).indexOf(file[0].lastModified);
-    //     console.log(key+' : '+value)
-    // })
-
+      });
+    }
   },
   methods: {
     navigate: function navigate() {
@@ -2215,11 +2207,6 @@ var imgref = [{
     upload: function upload(carrusel) {
       var _this2 = this;
 
-      // console.log(carrusel)
-      // console.log(this.$refs)
-      // console.log(this.$refs[carrusel][0].croppa)
-      // return
-      // console.log(carrusel)
       if (!this.$refs[carrusel][0].croppa.hasImage() || this.idempresa == null) {
         this.$q.notify({
           color: 'negative',
@@ -2243,7 +2230,7 @@ var imgref = [{
 
         return new Promise(function (resolve) {
           app.$store.dispatch('formulario/GUARDAR_FILE', obj).then(function (resp) {
-            // app.onReset()            
+            // app.onReset()
             if (!resp.ok) {
               app.$q.notify({
                 color: 'negative',
@@ -2263,8 +2250,7 @@ var imgref = [{
               });
             }
 
-            app.$store.commit('formulario/CARGANDO', false); // app.$router.go(-1);
-
+            app.$store.commit('formulario/CARGANDO', false);
             resolve(resp);
           });
         });
@@ -55803,6 +55789,7 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "q-card",
+    { staticStyle: { width: "735px" } },
     [
       _c(
         "q-tabs",
