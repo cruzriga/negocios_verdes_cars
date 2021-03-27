@@ -1,12 +1,5 @@
 <template>
   <q-page >
-    <!-- <div> {{this.$store.state.admin.empresas.data[0]}}</div> -->
-    <!-- <div v-for="(empresa, count) in this.$store.state.admin.empresas.data" v-bind:key="count">
-      <div>{{counter}} : {{applicant}}</div>
-    </div>     -->
-    <!-- <div class="hello">
-        <button @click="openFormulario">F</button>
-    </div> -->
     <q-list bordered class="rounded-borders fit"  >
       <q-item-label  header>
         <q-toolbar class="text-primary" style="height: 50px">
@@ -27,21 +20,17 @@
         <!-- {{empresa}} -->
         <q-separator spaced/>
         <q-item>
-          <q-item-section avatar top>
-            <div>
-              <q-toggle
-                false-value="0"
-                true-value="1"
-                v-model="empresa.activo"
-                :key="empresa.idempresa"
-                :name="empresa.idempresa"
-                :ref="'activo'+empresa.idempresa"
-                color="green"
-                icon="check"
-                @input="onToggleChange"
-              />
-            </div>
-
+          <q-item-section avatar style="width: 90px;">
+            <q-img
+                :src="'../'+empresa.imagenlogo"
+                style="height: 80px;"
+            >
+              <template v-slot:error>
+                <div class="absolute-full flex flex-center bg-grey-6 text-white rounded-borders">
+                  <q-icon name="image" size="md"></q-icon>
+                </div>
+              </template>
+            </q-img>
           </q-item-section>
 
           <q-item-section top>
@@ -159,20 +148,19 @@
               </q-chip>
             </q-item-label>
           </q-item-section>
-
-          <!-- <q-item-section side style="align-items: center;">
-            <q-item-label lines = "1" >            
-                <q-icon  @click="openFormulario(empresa)" name="edit" class="text-primary" style="font-size: 32px;" />
-            </q-item-label>
-          </q-item-section> -->
-
-          <!-- <q-item-section top side>
-            <div class = "text-grey-8 q-gutter-xs">
-              <q-btn v-if="false" class = "gt-xs" size = "12px" flat dense round icon = "delete"/>
-              <q-btn v-if="false" class = "gt-xs" size = "12px" flat dense round icon = "mode"/>
-              <q-btn size = "12px" flat dense round icon = "more_vert"/>
-            </div>
-          </q-item-section> -->
+          <q-item-section top side>
+              <q-toggle
+                  false-value="0"
+                  true-value="1"
+                  v-model="empresa.activo"
+                  :key="empresa.idempresa"
+                  :name="empresa.idempresa"
+                  :ref="'activo'+empresa.idempresa"
+                  color="green"
+                  icon="check"
+                  @input="onToggleChange"
+              />
+          </q-item-section>
           <q-item-section top side>
             <q-btn class="more_vert" ound flat icon="more_vert">
               <q-menu auto-close :offset="[110, 0]">

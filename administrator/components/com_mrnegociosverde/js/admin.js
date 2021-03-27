@@ -2474,18 +2474,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
@@ -4704,7 +4692,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -56049,35 +56037,47 @@ var render = function() {
                       [
                         _c(
                           "q-item-section",
-                          { attrs: { avatar: "", top: "" } },
+                          {
+                            staticStyle: { width: "90px" },
+                            attrs: { avatar: "" }
+                          },
                           [
-                            _c(
-                              "div",
-                              [
-                                _c("q-toggle", {
-                                  key: empresa.idempresa,
-                                  ref: "activo" + empresa.idempresa,
-                                  refInFor: true,
-                                  attrs: {
-                                    "false-value": "0",
-                                    "true-value": "1",
-                                    name: empresa.idempresa,
-                                    color: "green",
-                                    icon: "check"
-                                  },
-                                  on: { input: _vm.onToggleChange },
-                                  model: {
-                                    value: empresa.activo,
-                                    callback: function($$v) {
-                                      _vm.$set(empresa, "activo", $$v)
+                            _c("q-img", {
+                              staticStyle: { height: "80px" },
+                              attrs: { src: "../" + empresa.imagenlogo },
+                              scopedSlots: _vm._u(
+                                [
+                                  {
+                                    key: "error",
+                                    fn: function() {
+                                      return [
+                                        _c(
+                                          "div",
+                                          {
+                                            staticClass:
+                                              "absolute-full flex flex-center bg-grey-6 text-white rounded-borders"
+                                          },
+                                          [
+                                            _c("q-icon", {
+                                              attrs: {
+                                                name: "image",
+                                                size: "md"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ]
                                     },
-                                    expression: "empresa.activo"
+                                    proxy: true
                                   }
-                                })
-                              ],
-                              1
-                            )
-                          ]
+                                ],
+                                null,
+                                true
+                              )
+                            })
+                          ],
+                          1
                         ),
                         _vm._v(" "),
                         _c(
@@ -56598,6 +56598,34 @@ var render = function() {
                          false
                           ? 0
                           : _vm._e(),
+                        _vm._v(" "),
+                        _c(
+                          "q-item-section",
+                          { attrs: { top: "", side: "" } },
+                          [
+                            _c("q-toggle", {
+                              key: empresa.idempresa,
+                              ref: "activo" + empresa.idempresa,
+                              refInFor: true,
+                              attrs: {
+                                "false-value": "0",
+                                "true-value": "1",
+                                name: empresa.idempresa,
+                                color: "green",
+                                icon: "check"
+                              },
+                              on: { input: _vm.onToggleChange },
+                              model: {
+                                value: empresa.activo,
+                                callback: function($$v) {
+                                  _vm.$set(empresa, "activo", $$v)
+                                },
+                                expression: "empresa.activo"
+                              }
+                            })
+                          ],
+                          1
+                        ),
                         _vm._v(" "),
                         _c(
                           "q-item-section",
