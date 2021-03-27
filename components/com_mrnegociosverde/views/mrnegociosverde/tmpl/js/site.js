@@ -1955,6 +1955,10 @@ __webpack_require__.r(__webpack_exports__);
       lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
     };
   },
+  created: function created() {
+    this.prop.cumplimiento = parseInt(this.prop.cumplimiento);
+    this.prop.adic = parseInt(this.prop.adic);
+  },
   methods: {
     openPerfil: function openPerfil(idEmpresa, empresa) {
       this.$router.push({
@@ -3428,7 +3432,8 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     buscar: function buscar() {
       var obj = {
-        buscar: this.search
+        buscar: this.search,
+        campo: 'e.nombreempresa'
       };
       this.$store.dispatch('listado/BUSCAR_EMPRESAS', obj);
     },
@@ -3464,6 +3469,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//
+//
 //
 //
 //
@@ -3907,26 +3922,91 @@ __webpack_require__.r(__webpack_exports__);
   name: 'Perfil',
   props: {
     propperfil: {
-      type: Object
+      type: Object,
+      "default": null
     }
   },
   data: function data() {
     return {
       slide: 1,
       autoplay: true,
-      adic: 60,
-      cump: 80,
       idEmpresa: 0,
-      drawer: false
+      drawer: false,
+      video_id: null,
+      propperfilmutable: null
     };
   },
   created: function created() {
     this.idEmpresa = this.$route.params.idEmpresa;
+    this.propperfilmutable = this.propperfil;
     console.log(this.propperfil);
+
+    if (this.propperfil == null) {
+      this.cargarempresa(this.idEmpresa);
+    } else {
+      this.video_id = this.propperfilmutable.linkvideo.split('v=')[1];
+      var ampersandPosition = this.video_id.indexOf('&');
+
+      if (ampersandPosition != -1 && this.propperfilmutable.linkvideo != null) {
+        this.video_id = this.video_id.substring(0, ampersandPosition);
+      } else {
+        this.video_id = 'rfD-UKuod18';
+      }
+
+      this.propperfilmutable.cumplimiento = parseInt(this.propperfilmutable.cumplimiento);
+      this.propperfilmutable.adic = parseInt(this.propperfilmutable.adic);
+    }
   },
+  beforeMount: function beforeMount() {},
   methods: {
+    cargarempresa: function cargarempresa(idempresa) {
+      var _this = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var ampersandPosition;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return _this.buscar(idempresa);
+
+              case 2:
+                _this.propperfilmutable = _context.sent;
+                _this.video_id = _this.propperfilmutable.linkvideo.split('v=')[1];
+                ampersandPosition = _this.video_id.indexOf('&');
+
+                if (ampersandPosition != -1 && _this.propperfilmutable.linkvideo != null) {
+                  _this.video_id = _this.video_id.substring(0, ampersandPosition);
+                } else {
+                  _this.video_id = 'rfD-UKuod18';
+                }
+
+                _this.propperfilmutable.cumplimiento = parseInt(_this.propperfilmutable.cumplimiento);
+                _this.propperfilmutable.adic = parseInt(_this.propperfilmutable.adic);
+                console.log(_this.propperfilmutable);
+                return _context.abrupt("return");
+
+              case 10:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
+    buscar: function buscar(idempresa) {
+      var obj = {
+        buscar: idempresa,
+        campo: 'e.idempresa'
+      };
+      return this.$store.dispatch('listado/BUSCAR_EMPRESAS', obj);
+    },
     navigate: function navigate() {
-      this.$router.go(-1);
+      // this.$router.go(-1);
+      this.$router.push({
+        path: '/'
+      });
     }
   }
 });
@@ -4481,8 +4561,8 @@ var store = {
 
               case 4:
                 resp = _context.sent;
-                console.log(resp);
 
+                // console.log(resp)
                 if (resp.ok) {
                   if (resp.resp != null && resp.resp != '') {
                     commit(EMPRESAS, resp.resp);
@@ -4491,7 +4571,7 @@ var store = {
                   commit(CARGANDO, false);
                 }
 
-              case 7:
+              case 6:
               case "end":
                 return _context.stop();
             }
@@ -4509,18 +4589,29 @@ var store = {
                 commit = _ref2.commit;
                 commit(CARGANDO, true);
                 _context2.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&buscar=' + datos.buscar);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo);
 
               case 4:
                 resp = _context2.sent;
 
-                // console.log(resp)
-                if (resp.ok) {
-                  commit(EMPRESAS, resp.resp);
-                  commit(CARGANDO, false);
+                if (!resp.ok) {
+                  _context2.next = 12;
+                  break;
                 }
 
-              case 6:
+                commit(CARGANDO, false);
+
+                if (!(datos.campo == 'e.idempresa')) {
+                  _context2.next = 11;
+                  break;
+                }
+
+                return _context2.abrupt("return", resp.resp.data.empresas[0]);
+
+              case 11:
+                commit(EMPRESAS, resp.resp);
+
+              case 12:
               case "end":
                 return _context2.stop();
             }
@@ -57555,962 +57646,1105 @@ var render = function() {
     "div",
     { staticClass: "q-pa-md" },
     [
-      _c(
-        "q-layout",
-        {
-          staticClass: "shadow-2 rounded-borders",
-          staticStyle: { height: "calc(100vh - 200px)" },
-          attrs: { view: "lHh Lpr lff", container: "" }
-        },
-        [
-          _c(
-            "q-header",
-            {
-              staticClass: "bg-white text-primary",
-              staticStyle: { "padding-bottom": "12px", "padding-top": "12px" }
-            },
+      _vm.propperfilmutable
+        ? _c(
+            "div",
             [
               _c(
-                "q-toolbar",
+                "q-layout",
+                {
+                  staticClass: "shadow-2 rounded-borders",
+                  staticStyle: { height: "calc(100vh - 200px)" },
+                  attrs: { view: "lHh Lpr lff", container: "" }
+                },
                 [
                   _c(
-                    "q-toolbar-title",
+                    "q-header",
                     {
+                      staticClass: "bg-white text-primary",
                       staticStyle: {
-                        "padding-left": "14px",
-                        color: "#000000",
-                        "font-weight": "bolder",
-                        "font-size": "30px",
-                        height: "29px"
-                      },
-                      attrs: { size: "30px" }
-                    },
-                    [_vm._v(_vm._s(_vm.propperfil.nombreempresa))]
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "q-btn",
-                    {
-                      attrs: { outline: "", color: "primary" },
-                      on: {
-                        click: function($event) {
-                          return _vm.navigate()
-                        }
+                        "padding-bottom": "12px",
+                        "padding-top": "12px"
                       }
                     },
                     [
-                      _c("q-icon", {
-                        attrs: { left: "", size: "3em", name: "arrow_back" }
-                      }),
-                      _vm._v(" "),
-                      _c("div", [_vm._v("Atras")])
-                    ],
-                    1
-                  )
-                ],
-                1
-              )
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "q-drawer",
-            {
-              attrs: { "show-if-above": "", width: 250, breakpoint: 400 },
-              model: {
-                value: _vm.drawer,
-                callback: function($$v) {
-                  _vm.drawer = $$v
-                },
-                expression: "drawer"
-              }
-            },
-            [
-              _c(
-                "q-scroll-area",
-                {
-                  staticStyle: {
-                    height: "calc(100% - 250px)",
-                    "margin-top": "250px",
-                    "border-right": "1px solid #ddd"
-                  }
-                },
-                [
-                  _c(
-                    "q-list",
-                    { attrs: { padding: "" } },
-                    [
                       _c(
-                        "q-list",
+                        "q-toolbar",
                         [
                           _c(
-                            "q-item",
-                            [
-                              _c(
-                                "q-item-section",
-                                { staticClass: "perfilempresa" },
-                                [
-                                  _c("q-item-label", [
-                                    _vm._v(
-                                      _vm._s(_vm.propperfil.representantelegal)
-                                    )
-                                  ]),
-                                  _vm._v(" "),
-                                  _c(
-                                    "q-item-label",
-                                    { attrs: { caption: "" } },
-                                    [
-                                      _c(
-                                        "q-item",
-                                        [
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "icono",
-                                              staticStyle: { height: "14px" },
-                                              attrs: { avatar: "" }
-                                            },
-                                            [
-                                              _c("q-icon", {
-                                                staticStyle: {
-                                                  "font-size": "14px"
-                                                },
-                                                attrs: { name: "face" }
-                                              })
-                                            ],
-                                            1
-                                          ),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "titulo",
-                                              staticStyle: { height: "14px" }
-                                            },
-                                            [_vm._v("Representante Legal")]
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              )
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _c("q-separator", {
-                            attrs: { spaced: "", inset: "" }
-                          }),
-                          _vm._v(" "),
-                          _c(
-                            "q-item",
-                            [
-                              _c(
-                                "q-item-section",
-                                { staticClass: "perfilempresa" },
-                                [
-                                  _c("q-item-label", [
-                                    _vm._v(_vm._s(_vm.propperfil.telefono))
-                                  ]),
-                                  _vm._v(" "),
-                                  _c(
-                                    "q-item-label",
-                                    { attrs: { caption: "" } },
-                                    [
-                                      _c(
-                                        "q-item",
-                                        [
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "icono",
-                                              staticStyle: { height: "14px" },
-                                              attrs: { avatar: "" }
-                                            },
-                                            [
-                                              _c("q-icon", {
-                                                staticStyle: {
-                                                  "font-size": "14px"
-                                                },
-                                                attrs: { name: "call" }
-                                              })
-                                            ],
-                                            1
-                                          ),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "titulo",
-                                              staticStyle: { height: "14px" }
-                                            },
-                                            [_vm._v("Telefono")]
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              )
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _c("q-separator", {
-                            attrs: { spaced: "", inset: "" }
-                          }),
-                          _vm._v(" "),
-                          _c(
-                            "q-item",
-                            [
-                              _c(
-                                "q-item-section",
-                                { staticClass: "perfilempresa" },
-                                [
-                                  _c("q-item-label", [
-                                    _vm._v(_vm._s(_vm.propperfil.municipio))
-                                  ]),
-                                  _vm._v(" "),
-                                  _c(
-                                    "q-item-label",
-                                    { attrs: { caption: "" } },
-                                    [
-                                      _c(
-                                        "q-item",
-                                        [
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "icono",
-                                              staticStyle: { height: "14px" },
-                                              attrs: { avatar: "" }
-                                            },
-                                            [
-                                              _c("q-icon", {
-                                                staticStyle: {
-                                                  "font-size": "14px"
-                                                },
-                                                attrs: { name: "explore" }
-                                              })
-                                            ],
-                                            1
-                                          ),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "titulo",
-                                              staticStyle: { height: "14px" }
-                                            },
-                                            [_vm._v("Municipio")]
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              )
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _c("q-separator", {
-                            attrs: { spaced: "", inset: "" }
-                          }),
-                          _vm._v(" "),
-                          _c(
-                            "q-item",
-                            [
-                              _c(
-                                "q-item-section",
-                                { staticClass: "perfilempresa" },
-                                [
-                                  _c("q-item-label", [
-                                    _vm._v(_vm._s(_vm.propperfil.direccion))
-                                  ]),
-                                  _vm._v(" "),
-                                  _c(
-                                    "q-item-label",
-                                    { attrs: { caption: "" } },
-                                    [
-                                      _c(
-                                        "q-item",
-                                        [
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "icono",
-                                              staticStyle: { height: "14px" },
-                                              attrs: { avatar: "" }
-                                            },
-                                            [
-                                              _c("q-icon", {
-                                                staticStyle: {
-                                                  "font-size": "14px"
-                                                },
-                                                attrs: { name: "location_on" }
-                                              })
-                                            ],
-                                            1
-                                          ),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "titulo",
-                                              staticStyle: { height: "14px" }
-                                            },
-                                            [_vm._v("Direccion")]
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              )
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _c("q-separator", {
-                            attrs: { spaced: "", inset: "" }
-                          }),
-                          _vm._v(" "),
-                          _c(
-                            "q-item",
-                            [
-                              _c(
-                                "q-item-section",
-                                { staticClass: "perfilempresa" },
-                                [
-                                  _c("q-item-label", [
-                                    _vm._v(_vm._s(_vm.propperfil.email))
-                                  ]),
-                                  _vm._v(" "),
-                                  _c(
-                                    "q-item-label",
-                                    { attrs: { caption: "" } },
-                                    [
-                                      _c(
-                                        "q-item",
-                                        [
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "icono",
-                                              staticStyle: { height: "14px" },
-                                              attrs: { avatar: "" }
-                                            },
-                                            [
-                                              _c("q-icon", {
-                                                staticStyle: {
-                                                  "font-size": "14px"
-                                                },
-                                                attrs: { name: "mail" }
-                                              })
-                                            ],
-                                            1
-                                          ),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-section",
-                                            {
-                                              staticClass: "titulo",
-                                              staticStyle: { height: "14px" }
-                                            },
-                                            [_vm._v("Email")]
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              )
-                            ],
-                            1
-                          ),
-                          _vm._v(" "),
-                          _vm.propperfil.twitter
-                            ? _c(
-                                "div",
-                                [
-                                  _c("q-separator", {
-                                    attrs: { spaced: "", inset: "" }
-                                  }),
-                                  _vm._v(" "),
-                                  _c(
-                                    "q-item",
-                                    [
-                                      _c(
-                                        "q-item-section",
-                                        { staticClass: "perfilempresa" },
-                                        [
-                                          _c("q-item-label", [
-                                            _vm._v(
-                                              _vm._s(_vm.propperfil.twitter)
-                                            )
-                                          ]),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-label",
-                                            { attrs: { caption: "" } },
-                                            [
-                                              _c(
-                                                "q-item",
-                                                [
-                                                  _c(
-                                                    "q-item-section",
-                                                    {
-                                                      staticClass: "icono",
-                                                      staticStyle: {
-                                                        height: "14px"
-                                                      },
-                                                      attrs: { avatar: "" }
-                                                    },
-                                                    [
-                                                      _c("q-icon", {
-                                                        staticStyle: {
-                                                          "font-size": "14px"
-                                                        },
-                                                        attrs: {
-                                                          name:
-                                                            "img:./../media/iconssvg/gorjeo.svg"
-                                                        }
-                                                      })
-                                                    ],
-                                                    1
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "q-item-section",
-                                                    {
-                                                      staticClass: "titulo",
-                                                      staticStyle: {
-                                                        height: "14px"
-                                                      }
-                                                    },
-                                                    [_vm._v("Twitter")]
-                                                  )
-                                                ],
-                                                1
-                                              )
-                                            ],
-                                            1
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              )
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.propperfil.facebook
-                            ? _c(
-                                "div",
-                                [
-                                  _c("q-separator", {
-                                    attrs: { spaced: "", inset: "" }
-                                  }),
-                                  _vm._v(" "),
-                                  _c(
-                                    "q-item",
-                                    [
-                                      _c(
-                                        "q-item-section",
-                                        { staticClass: "perfilempresa" },
-                                        [
-                                          _c("q-item-label", [
-                                            _vm._v(
-                                              _vm._s(_vm.propperfil.facebook)
-                                            )
-                                          ]),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-label",
-                                            { attrs: { caption: "" } },
-                                            [
-                                              _c(
-                                                "q-item",
-                                                [
-                                                  _c(
-                                                    "q-item-section",
-                                                    {
-                                                      staticClass: "icono",
-                                                      staticStyle: {
-                                                        height: "14px"
-                                                      },
-                                                      attrs: { avatar: "" }
-                                                    },
-                                                    [
-                                                      _c("q-icon", {
-                                                        staticStyle: {
-                                                          "font-size": "14px"
-                                                        },
-                                                        attrs: {
-                                                          name:
-                                                            "img:./../media/iconssvg/facebook.svg"
-                                                        }
-                                                      })
-                                                    ],
-                                                    1
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "q-item-section",
-                                                    {
-                                                      staticClass: "titulo",
-                                                      staticStyle: {
-                                                        height: "14px"
-                                                      }
-                                                    },
-                                                    [_vm._v("Facebook")]
-                                                  )
-                                                ],
-                                                1
-                                              )
-                                            ],
-                                            1
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              )
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _vm.propperfil.instagram
-                            ? _c(
-                                "div",
-                                [
-                                  _c("q-separator", {
-                                    attrs: { spaced: "", inset: "" }
-                                  }),
-                                  _vm._v(" "),
-                                  _c(
-                                    "q-item",
-                                    [
-                                      _c(
-                                        "q-item-section",
-                                        { staticClass: "perfilempresa" },
-                                        [
-                                          _c("q-item-label", [
-                                            _vm._v(
-                                              _vm._s(_vm.propperfil.instagram)
-                                            )
-                                          ]),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-label",
-                                            { attrs: { caption: "" } },
-                                            [
-                                              _c(
-                                                "q-item",
-                                                [
-                                                  _c(
-                                                    "q-item-section",
-                                                    {
-                                                      staticClass: "icono",
-                                                      staticStyle: {
-                                                        height: "14px"
-                                                      },
-                                                      attrs: { avatar: "" }
-                                                    },
-                                                    [
-                                                      _c("q-icon", {
-                                                        staticStyle: {
-                                                          "font-size": "14px"
-                                                        },
-                                                        attrs: {
-                                                          name:
-                                                            "img:./../media/iconssvg/instagram.svg"
-                                                        }
-                                                      })
-                                                    ],
-                                                    1
-                                                  ),
-                                                  _vm._v(" "),
-                                                  _c(
-                                                    "q-item-section",
-                                                    {
-                                                      staticClass: "titulo",
-                                                      staticStyle: {
-                                                        height: "14px"
-                                                      }
-                                                    },
-                                                    [_vm._v("Instagram")]
-                                                  )
-                                                ],
-                                                1
-                                              )
-                                            ],
-                                            1
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              )
-                            : _vm._e(),
-                          _vm._v(" "),
-                          _c("q-separator", {
-                            attrs: { spaced: "", inset: "" }
-                          })
-                        ],
-                        1
-                      )
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c("q-img", {
-                staticClass: "absolute-top",
-                staticStyle: { height: "250px" },
-                attrs: { src: _vm.propperfil.imagenlogo, ratio: 1 }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _c(
-            "q-page-container",
-            [
-              _c(
-                "q-page",
-                { attrs: { padding: "" } },
-                [
-                  _vm.propperfil.imgcarrusel
-                    ? _c(
-                        "div",
-                        { staticClass: "q-pa-md" },
-                        [
-                          _c(
-                            "q-carousel",
+                            "q-toolbar-title",
                             {
-                              attrs: {
-                                swipeable: "",
-                                animated: "",
-                                thumbnails: "",
-                                infinite: ""
+                              staticStyle: {
+                                "padding-left": "14px",
+                                color: "#000000",
+                                "font-weight": "bolder",
+                                "font-size": "30px",
+                                height: "29px"
                               },
-                              model: {
-                                value: _vm.slide,
-                                callback: function($$v) {
-                                  _vm.slide = $$v
-                                },
-                                expression: "slide"
+                              attrs: { size: "30px" }
+                            },
+                            [
+                              _vm._v(
+                                _vm._s(_vm.propperfilmutable.nombreempresa)
+                              )
+                            ]
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "q-btn",
+                            {
+                              attrs: { outline: "", color: "primary" },
+                              on: {
+                                click: function($event) {
+                                  return _vm.navigate()
+                                }
                               }
                             },
-                            _vm._l(_vm.propperfil.imgcarrusel, function(
-                              img,
-                              count
-                            ) {
-                              return _c("q-carousel-slide", {
-                                key: count,
+                            [
+                              _c("q-icon", {
                                 attrs: {
-                                  name: count,
-                                  "img-src": img.urldocumento
+                                  left: "",
+                                  size: "3em",
+                                  name: "arrow_back"
                                 }
-                              })
-                            }),
+                              }),
+                              _vm._v(" "),
+                              _c("div", [_vm._v("Atras")])
+                            ],
                             1
                           )
                         ],
                         1
                       )
-                    : _c(
-                        "div",
-                        { staticClass: "q-pa-md" },
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "q-drawer",
+                    {
+                      attrs: {
+                        "show-if-above": "",
+                        width: 250,
+                        breakpoint: 400
+                      },
+                      model: {
+                        value: _vm.drawer,
+                        callback: function($$v) {
+                          _vm.drawer = $$v
+                        },
+                        expression: "drawer"
+                      }
+                    },
+                    [
+                      _c(
+                        "q-scroll-area",
+                        {
+                          staticStyle: {
+                            height: "calc(100% - 250px)",
+                            "margin-top": "250px",
+                            "border-right": "1px solid #ddd"
+                          }
+                        },
                         [
                           _c(
-                            "q-carousel",
-                            {
-                              attrs: {
-                                swipeable: "",
-                                animated: "",
-                                thumbnails: "",
-                                infinite: ""
-                              },
-                              model: {
-                                value: _vm.slide,
-                                callback: function($$v) {
-                                  _vm.slide = $$v
-                                },
-                                expression: "slide"
-                              }
-                            },
+                            "q-list",
+                            { attrs: { padding: "" } },
                             [
-                              _c("q-carousel-slide", {
-                                attrs: {
-                                  name: 1,
-                                  "img-src":
-                                    "https://cdn.quasar.dev/img/mountains.jpg"
-                                }
-                              }),
-                              _vm._v(" "),
-                              _c("q-carousel-slide", {
-                                attrs: {
-                                  name: 2,
-                                  "img-src":
-                                    "https://cdn.quasar.dev/img/parallax1.jpg"
-                                }
-                              }),
-                              _vm._v(" "),
-                              _c("q-carousel-slide", {
-                                attrs: {
-                                  name: 3,
-                                  "img-src":
-                                    "https://cdn.quasar.dev/img/parallax2.jpg"
-                                }
-                              }),
-                              _vm._v(" "),
-                              _c("q-carousel-slide", {
-                                attrs: {
-                                  name: 4,
-                                  "img-src":
-                                    "https://cdn.quasar.dev/img/quasar.jpg"
-                                }
-                              })
+                              _c(
+                                "q-list",
+                                [
+                                  _c(
+                                    "q-item",
+                                    [
+                                      _c(
+                                        "q-item-section",
+                                        { staticClass: "perfilempresa" },
+                                        [
+                                          _c("q-item-label", [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm.propperfilmutable
+                                                  .representantelegal
+                                              )
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-label",
+                                            { attrs: { caption: "" } },
+                                            [
+                                              _c(
+                                                "q-item",
+                                                [
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "icono",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      },
+                                                      attrs: { avatar: "" }
+                                                    },
+                                                    [
+                                                      _c("q-icon", {
+                                                        staticStyle: {
+                                                          "font-size": "14px"
+                                                        },
+                                                        attrs: { name: "face" }
+                                                      })
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "titulo",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      }
+                                                    },
+                                                    [
+                                                      _vm._v(
+                                                        "Representante Legal"
+                                                      )
+                                                    ]
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c("q-separator", {
+                                    attrs: { spaced: "", inset: "" }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item",
+                                    [
+                                      _c(
+                                        "q-item-section",
+                                        { staticClass: "perfilempresa" },
+                                        [
+                                          _c("q-item-label", [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm.propperfilmutable.telefono
+                                              )
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-label",
+                                            { attrs: { caption: "" } },
+                                            [
+                                              _c(
+                                                "q-item",
+                                                [
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "icono",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      },
+                                                      attrs: { avatar: "" }
+                                                    },
+                                                    [
+                                                      _c("q-icon", {
+                                                        staticStyle: {
+                                                          "font-size": "14px"
+                                                        },
+                                                        attrs: { name: "call" }
+                                                      })
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "titulo",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      }
+                                                    },
+                                                    [_vm._v("Telefono")]
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c("q-separator", {
+                                    attrs: { spaced: "", inset: "" }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item",
+                                    [
+                                      _c(
+                                        "q-item-section",
+                                        { staticClass: "perfilempresa" },
+                                        [
+                                          _c("q-item-label", [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm.propperfilmutable.municipio
+                                              )
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-label",
+                                            { attrs: { caption: "" } },
+                                            [
+                                              _c(
+                                                "q-item",
+                                                [
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "icono",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      },
+                                                      attrs: { avatar: "" }
+                                                    },
+                                                    [
+                                                      _c("q-icon", {
+                                                        staticStyle: {
+                                                          "font-size": "14px"
+                                                        },
+                                                        attrs: {
+                                                          name: "explore"
+                                                        }
+                                                      })
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "titulo",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      }
+                                                    },
+                                                    [_vm._v("Municipio")]
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c("q-separator", {
+                                    attrs: { spaced: "", inset: "" }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item",
+                                    [
+                                      _c(
+                                        "q-item-section",
+                                        { staticClass: "perfilempresa" },
+                                        [
+                                          _c("q-item-label", [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm.propperfilmutable.direccion
+                                              )
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-label",
+                                            { attrs: { caption: "" } },
+                                            [
+                                              _c(
+                                                "q-item",
+                                                [
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "icono",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      },
+                                                      attrs: { avatar: "" }
+                                                    },
+                                                    [
+                                                      _c("q-icon", {
+                                                        staticStyle: {
+                                                          "font-size": "14px"
+                                                        },
+                                                        attrs: {
+                                                          name: "location_on"
+                                                        }
+                                                      })
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "titulo",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      }
+                                                    },
+                                                    [_vm._v("Direccion")]
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c("q-separator", {
+                                    attrs: { spaced: "", inset: "" }
+                                  }),
+                                  _vm._v(" "),
+                                  _c(
+                                    "q-item",
+                                    [
+                                      _c(
+                                        "q-item-section",
+                                        { staticClass: "perfilempresa" },
+                                        [
+                                          _c("q-item-label", [
+                                            _vm._v(
+                                              _vm._s(
+                                                _vm.propperfilmutable.email
+                                              )
+                                            )
+                                          ]),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item-label",
+                                            { attrs: { caption: "" } },
+                                            [
+                                              _c(
+                                                "q-item",
+                                                [
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "icono",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      },
+                                                      attrs: { avatar: "" }
+                                                    },
+                                                    [
+                                                      _c("q-icon", {
+                                                        staticStyle: {
+                                                          "font-size": "14px"
+                                                        },
+                                                        attrs: { name: "mail" }
+                                                      })
+                                                    ],
+                                                    1
+                                                  ),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-section",
+                                                    {
+                                                      staticClass: "titulo",
+                                                      staticStyle: {
+                                                        height: "14px"
+                                                      }
+                                                    },
+                                                    [_vm._v("Email")]
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    ],
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _vm.propperfilmutable.twitter
+                                    ? _c(
+                                        "div",
+                                        [
+                                          _c("q-separator", {
+                                            attrs: { spaced: "", inset: "" }
+                                          }),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item",
+                                            [
+                                              _c(
+                                                "q-item-section",
+                                                {
+                                                  staticClass: "perfilempresa"
+                                                },
+                                                [
+                                                  _c("q-item-label", [
+                                                    _vm._v(
+                                                      _vm._s(
+                                                        _vm.propperfilmutable
+                                                          .twitter
+                                                      )
+                                                    )
+                                                  ]),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-label",
+                                                    { attrs: { caption: "" } },
+                                                    [
+                                                      _c(
+                                                        "q-item",
+                                                        [
+                                                          _c(
+                                                            "q-item-section",
+                                                            {
+                                                              staticClass:
+                                                                "icono",
+                                                              staticStyle: {
+                                                                height: "14px"
+                                                              },
+                                                              attrs: {
+                                                                avatar: ""
+                                                              }
+                                                            },
+                                                            [
+                                                              _c("q-icon", {
+                                                                staticStyle: {
+                                                                  "font-size":
+                                                                    "14px"
+                                                                },
+                                                                attrs: {
+                                                                  name:
+                                                                    "img:./../media/iconssvg/gorjeo.svg"
+                                                                }
+                                                              })
+                                                            ],
+                                                            1
+                                                          ),
+                                                          _vm._v(" "),
+                                                          _c(
+                                                            "q-item-section",
+                                                            {
+                                                              staticClass:
+                                                                "titulo",
+                                                              staticStyle: {
+                                                                height: "14px"
+                                                              }
+                                                            },
+                                                            [_vm._v("Twitter")]
+                                                          )
+                                                        ],
+                                                        1
+                                                      )
+                                                    ],
+                                                    1
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    : _vm._e(),
+                                  _vm._v(" "),
+                                  _vm.propperfilmutable.facebook
+                                    ? _c(
+                                        "div",
+                                        [
+                                          _c("q-separator", {
+                                            attrs: { spaced: "", inset: "" }
+                                          }),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item",
+                                            [
+                                              _c(
+                                                "q-item-section",
+                                                {
+                                                  staticClass: "perfilempresa"
+                                                },
+                                                [
+                                                  _c("q-item-label", [
+                                                    _vm._v(
+                                                      _vm._s(
+                                                        _vm.propperfilmutable
+                                                          .facebook
+                                                      )
+                                                    )
+                                                  ]),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-label",
+                                                    { attrs: { caption: "" } },
+                                                    [
+                                                      _c(
+                                                        "q-item",
+                                                        [
+                                                          _c(
+                                                            "q-item-section",
+                                                            {
+                                                              staticClass:
+                                                                "icono",
+                                                              staticStyle: {
+                                                                height: "14px"
+                                                              },
+                                                              attrs: {
+                                                                avatar: ""
+                                                              }
+                                                            },
+                                                            [
+                                                              _c("q-icon", {
+                                                                staticStyle: {
+                                                                  "font-size":
+                                                                    "14px"
+                                                                },
+                                                                attrs: {
+                                                                  name:
+                                                                    "img:./../media/iconssvg/facebook.svg"
+                                                                }
+                                                              })
+                                                            ],
+                                                            1
+                                                          ),
+                                                          _vm._v(" "),
+                                                          _c(
+                                                            "q-item-section",
+                                                            {
+                                                              staticClass:
+                                                                "titulo",
+                                                              staticStyle: {
+                                                                height: "14px"
+                                                              }
+                                                            },
+                                                            [_vm._v("Facebook")]
+                                                          )
+                                                        ],
+                                                        1
+                                                      )
+                                                    ],
+                                                    1
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    : _vm._e(),
+                                  _vm._v(" "),
+                                  _vm.propperfilmutable.instagram
+                                    ? _c(
+                                        "div",
+                                        [
+                                          _c("q-separator", {
+                                            attrs: { spaced: "", inset: "" }
+                                          }),
+                                          _vm._v(" "),
+                                          _c(
+                                            "q-item",
+                                            [
+                                              _c(
+                                                "q-item-section",
+                                                {
+                                                  staticClass: "perfilempresa"
+                                                },
+                                                [
+                                                  _c("q-item-label", [
+                                                    _vm._v(
+                                                      _vm._s(
+                                                        _vm.propperfilmutable
+                                                          .instagram
+                                                      )
+                                                    )
+                                                  ]),
+                                                  _vm._v(" "),
+                                                  _c(
+                                                    "q-item-label",
+                                                    { attrs: { caption: "" } },
+                                                    [
+                                                      _c(
+                                                        "q-item",
+                                                        [
+                                                          _c(
+                                                            "q-item-section",
+                                                            {
+                                                              staticClass:
+                                                                "icono",
+                                                              staticStyle: {
+                                                                height: "14px"
+                                                              },
+                                                              attrs: {
+                                                                avatar: ""
+                                                              }
+                                                            },
+                                                            [
+                                                              _c("q-icon", {
+                                                                staticStyle: {
+                                                                  "font-size":
+                                                                    "14px"
+                                                                },
+                                                                attrs: {
+                                                                  name:
+                                                                    "img:./../media/iconssvg/instagram.svg"
+                                                                }
+                                                              })
+                                                            ],
+                                                            1
+                                                          ),
+                                                          _vm._v(" "),
+                                                          _c(
+                                                            "q-item-section",
+                                                            {
+                                                              staticClass:
+                                                                "titulo",
+                                                              staticStyle: {
+                                                                height: "14px"
+                                                              }
+                                                            },
+                                                            [
+                                                              _vm._v(
+                                                                "Instagram"
+                                                              )
+                                                            ]
+                                                          )
+                                                        ],
+                                                        1
+                                                      )
+                                                    ],
+                                                    1
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ],
+                                            1
+                                          )
+                                        ],
+                                        1
+                                      )
+                                    : _vm._e(),
+                                  _vm._v(" "),
+                                  _c("q-separator", {
+                                    attrs: { spaced: "", inset: "" }
+                                  })
+                                ],
+                                1
+                              )
                             ],
                             1
                           )
                         ],
                         1
                       ),
-                  _vm._v(" "),
-                  _c("p", [
-                    _vm._v(
-                      "\r\n            " +
-                        _vm._s(_vm.propperfil.descripcion) +
-                        "\r\n          "
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("div", { staticClass: "row" }, [
-                    _c("div", { staticClass: "col-6" }, [
-                      _c("div", { staticClass: "q-video" }, [
-                        _c("iframe", {
-                          attrs: {
-                            width: "400",
-                            height: "250",
-                            src:
-                              "https://www.youtube.com/embed/rfD-UKuod18?rel=0",
-                            frameborder: "0",
-                            allowfullscreen: ""
-                          }
-                        })
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      {
-                        staticClass: "col-6",
-                        staticStyle: {
-                          padding: "16px",
-                          "justify-content": "center",
-                          display: "flex"
+                      _vm._v(" "),
+                      _c("q-img", {
+                        staticClass: "absolute-top",
+                        staticStyle: { height: "250px" },
+                        attrs: {
+                          src: _vm.propperfilmutable.imagenlogo,
+                          ratio: 1
                         }
-                      },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "row",
-                            staticStyle: { "padding-left": "16px" }
-                          },
-                          [
-                            _c(
-                              "q-item-section",
-                              {
-                                staticStyle: { "align-items": "center" },
-                                attrs: { side: "", top: "" }
-                              },
-                              [
-                                _c("q-item-label", { attrs: { lines: "1" } }, [
-                                  _c(
-                                    "span",
-                                    {
-                                      staticClass: "q-mt-xs text-weight-bold "
-                                    },
-                                    [_vm._v("Cump")]
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c(
-                                  "q-item-label",
-                                  { attrs: { lines: "1" } },
-                                  [
-                                    _c("q-knob", {
-                                      attrs: {
-                                        "show-value": "",
-                                        size: "150px",
-                                        color: "teal",
-                                        "track-color": "grey-3",
-                                        readonly: ""
-                                      },
-                                      model: {
-                                        value: _vm.propperfil.cumplimiento,
-                                        callback: function($$v) {
-                                          _vm.$set(
-                                            _vm.propperfil,
-                                            "cumplimiento",
-                                            $$v
-                                          )
-                                        },
-                                        expression: "propperfil.cumplimiento"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "q-item-section",
-                              {
-                                staticStyle: { "align-items": "center" },
-                                attrs: { side: "", top: "" }
-                              },
-                              [
-                                _c("q-item-label", { attrs: { lines: "1" } }, [
-                                  _c(
-                                    "span",
-                                    {
-                                      staticClass: "q-mt-xs text-weight-bold "
-                                    },
-                                    [_vm._v("Adic")]
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c(
-                                  "q-item-label",
-                                  { attrs: { lines: "1" } },
-                                  [
-                                    _c("q-knob", {
-                                      attrs: {
-                                        "show-value": "",
-                                        size: "150px",
-                                        color: "teal",
-                                        "track-color": "grey-3",
-                                        readonly: ""
-                                      },
-                                      model: {
-                                        value: _vm.propperfil.adic,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.propperfil, "adic", $$v)
-                                        },
-                                        expression: "propperfil.adic"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        )
-                      ]
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c(
-                    "q-list",
-                    { attrs: { bordered: "", padding: "" } },
-                    [
-                      _c("q-item-label", { attrs: { header: "" } }, [
-                        _vm._v("Productos")
-                      ]),
-                      _vm._v(" "),
-                      _c("q-separator", { attrs: { spaced: "" } }),
-                      _vm._v(" "),
-                      _vm._l(_vm.propperfil.productos, function(
-                        producto,
-                        count
-                      ) {
-                        return _c(
-                          "div",
-                          { key: count },
-                          [
-                            _c(
-                              "q-item",
-                              [
-                                _c(
-                                  "q-item-section",
-                                  [
-                                    _c("q-item-label", [
-                                      _vm._v(_vm._s(producto.nombre))
-                                    ]),
-                                    _vm._v(" "),
-                                    _c(
-                                      "q-item-label",
-                                      { attrs: { caption: "" } },
-                                      [_vm._v(_vm._s(producto.descripcion))]
-                                    )
-                                  ],
-                                  1
-                                ),
-                                _vm._v(" "),
-                                _c(
-                                  "q-item-section",
-                                  { attrs: { side: "", top: "" } },
-                                  [
-                                    _c(
-                                      "q-item-label",
-                                      { attrs: { caption: "" } },
-                                      [_vm._v("5 min ago")]
-                                    )
-                                  ],
-                                  1
-                                )
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _vm.propperfil.productos.length != count + 1
-                              ? _c("q-separator", { attrs: { spaced: "" } })
-                              : _vm._e()
-                          ],
-                          1
-                        )
                       })
                     ],
-                    2
+                    1
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "q-page-container",
+                    [
+                      _c(
+                        "q-page",
+                        { attrs: { padding: "" } },
+                        [
+                          _vm.propperfilmutable.imgcarrusel
+                            ? _c(
+                                "div",
+                                { staticClass: "q-pa-md" },
+                                [
+                                  _c(
+                                    "q-carousel",
+                                    {
+                                      attrs: {
+                                        swipeable: "",
+                                        animated: "",
+                                        thumbnails: "",
+                                        infinite: ""
+                                      },
+                                      model: {
+                                        value: _vm.slide,
+                                        callback: function($$v) {
+                                          _vm.slide = $$v
+                                        },
+                                        expression: "slide"
+                                      }
+                                    },
+                                    _vm._l(
+                                      _vm.propperfilmutable.imgcarrusel,
+                                      function(img, count) {
+                                        return _c("q-carousel-slide", {
+                                          key: count,
+                                          attrs: {
+                                            name: count,
+                                            "img-src": img.urldocumento
+                                          }
+                                        })
+                                      }
+                                    ),
+                                    1
+                                  )
+                                ],
+                                1
+                              )
+                            : _c(
+                                "div",
+                                { staticClass: "q-pa-md" },
+                                [
+                                  _c(
+                                    "q-carousel",
+                                    {
+                                      attrs: {
+                                        swipeable: "",
+                                        animated: "",
+                                        thumbnails: "",
+                                        infinite: ""
+                                      },
+                                      model: {
+                                        value: _vm.slide,
+                                        callback: function($$v) {
+                                          _vm.slide = $$v
+                                        },
+                                        expression: "slide"
+                                      }
+                                    },
+                                    [
+                                      _c("q-carousel-slide", {
+                                        attrs: {
+                                          name: 1,
+                                          "img-src":
+                                            "https://cdn.quasar.dev/img/mountains.jpg"
+                                        }
+                                      }),
+                                      _vm._v(" "),
+                                      _c("q-carousel-slide", {
+                                        attrs: {
+                                          name: 2,
+                                          "img-src":
+                                            "https://cdn.quasar.dev/img/parallax1.jpg"
+                                        }
+                                      }),
+                                      _vm._v(" "),
+                                      _c("q-carousel-slide", {
+                                        attrs: {
+                                          name: 3,
+                                          "img-src":
+                                            "https://cdn.quasar.dev/img/parallax2.jpg"
+                                        }
+                                      }),
+                                      _vm._v(" "),
+                                      _c("q-carousel-slide", {
+                                        attrs: {
+                                          name: 4,
+                                          "img-src":
+                                            "https://cdn.quasar.dev/img/quasar.jpg"
+                                        }
+                                      })
+                                    ],
+                                    1
+                                  )
+                                ],
+                                1
+                              ),
+                          _vm._v(" "),
+                          _c("p", [
+                            _vm._v(
+                              "\r\n            " +
+                                _vm._s(_vm.propperfilmutable.descripcion) +
+                                "\r\n          "
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "row" }, [
+                            _c("div", { staticClass: "col-6" }, [
+                              _c(
+                                "div",
+                                { staticClass: "q-pa-md" },
+                                [
+                                  _c("q-video", {
+                                    attrs: {
+                                      ratio: 16 / 9,
+                                      src:
+                                        "https://www.youtube.com/embed/" +
+                                        _vm.video_id +
+                                        "?rel=0"
+                                    }
+                                  })
+                                ],
+                                1
+                              )
+                            ]),
+                            _vm._v(" "),
+                            _c(
+                              "div",
+                              {
+                                staticClass: "col-6",
+                                staticStyle: {
+                                  padding: "16px",
+                                  "justify-content": "center",
+                                  display: "flex"
+                                }
+                              },
+                              [
+                                _c(
+                                  "div",
+                                  {
+                                    staticClass: "row",
+                                    staticStyle: { "padding-left": "16px" }
+                                  },
+                                  [
+                                    _c(
+                                      "q-item-section",
+                                      {
+                                        staticStyle: {
+                                          "align-items": "center"
+                                        },
+                                        attrs: { side: "", top: "" }
+                                      },
+                                      [
+                                        _c(
+                                          "q-item-label",
+                                          { attrs: { lines: "1" } },
+                                          [
+                                            _c(
+                                              "span",
+                                              {
+                                                staticClass:
+                                                  "q-mt-xs text-weight-bold "
+                                              },
+                                              [_vm._v("Cump")]
+                                            )
+                                          ]
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "q-item-label",
+                                          { attrs: { lines: "1" } },
+                                          [
+                                            _c("q-knob", {
+                                              attrs: {
+                                                "show-value": "",
+                                                size: "150px",
+                                                color: "teal",
+                                                "track-color": "grey-3",
+                                                readonly: ""
+                                              },
+                                              model: {
+                                                value:
+                                                  _vm.propperfilmutable
+                                                    .cumplimiento,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.propperfilmutable,
+                                                    "cumplimiento",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "propperfilmutable.cumplimiento"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "q-item-section",
+                                      {
+                                        staticStyle: {
+                                          "align-items": "center"
+                                        },
+                                        attrs: { side: "", top: "" }
+                                      },
+                                      [
+                                        _c(
+                                          "q-item-label",
+                                          { attrs: { lines: "1" } },
+                                          [
+                                            _c(
+                                              "span",
+                                              {
+                                                staticClass:
+                                                  "q-mt-xs text-weight-bold "
+                                              },
+                                              [_vm._v("Adic")]
+                                            )
+                                          ]
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "q-item-label",
+                                          { attrs: { lines: "1" } },
+                                          [
+                                            _c("q-knob", {
+                                              attrs: {
+                                                "show-value": "",
+                                                size: "150px",
+                                                color: "teal",
+                                                "track-color": "grey-3",
+                                                readonly: ""
+                                              },
+                                              model: {
+                                                value:
+                                                  _vm.propperfilmutable.adic,
+                                                callback: function($$v) {
+                                                  _vm.$set(
+                                                    _vm.propperfilmutable,
+                                                    "adic",
+                                                    $$v
+                                                  )
+                                                },
+                                                expression:
+                                                  "propperfilmutable.adic"
+                                              }
+                                            })
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ]
+                            )
+                          ]),
+                          _vm._v(" "),
+                          _c(
+                            "q-list",
+                            { attrs: { bordered: "", padding: "" } },
+                            [
+                              _c("q-item-label", { attrs: { header: "" } }, [
+                                _vm._v("Productos")
+                              ]),
+                              _vm._v(" "),
+                              _c("q-separator", { attrs: { spaced: "" } }),
+                              _vm._v(" "),
+                              _vm._l(_vm.propperfilmutable.productos, function(
+                                producto,
+                                count
+                              ) {
+                                return _c(
+                                  "div",
+                                  { key: count },
+                                  [
+                                    _c(
+                                      "q-item",
+                                      [
+                                        _c(
+                                          "q-item-section",
+                                          [
+                                            _c("q-item-label", [
+                                              _vm._v(_vm._s(producto.nombre))
+                                            ]),
+                                            _vm._v(" "),
+                                            _c(
+                                              "q-item-label",
+                                              { attrs: { caption: "" } },
+                                              [
+                                                _vm._v(
+                                                  _vm._s(producto.descripcion)
+                                                )
+                                              ]
+                                            )
+                                          ],
+                                          1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "q-item-section",
+                                          { attrs: { side: "", top: "" } },
+                                          [
+                                            _c(
+                                              "q-item-label",
+                                              { attrs: { caption: "" } },
+                                              [_vm._v("5 min ago")]
+                                            )
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _vm.propperfilmutable.productos.length !=
+                                    count + 1
+                                      ? _c("q-separator", {
+                                          attrs: { spaced: "" }
+                                        })
+                                      : _vm._e()
+                                  ],
+                                  1
+                                )
+                              })
+                            ],
+                            2
+                          )
+                        ],
+                        1
+                      )
+                    ],
+                    1
                   )
                 ],
                 1
@@ -58518,6 +58752,15 @@ var render = function() {
             ],
             1
           )
+        : _vm._e(),
+      _vm._v(" "),
+      _c(
+        "q-inner-loading",
+        { attrs: { showing: this.$store.state.listado.cargando } },
+        [
+          _c("q-spinner-hourglass", {
+            attrs: { size: "5.5em", color: "green" }
+          })
         ],
         1
       )

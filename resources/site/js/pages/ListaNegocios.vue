@@ -49,7 +49,8 @@ export default {
     buscar(){
 
       let obj = {
-        buscar: this.search
+        buscar: this.search,
+        campo: 'e.nombreempresa'
       }
       this.$store.dispatch('listado/BUSCAR_EMPRESAS',obj);
     },

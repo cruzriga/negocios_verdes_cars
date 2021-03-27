@@ -1,9 +1,10 @@
 <template>
 <div class="q-pa-md">
+  <div v-if="propperfilmutable">    
     <q-layout view="lHh Lpr lff" container style="height: calc(100vh - 200px);" class="shadow-2 rounded-borders">
       <q-header style="padding-bottom: 12px;padding-top: 12px;" class="bg-white text-primary">
         <q-toolbar>
-          <q-toolbar-title size="30px" style="padding-left: 14px;color:#000000;font-weight: bolder;font-size: 30px;height: 29px;">{{propperfil.nombreempresa}}</q-toolbar-title>
+          <q-toolbar-title size="30px" style="padding-left: 14px;color:#000000;font-weight: bolder;font-size: 30px;height: 29px;">{{propperfilmutable.nombreempresa}}</q-toolbar-title>
           <!-- <q-btn flat @click="drawer = !drawer" round dense icon="menu" /> -->
           <!-- <q-icon  style="font-size: 3em;" v-on:click="navigate()" name="arrow_back" /> -->
           <q-btn v-on:click="navigate()" outline color="primary" >
@@ -30,7 +31,7 @@
             <q-list>
               <q-item>
                 <q-item-section class="perfilempresa">
-                  <q-item-label>{{propperfil.representantelegal}}</q-item-label>
+                  <q-item-label>{{propperfilmutable.representantelegal}}</q-item-label>
                   <q-item-label caption>
                     <q-item>
                       <q-item-section style="height: 14px;" class="icono" avatar>
@@ -50,7 +51,7 @@
               <q-separator spaced inset />
               <q-item>
                 <q-item-section class="perfilempresa">
-                  <q-item-label>{{propperfil.telefono}}</q-item-label>
+                  <q-item-label>{{propperfilmutable.telefono}}</q-item-label>
                   <q-item-label caption>
                     <q-item>
                       <q-item-section style="height: 14px;" class="icono" avatar>
@@ -70,7 +71,7 @@
               <q-separator spaced inset />
               <q-item>
                 <q-item-section class="perfilempresa">
-                  <q-item-label>{{propperfil.municipio}}</q-item-label>
+                  <q-item-label>{{propperfilmutable.municipio}}</q-item-label>
                   <q-item-label caption>
                     <q-item>
                       <q-item-section style="height: 14px;" class="icono" avatar>
@@ -90,7 +91,7 @@
               <q-separator spaced inset />
               <q-item>
                 <q-item-section class="perfilempresa">
-                  <q-item-label>{{propperfil.direccion}}</q-item-label>
+                  <q-item-label>{{propperfilmutable.direccion}}</q-item-label>
                   <q-item-label caption>
                     <q-item>
                       <q-item-section style="height: 14px;" class="icono" avatar>
@@ -110,7 +111,7 @@
               <q-separator spaced inset />
               <q-item>
                 <q-item-section class="perfilempresa">
-                  <q-item-label>{{propperfil.email}}</q-item-label>
+                  <q-item-label>{{propperfilmutable.email}}</q-item-label>
                   <q-item-label caption>
                     <q-item>
                       <q-item-section style="height: 14px;" class="icono" avatar>
@@ -126,12 +127,12 @@
                   <q-icon name="star" color="yellow" />
                 </q-item-section> -->
               </q-item>
-              <div v-if="propperfil.twitter">
+              <div v-if="propperfilmutable.twitter">
 
                 <q-separator spaced inset />
                 <q-item>
                   <q-item-section class="perfilempresa">
-                    <q-item-label>{{propperfil.twitter}}</q-item-label>
+                    <q-item-label>{{propperfilmutable.twitter}}</q-item-label>
                     <q-item-label caption>
                       <q-item>
                         <q-item-section style="height: 14px;" class="icono" avatar>
@@ -148,12 +149,12 @@
                   </q-item-section> -->
                 </q-item>
               </div>
-               <div v-if="propperfil.facebook">
+               <div v-if="propperfilmutable.facebook">
 
                 <q-separator spaced inset />
                 <q-item>
                   <q-item-section class="perfilempresa">
-                    <q-item-label>{{propperfil.facebook}}</q-item-label>
+                    <q-item-label>{{propperfilmutable.facebook}}</q-item-label>
                     <q-item-label caption>
                       <q-item>
                         <q-item-section style="height: 14px;" class="icono" avatar>
@@ -171,11 +172,11 @@
                 </q-item>
               </div>
 
-              <div v-if="propperfil.instagram">
+              <div v-if="propperfilmutable.instagram">
                 <q-separator spaced inset />
                 <q-item>
                   <q-item-section class="perfilempresa">
-                    <q-item-label>{{propperfil.instagram}}</q-item-label>
+                    <q-item-label>{{propperfilmutable.instagram}}</q-item-label>
                     <q-item-label caption>
                       <q-item>
                         <q-item-section style="height: 14px;" class="icono" avatar>
@@ -206,7 +207,7 @@
                 </q-item>               
               </div>
               <div class="col">
-                <p>{{propperfil.representantelegal}}</p>
+                <p>{{propperfilmutable.representantelegal}}</p>
               </div>
             </div>
             <div class="column perfilempresa">
@@ -218,7 +219,7 @@
                   <q-item-section class="titulo">Telefono</q-item-section>
                 </q-item>               
               </div>
-              <div class="col"><p>{{propperfil.telefono}}</p></div>
+              <div class="col"><p>{{propperfilmutable.telefono}}</p></div>
             </div>
             <div class="column perfilempresa">
               <div class="col">                
@@ -229,7 +230,7 @@
                   <q-item-section class="titulo">Municipio</q-item-section>
                 </q-item>               
               </div>
-              <div class="col"><p>{{propperfil.municipio}}</p></div>
+              <div class="col"><p>{{propperfilmutable.municipio}}</p></div>
             </div>
             <div class="column perfilempresa">
               <div class="col">                
@@ -240,7 +241,7 @@
                   <q-item-section class="titulo">Direccion</q-item-section>
                 </q-item>               
               </div>
-              <div class="col"><p>{{propperfil.direccion}}</p></div>
+              <div class="col"><p>{{propperfilmutable.direccion}}</p></div>
             </div>
             <div class="column perfilempresa">
               <div class="col">                
@@ -251,7 +252,7 @@
                   <q-item-section class="titulo">Email</q-item-section>
                 </q-item>               
               </div>
-              <div class="col"><p>{{propperfil.email}}</p></div>
+              <div class="col"><p>{{propperfilmutable.email}}</p></div>
             </div>
             <div class="row perfilempresa">
               <div class="col" style="display: flex;justify-content: center;align-items: center;"><q-icon style="font-size: 2em;" name="img:./../media/iconssvg/gorjeo.svg" /></div>
@@ -303,14 +304,14 @@
         </q-scroll-area>
         
           <q-img class="absolute-top" style="height: 250px"
-            :src="propperfil.imagenlogo"
+            :src="propperfilmutable.imagenlogo"
             :ratio="1"
           />
       </q-drawer>
 
       <q-page-container>
         <q-page padding>
-          <div v-if="propperfil.imgcarrusel" class="q-pa-md">
+          <div v-if="propperfilmutable.imgcarrusel" class="q-pa-md">
             <q-carousel
               swipeable
               animated
@@ -318,7 +319,7 @@
               thumbnails
               infinite
             >
-              <q-carousel-slide  v-for="(img , count) in propperfil.imgcarrusel" v-bind:key="count"  :name="count" :img-src="img.urldocumento" />
+              <q-carousel-slide  v-for="(img , count) in propperfilmutable.imgcarrusel" v-bind:key="count"  :name="count" :img-src="img.urldocumento" />
               <!-- <q-carousel-slide :name="2" img-src="https://cdn.quasar.dev/img/parallax1.jpg" />
               <q-carousel-slide :name="3" img-src="https://cdn.quasar.dev/img/parallax2.jpg" />
               <q-carousel-slide :name="4" img-src="https://cdn.quasar.dev/img/quasar.jpg" /> -->
@@ -339,18 +340,15 @@
             </q-carousel>
           </div>
           <p>
-            {{propperfil.descripcion}}
+            {{propperfilmutable.descripcion}}
           </p>
           <div class="row">
-            <div class="col-6">        
-              <div class="q-video">
-                <iframe
-                  width="400"
-                  height="250"
-                  src="https://www.youtube.com/embed/rfD-UKuod18?rel=0"
-                  frameborder="0"
-                  allowfullscreen
-                ></iframe>
+            <div class="col-6">
+              <div class="q-pa-md">
+                <q-video
+                  :ratio="16/9"
+                  :src="'https://www.youtube.com/embed/'+video_id+'?rel=0'"
+                />
               </div>
             </div>
             <div class="col-6" style="padding: 16px;justify-content: center;display: flex;" >
@@ -362,7 +360,7 @@
                   </q-item-label >
                   <q-item-label lines = "1" >
                     <q-knob
-                      v-model="propperfil.cumplimiento"
+                      v-model="propperfilmutable.cumplimiento"
                       show-value
                       size="150px"
                       color="teal"
@@ -377,7 +375,7 @@
                   </q-item-label >
                   <q-item-label lines = "1" >
                     <q-knob
-                      v-model="propperfil.adic"
+                      v-model="propperfilmutable.adic"
                       show-value
                       size="150px"
                       color="teal"
@@ -399,7 +397,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(producto , count) in propperfil.productos" v-bind:key="count">
+                <tr v-for="(producto , count) in propperfilmutable.productos" v-bind:key="count">
                   <td class="text-left">{{producto.nombre}}</td>
                   <td class="text-left">{{producto.descripcion}}</td>
                 </tr>
@@ -410,7 +408,7 @@
             <q-item-label header>Productos</q-item-label>
             <q-separator spaced />
 
-            <div v-for="(producto , count) in propperfil.productos" v-bind:key="count">
+            <div v-for="(producto , count) in propperfilmutable.productos" v-bind:key="count">
               <q-item >
                 <q-item-section>
                   <!-- <q-item-label overline>OVERLINE</q-item-label> -->
@@ -422,7 +420,7 @@
                   <q-item-label caption>5 min ago</q-item-label>
                 </q-item-section>
               </q-item>
-              <q-separator v-if="propperfil.productos.length!=count+1" spaced />
+              <q-separator v-if="propperfilmutable.productos.length!=count+1" spaced />
             </div>
           </q-list>
           <!-- <p>
@@ -435,6 +433,10 @@
       </q-page-container>
     </q-layout>
   </div>
+    <q-inner-loading :showing="this.$store.state.listado.cargando">
+      <q-spinner-hourglass size="5.5em" color="green" />
+    </q-inner-loading>
+  </div>
 </template>
 
 <script>
@@ -442,26 +444,65 @@ export default {
   name: 'Perfil',
   props: {
     propperfil: {
-      type: Object
+      type: Object,
+      default: null
     }
   },
   data () {
     return {
       slide: 1,
       autoplay: true,
-      adic: 60,
-      cump : 80,
       idEmpresa: 0,
-      drawer: false
+      drawer: false,
+      video_id:null,
+      propperfilmutable:null
     }
   },
   created() {
     this.idEmpresa = this.$route.params.idEmpresa;
+    this.propperfilmutable = this.propperfil
     console.log(this.propperfil);
+    if (this.propperfil==null) {      
+     this.cargarempresa(this.idEmpresa);
+    }else{
+      this.video_id = this.propperfilmutable.linkvideo.split('v=')[1];
+      var ampersandPosition = this.video_id.indexOf('&');
+      if(ampersandPosition != -1 && this.propperfilmutable.linkvideo!=null) {
+        this.video_id = this.video_id.substring(0, ampersandPosition);
+      }else{
+        this.video_id='rfD-UKuod18'
+      }
+      this.propperfilmutable.cumplimiento=parseInt(this.propperfilmutable.cumplimiento)
+      this.propperfilmutable.adic=parseInt(this.propperfilmutable.adic)
+    }
+  },
+  beforeMount(){
   },
   methods: {
+    async cargarempresa(idempresa){
+      this.propperfilmutable = await this.buscar(idempresa);
+      this.video_id = this.propperfilmutable.linkvideo.split('v=')[1];
+      var ampersandPosition = this.video_id.indexOf('&');
+      if(ampersandPosition != -1 && this.propperfilmutable.linkvideo!=null) {
+        this.video_id = this.video_id.substring(0, ampersandPosition);
+      }else{
+        this.video_id='rfD-UKuod18'
+      }
+      this.propperfilmutable.cumplimiento=parseInt(this.propperfilmutable.cumplimiento)
+      this.propperfilmutable.adic=parseInt(this.propperfilmutable.adic)
+      console.log(this.propperfilmutable);
+      return 
+    },
+    buscar(idempresa){   
+      let obj = {
+        buscar: idempresa,
+        campo: 'e.idempresa'
+      }
+      return this.$store.dispatch('listado/BUSCAR_EMPRESAS',obj);
+    },
     navigate() {
-      this.$router.go(-1);
+      // this.$router.go(-1);
+       this.$router.push({path: '/'})
     }
   }
 }

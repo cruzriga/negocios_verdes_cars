@@ -39,7 +39,7 @@ const store =
             async CARGAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
                 let resp = await request('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
-                console.log(resp)
+                // console.log(resp)
                 if(resp.ok){
                     if (resp.resp!=null && resp.resp!='') {
                         commit(EMPRESAS,resp.resp)
@@ -49,13 +49,17 @@ const store =
             },
             async BUSCAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
-                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&buscar='+datos.buscar)
+                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&buscar='+datos.buscar+'&campo='+datos.campo)
                 // console.log(resp)
                 if(resp.ok){
-                    commit(EMPRESAS,resp.resp)
                     commit(CARGANDO,false)
+                    if (datos.campo=='e.idempresa') {                        
+                        return(resp.resp.data.empresas[0])
+                    }else{
+                        commit(EMPRESAS,resp.resp)
+                    }
                 }
-            },
+            }
         }
     };
 export default store

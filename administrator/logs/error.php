@@ -26,3 +26,5 @@
 2021-03-21T00:54:00+00:00	INFO 192.168.10.1	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
 2021-03-22T17:41:41+00:00	INFO 192.168.10.1	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
 2021-03-24T06:31:07+00:00	INFO 192.168.10.1	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
+2021-03-26T22:46:02+00:00	INFO 192.168.10.1	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
+2021-03-27T02:30:16+00:00	INFO 192.168.10.1	joomlafailure	El usuario y contraseña no coinciden o usted aún no tiene una cuenta.
