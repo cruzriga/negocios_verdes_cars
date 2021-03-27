@@ -1,5 +1,5 @@
 <template>
-<div>
+<div style="display: flex;flex-direction: column;">
     <!-- {{url}}
     {{urlImg}} -->
     <croppa v-model="croppa"
@@ -15,16 +15,22 @@
         accept=".jpeg,.png"
         initial-size="cover"
         initial-position="center"
-        :show-remove-button="true"
+        :show-remove-button="false"
+        :zoom-speed="10"
         remove-button-color="black"
-        :remove-button-size="40">
+        :remove-button-size="40"
+        >
         <img v-if="urlImg!=null" crossOrigin="anonymous" :src="url" slot="initial">
     </croppa>
     <!-- :initial-image="urlImg!=null?urlImg:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'"-->
-    <input v-if="!moveimg" color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal">
+    <!-- <input v-if="!moveimg" color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal"> -->
     <!-- <q-slider @input ="onSliderChange" v-model="sliderVal" :min="sliderMin" :max="sliderMax" step="0.001"/> -->
-    <!-- <button @click="croppa.zoomIn()">zoom in</button>
-    <button @click="croppa.zoomOut()">zoom out</button> -->
+    <div style="display: flex;flex-direction: row;justify-content: center;">
+        <q-btn style="margin:10px" v-on:click="croppa.zoomIn()" outline round color="primary" icon="zoom_in" />
+        <q-btn style="margin:10px" v-on:click="croppa.zoomOut()" outline round color="primary" icon="zoom_out" />
+        <q-btn style="margin:10px" v-on:click="croppa.rotate(-1)" outline round color="primary" icon="cameraswitch" />
+        <q-btn style="margin:10px" v-on:click="croppa.remove()" outline round color="primary" icon="delete" />
+    </div>
 </div>
 </template>
 
@@ -42,7 +48,8 @@ export default {
             type: Number
         },
         moveimg: {
-            type: Boolean
+            type: Boolean,
+            default:false
         }
     },
     data() {
@@ -76,21 +83,6 @@ export default {
     beforeMount() {
     },
     methods: {
-         onInit() {
-            this.croppa.addClipPlugin(function (ctx, x, y, w, h) {
-                /*
-                * ctx: canvas context
-                * x: start point (top-left corner) x coordination
-                * y: start point (top-left corner) y coordination
-                * w: croppa width
-                * h: croppa height
-                */
-                console.log(x, y, w, h)
-                ctx.beginPath()
-                ctx.arc(x + w / 2, y + h / 2, w / 2, 0, 2 * Math.PI, true)
-                ctx.closePath()
-            })
-        },
         onNewImage() {
             this.sliderVal = this.croppa.scaleRatio
             this.sliderMin = this.croppa.scaleRatio / 2
@@ -98,7 +90,6 @@ export default {
         },
 
         onSliderChange(evt) {
-            // console.log(evt);
             var increment = evt.target.value
             this.croppa.scaleRatio = +increment
         },
@@ -120,4 +111,6 @@ export default {
 <style lang="sass" scoped>
 input[type=range]
   width: 100%
+q-btn
+    margin:10px
 </style>

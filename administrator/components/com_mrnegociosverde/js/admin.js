@@ -2677,6 +2677,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'EmpresaAvatar',
   props: {
@@ -2690,7 +2696,8 @@ __webpack_require__.r(__webpack_exports__);
       type: Number
     },
     moveimg: {
-      type: Boolean
+      type: Boolean,
+      "default": false
     }
   },
   data: function data() {
@@ -2720,28 +2727,12 @@ __webpack_require__.r(__webpack_exports__);
   },
   beforeMount: function beforeMount() {},
   methods: {
-    onInit: function onInit() {
-      this.croppa.addClipPlugin(function (ctx, x, y, w, h) {
-        /*
-        * ctx: canvas context
-        * x: start point (top-left corner) x coordination
-        * y: start point (top-left corner) y coordination
-        * w: croppa width
-        * h: croppa height
-        */
-        console.log(x, y, w, h);
-        ctx.beginPath();
-        ctx.arc(x + w / 2, y + h / 2, w / 2, 0, 2 * Math.PI, true);
-        ctx.closePath();
-      });
-    },
     onNewImage: function onNewImage() {
       this.sliderVal = this.croppa.scaleRatio;
       this.sliderMin = this.croppa.scaleRatio / 2;
       this.sliderMax = this.croppa.scaleRatio * 2;
     },
     onSliderChange: function onSliderChange(evt) {
-      // console.log(evt);
       var increment = evt.target.value;
       this.croppa.scaleRatio = +increment;
     },
@@ -4763,7 +4754,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "input[type=range][data-v-5f950d5f] {\n  width: 100%;\n}", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "input[type=range][data-v-5f950d5f] {\n  width: 100%;\n}\nq-btn[data-v-5f950d5f] {\n  margin: 10px;\n}", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -56820,6 +56811,7 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
+    { staticStyle: { display: "flex", "flex-direction": "column" } },
     [
       _c(
         "croppa",
@@ -56837,7 +56829,8 @@ var render = function() {
             accept: ".jpeg,.png",
             "initial-size": "cover",
             "initial-position": "center",
-            "show-remove-button": true,
+            "show-remove-button": false,
+            "zoom-speed": 10,
             "remove-button-color": "black",
             "remove-button-size": 40
           },
@@ -56863,32 +56856,73 @@ var render = function() {
         ]
       ),
       _vm._v(" "),
-      !_vm.moveimg
-        ? _c("input", {
-            directives: [
-              {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.sliderVal,
-                expression: "sliderVal"
-              }
-            ],
+      _c(
+        "div",
+        {
+          staticStyle: {
+            display: "flex",
+            "flex-direction": "row",
+            "justify-content": "center"
+          }
+        },
+        [
+          _c("q-btn", {
+            staticStyle: { margin: "10px" },
             attrs: {
+              outline: "",
+              round: "",
               color: "primary",
-              type: "range",
-              min: _vm.sliderMin,
-              max: _vm.sliderMax,
-              step: ".001"
+              icon: "zoom_in"
             },
-            domProps: { value: _vm.sliderVal },
             on: {
-              input: _vm.onSliderChange,
-              __r: function($event) {
-                _vm.sliderVal = $event.target.value
+              click: function($event) {
+                return _vm.croppa.zoomIn()
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("q-btn", {
+            staticStyle: { margin: "10px" },
+            attrs: {
+              outline: "",
+              round: "",
+              color: "primary",
+              icon: "zoom_out"
+            },
+            on: {
+              click: function($event) {
+                return _vm.croppa.zoomOut()
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("q-btn", {
+            staticStyle: { margin: "10px" },
+            attrs: {
+              outline: "",
+              round: "",
+              color: "primary",
+              icon: "cameraswitch"
+            },
+            on: {
+              click: function($event) {
+                return _vm.croppa.rotate(-1)
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c("q-btn", {
+            staticStyle: { margin: "10px" },
+            attrs: { outline: "", round: "", color: "primary", icon: "delete" },
+            on: {
+              click: function($event) {
+                return _vm.croppa.remove()
               }
             }
           })
-        : _vm._e()
+        ],
+        1
+      )
     ],
     1
   )
