@@ -3830,6 +3830,13 @@ var anexarfile = [{
 
       if (!this.$refs.child.croppa.hasImage()) {
         console.log('No');
+        app.$q.notify({
+          color: 'negative',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: 'Seleccione un Logo',
+          position: 'center'
+        });
         return;
       }
 
@@ -56814,32 +56821,47 @@ var render = function() {
   return _c(
     "div",
     [
-      _c("croppa", {
-        attrs: {
-          width: _vm.width != null ? _vm.width : 250,
-          height: _vm.height != null ? _vm.height : 250,
-          placeholder: "Seleccione Imagen",
-          "canvas-color": "#eeeeee",
-          "placeholder-font-size": 19,
-          "show-loading": true,
-          "loading-size": 50,
-          "disable-drag-and-drop": false,
-          "disable-drag-to-move": _vm.moveimg != true ? false : _vm.moveimg,
-          accept: ".jpeg,.png",
-          "initial-size": "cover",
-          "initial-position": "center",
-          "show-remove-button": true,
-          "remove-button-color": "black",
-          "remove-button-size": 40
-        },
-        model: {
-          value: _vm.croppa,
-          callback: function($$v) {
-            _vm.croppa = $$v
+      _c(
+        "croppa",
+        {
+          attrs: {
+            width: _vm.width != null ? _vm.width : 250,
+            height: _vm.height != null ? _vm.height : 250,
+            placeholder: "Seleccione Imagen",
+            "canvas-color": "#eeeeee",
+            "placeholder-font-size": 19,
+            "show-loading": true,
+            "loading-size": 50,
+            "disable-drag-and-drop": false,
+            "disable-drag-to-move": _vm.moveimg != true ? false : _vm.moveimg,
+            accept: ".jpeg,.png",
+            "initial-size": "cover",
+            "initial-position": "center",
+            "show-remove-button": true,
+            "remove-button-color": "black",
+            "remove-button-size": 40
           },
-          expression: "croppa"
-        }
-      }),
+          model: {
+            value: _vm.croppa,
+            callback: function($$v) {
+              _vm.croppa = $$v
+            },
+            expression: "croppa"
+          }
+        },
+        [
+          _vm.urlImg != null
+            ? _c("img", {
+                attrs: {
+                  slot: "initial",
+                  crossOrigin: "anonymous",
+                  src: _vm.url
+                },
+                slot: "initial"
+              })
+            : _vm._e()
+        ]
+      ),
       _vm._v(" "),
       !_vm.moveimg
         ? _c("input", {

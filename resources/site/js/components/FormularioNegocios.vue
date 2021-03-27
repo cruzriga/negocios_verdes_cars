@@ -1029,6 +1029,13 @@ export default {
       const app = this;
       if (!this.$refs.child.croppa.hasImage()) {
         console.log('No')
+        app.$q.notify({
+          color: 'negative',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: 'Seleccione un Logo',
+          position:'center'
+        })
         return
       }
       var submitResult = {}

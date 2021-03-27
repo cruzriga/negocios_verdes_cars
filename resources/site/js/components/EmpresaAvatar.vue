@@ -18,7 +18,7 @@
         :show-remove-button="true"
         remove-button-color="black"
         :remove-button-size="40">
-        <!-- <img crossOrigin="anonymous" :src="urlImg!=null?url:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'" slot="initial"> -->
+        <img v-if="urlImg!=null" crossOrigin="anonymous" :src="url" slot="initial">
     </croppa>
     <!-- :initial-image="urlImg!=null?urlImg:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'"-->
     <input v-if="!moveimg" color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal">
