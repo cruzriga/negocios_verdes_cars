@@ -11,7 +11,9 @@
 defined('_JEXEC') or die('Restricted access');
 ?>
 <div style="min-height: calc(100vh - 172px);">
-    <link href="<?=JURI::base()?>components/com_MrNegociosVerde/views/MrNegociosVerde/tmpl/css/site.css" rel="stylesheet">
+    <link href="<?=JURI::base()?>components/com_mrnegociosverde/views/mrnegociosverde/tmpl/css/site.css" rel="stylesheet">
     <div id="appsite"></div>
-    <script src="<?=JURI::base()?>components/com_MrNegociosVerde/views/MrNegociosVerde/tmpl/js/site.js"></script>
+    <script src="<?=JURI::base()?>components/com_mrnegociosverde/views/mrnegociosverde/tmpl/js/site.js"></script>
 </div>
+
+

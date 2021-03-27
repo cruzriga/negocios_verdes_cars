@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="2fc0239e-deca-4b8f-910f-99a044529dc8" name="corpoguajira" url="http://72.55.174.174">
+        <fileTransfer rootFolder="/public_html/verdes" host="72.55.174.174" port="21">
+          <advancedOptions>
+            <advancedOptions compatibilityMode="true" dataProtectionLevel="Private" keepAliveCommand="LIST" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
