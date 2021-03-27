@@ -4,7 +4,7 @@
   <div class="q-gutter-lg" style="min-height: calc(100vh - 172px)">
     <q-item-label  header>
       <q-toolbar class="text-primary" style="height: 50px">
-        <q-input @keyup.enter="buscar" class="GPL__toolbar-input" dense standout="bg-primary" v-model="search" placeholder="Buscar">
+        <q-input @keyup.enter="buscar"  v-model="search" placeholder="Buscar" color="teal" >
           <template v-slot:prepend>
             <q-icon v-if="search === ''" name="search" />
             <q-icon v-else name="clear" class="cursor-pointer" @click="search = ''" />

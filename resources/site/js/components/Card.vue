@@ -1,32 +1,20 @@
 <template>
   <div class="q-pa-md row items-start q-gutter-md">
-    <q-card class="my-card" flat bordered @click="openPerfil(prop.idempresa,prop)">
-      <div v-if="prop.imagenlogo != null">
-        <div v-if="prop.imagenlogo != ''">
-          <q-img
-            class="rounded-borders"
-            :src="prop.imagenlogo"
-            height="200px"
-          />
-        </div>
-        <div v-else>
-          <q-card-section horizontal class="flex flex-center">
-            <q-img class="img-def"
-              src="../assets/imagenes/def.png"
-              contain
-            />
-          </q-card-section>
-        </div>
-      </div>
-      <div v-else>
-        <q-card-section class="flex flex-center">
-          <q-img class="img-def"
-            src="../assets/imagenes/def.png"
-            style="max-width: 300px; height: 300px;"
-            contain 
-          />
-        </q-card-section>
-      </div>
+    <q-card class="my-card" flat bordered >
+
+      <q-img
+          @click="openPerfil(prop.idempresa,prop)"
+          :src="prop.imagenlogo"
+          style="height: 318px; max-width: 318px"
+      >
+        <template v-slot:error>
+          <div class="absolute-full flex flex-center bg-white text-white">
+            <q-img src="/images/logo-negocios-verdes-header.png"/>
+          </div>
+        </template>
+      </q-img>
+
+
       <q-card-section>
         <div class="text-green-10" v-show="false">{{prop.categoria.nombre}}</div>
         <div class="text-green-7" v-show="false">{{prop.subcategoria.nombre}}</div>
@@ -70,14 +58,9 @@
           </q-item-section>
         </div>
       </q-card-section>
-      <!-- <q-slide-transition>
-        <div v-show="expanded">
-          <q-separator />
-          <q-card-section class="text-subitle2">
-            {{ lorem }}
-          </q-card-section>
-        </div>
-      </q-slide-transition> -->
+      <q-card-actions align="right">
+        <q-btn flat label="Ver perfil" icon-right="arrow_right" @click="openPerfil(prop.idempresa,prop)"/>
+      </q-card-actions>
     </q-card>
   </div>
 </template>
@@ -110,9 +93,15 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-.my-card
-  width: 320px
-.img-def
-  width: 90%
+<style lang="scss" >
+.my-card {
+  width: 320px;
+}
+.img-def {
+  width: 90%;
+}
+.row:not(#app-site-container *) {
+  margin-right: 0px !important;
+  margin-left: 0px !important;
+}
 </style>
