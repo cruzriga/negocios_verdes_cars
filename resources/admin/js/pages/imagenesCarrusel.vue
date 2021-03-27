@@ -77,6 +77,9 @@ export default {
   created() {
   },
   beforeMount() {
+    this.imgref.forEach((element,key) => {
+      this.imgref[key].imgurl = null
+    });
     if (this.imgCarrusel) {
       this.imgCarrusel.forEach(element => {
         // console.log(element)

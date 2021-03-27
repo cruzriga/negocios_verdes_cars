@@ -2189,6 +2189,10 @@ var imgref = [{
   beforeMount: function beforeMount() {
     var _this = this;
 
+    this.imgref.forEach(function (element, key) {
+      _this.imgref[key].imgurl = null;
+    });
+
     if (this.imgCarrusel) {
       this.imgCarrusel.forEach(function (element) {
         // console.log(element)
