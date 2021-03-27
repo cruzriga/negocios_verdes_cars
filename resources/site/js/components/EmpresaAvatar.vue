@@ -28,9 +28,9 @@
     <!-- <input v-if="!moveimg" color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal"> -->
     <!-- <q-slider @input ="onSliderChange" v-model="sliderVal" :min="sliderMin" :max="sliderMax" step="0.001"/> -->
     <div style="display: flex;flex-direction: row;justify-content: center;">
-        <q-btn style="margin:10px" v-on:click="croppa.zoomIn()" outline round color="primary" icon="zoom_in" />
-        <q-btn style="margin:10px" v-on:click="croppa.zoomOut()" outline round color="primary" icon="zoom_out" />
-        <q-btn style="margin:10px" v-on:click="croppa.rotate(-1)" outline round color="primary" icon="cameraswitch" />
+        <q-btn v-if="!moveimg" style="margin:10px" v-on:click="croppa.zoomIn()" outline round color="primary" icon="zoom_in" />
+        <q-btn v-if="!moveimg" style="margin:10px" v-on:click="croppa.zoomOut()" outline round color="primary" icon="zoom_out" />
+        <q-btn v-if="!moveimg" style="margin:10px" v-on:click="croppa.rotate(-1)" outline round color="primary" icon="cameraswitch" />
         <q-btn style="margin:10px" v-on:click="croppa.remove()" outline round color="primary" icon="delete" />
     </div>
 </div>

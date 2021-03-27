@@ -56956,50 +56956,56 @@ var render = function() {
           }
         },
         [
-          _c("q-btn", {
-            staticStyle: { margin: "10px" },
-            attrs: {
-              outline: "",
-              round: "",
-              color: "primary",
-              icon: "zoom_in"
-            },
-            on: {
-              click: function($event) {
-                return _vm.croppa.zoomIn()
-              }
-            }
-          }),
+          !_vm.moveimg
+            ? _c("q-btn", {
+                staticStyle: { margin: "10px" },
+                attrs: {
+                  outline: "",
+                  round: "",
+                  color: "primary",
+                  icon: "zoom_in"
+                },
+                on: {
+                  click: function($event) {
+                    return _vm.croppa.zoomIn()
+                  }
+                }
+              })
+            : _vm._e(),
           _vm._v(" "),
-          _c("q-btn", {
-            staticStyle: { margin: "10px" },
-            attrs: {
-              outline: "",
-              round: "",
-              color: "primary",
-              icon: "zoom_out"
-            },
-            on: {
-              click: function($event) {
-                return _vm.croppa.zoomOut()
-              }
-            }
-          }),
+          !_vm.moveimg
+            ? _c("q-btn", {
+                staticStyle: { margin: "10px" },
+                attrs: {
+                  outline: "",
+                  round: "",
+                  color: "primary",
+                  icon: "zoom_out"
+                },
+                on: {
+                  click: function($event) {
+                    return _vm.croppa.zoomOut()
+                  }
+                }
+              })
+            : _vm._e(),
           _vm._v(" "),
-          _c("q-btn", {
-            staticStyle: { margin: "10px" },
-            attrs: {
-              outline: "",
-              round: "",
-              color: "primary",
-              icon: "cameraswitch"
-            },
-            on: {
-              click: function($event) {
-                return _vm.croppa.rotate(-1)
-              }
-            }
-          }),
+          !_vm.moveimg
+            ? _c("q-btn", {
+                staticStyle: { margin: "10px" },
+                attrs: {
+                  outline: "",
+                  round: "",
+                  color: "primary",
+                  icon: "cameraswitch"
+                },
+                on: {
+                  click: function($event) {
+                    return _vm.croppa.rotate(-1)
+                  }
+                }
+              })
+            : _vm._e(),
           _vm._v(" "),
           _c("q-btn", {
             staticStyle: { margin: "10px" },
