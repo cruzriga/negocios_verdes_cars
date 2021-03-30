@@ -3799,12 +3799,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
-//
-//
-//
-//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Perfil',
   props: {
@@ -57585,6 +57579,16 @@ var render = function() {
             key: "before",
             fn: function() {
               return [
+                _c("q-btn", {
+                  attrs: {
+                    to: "/",
+                    outline: "",
+                    color: "teal",
+                    round: "",
+                    icon: "arrow_back"
+                  }
+                }),
+                _vm._v(" "),
                 _c("q-img", {
                   staticStyle: { height: "250px", "max-width": "250px" },
                   attrs: { src: _vm.propperfilmutable.imagenlogo },
@@ -57962,7 +57966,7 @@ var render = function() {
                                                     _c("q-icon", {
                                                       attrs: {
                                                         name:
-                                                          "img:./../media/iconssvg/gorjeo.svg"
+                                                          "img:media/iconssvg/gorjeo.svg"
                                                       }
                                                     })
                                                   ],
@@ -58034,7 +58038,7 @@ var render = function() {
                                                     _c("q-icon", {
                                                       attrs: {
                                                         name:
-                                                          "img:./../media/iconssvg/facebook.svg"
+                                                          "img:media/iconssvg/facebook.svg"
                                                       }
                                                     })
                                                   ],
@@ -58106,7 +58110,7 @@ var render = function() {
                                                     _c("q-icon", {
                                                       attrs: {
                                                         name:
-                                                          "img:./../media/iconssvg/instagram.svg"
+                                                          "img:media/iconssvg/instagram.svg"
                                                       }
                                                     })
                                                   ],
@@ -58159,50 +58163,13 @@ var render = function() {
                   "div",
                   { staticClass: "q-pa-lg" },
                   [
-                    _c(
-                      "q-toolbar",
-                      [
-                        _c(
-                          "q-toolbar-title",
-                          {
-                            staticStyle: {
-                              "padding-left": "14px",
-                              color: "#000000",
-                              "font-weight": "bolder",
-                              "font-size": "30px",
-                              height: "29px"
-                            },
-                            attrs: { size: "30px" }
-                          },
-                          [_vm._v(_vm._s(_vm.propperfilmutable.nombreempresa))]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "q-btn",
-                          {
-                            attrs: { outline: "", color: "primary" },
-                            on: {
-                              click: function($event) {
-                                return _vm.navigate()
-                              }
-                            }
-                          },
-                          [
-                            _c("q-icon", {
-                              attrs: {
-                                left: "",
-                                size: "3em",
-                                name: "arrow_back"
-                              }
-                            }),
-                            _vm._v(" "),
-                            _c("div", [_vm._v("Atras")])
-                          ],
-                          1
-                        )
-                      ],
-                      1
-                    ),
+                    _c("div", { staticClass: "text-h4" }, [
+                      _vm._v(
+                        "\n          " +
+                          _vm._s(_vm.propperfilmutable.nombreempresa) +
+                          "\n        "
+                      )
+                    ]),
                     _vm._v(" "),
                     _vm.propperfilmutable.imgcarrusel
                       ? _c(
@@ -58243,66 +58210,11 @@ var render = function() {
                           ],
                           1
                         )
-                      : _c(
-                          "div",
-                          { staticClass: "q-pa-md" },
-                          [
-                            _c(
-                              "q-carousel",
-                              {
-                                attrs: {
-                                  swipeable: "",
-                                  animated: "",
-                                  thumbnails: "",
-                                  infinite: "",
-                                  autoplay: _vm.autoplay
-                                },
-                                model: {
-                                  value: _vm.slide,
-                                  callback: function($$v) {
-                                    _vm.slide = $$v
-                                  },
-                                  expression: "slide"
-                                }
-                              },
-                              [
-                                _c("q-carousel-slide", {
-                                  attrs: {
-                                    name: 0,
-                                    "img-src":
-                                      "https://cdn.quasar.dev/img/mountains.jpg"
-                                  }
-                                }),
-                                _vm._v(" "),
-                                _c("q-carousel-slide", {
-                                  attrs: {
-                                    name: 1,
-                                    "img-src":
-                                      "https://cdn.quasar.dev/img/parallax1.jpg"
-                                  }
-                                }),
-                                _vm._v(" "),
-                                _c("q-carousel-slide", {
-                                  attrs: {
-                                    name: 2,
-                                    "img-src":
-                                      "https://cdn.quasar.dev/img/parallax2.jpg"
-                                  }
-                                }),
-                                _vm._v(" "),
-                                _c("q-carousel-slide", {
-                                  attrs: {
-                                    name: 3,
-                                    "img-src":
-                                      "https://cdn.quasar.dev/img/quasar.jpg"
-                                  }
-                                })
-                              ],
-                              1
-                            )
-                          ],
-                          1
-                        ),
+                      : _vm._e(),
+                    _vm._v(" "),
+                     false
+                      ? 0
+                      : _vm._e(),
                     _vm._v(" "),
                     _c("p", [
                       _vm._v(

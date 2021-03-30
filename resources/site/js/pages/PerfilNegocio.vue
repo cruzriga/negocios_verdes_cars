@@ -7,6 +7,7 @@
     >
 
       <template v-slot:before>
+        <q-btn to="/" outline color="teal" round icon="arrow_back"/>
         <q-img
             :src="propperfilmutable.imagenlogo"
             style="height: 250px; max-width: 250px"
@@ -102,7 +103,7 @@
                   <a _target="blank" :href="propperfilmutable.twitter">
                     <q-item>
                       <q-item-section class = "icono" avatar>
-                        <q-icon name = "img:./../media/iconssvg/gorjeo.svg"/>
+                        <q-icon name = "img:media/iconssvg/gorjeo.svg"/>
                       </q-item-section>
                       <q-item-section style="margin-left: 10px;color:#000000;" class = "titulo">Twitter</q-item-section>
                     </q-item>
@@ -110,7 +111,7 @@
                   <!-- <q-item-label caption>
                     <q-item>
                       <q-item-section style = "height: 14px;" class = "icono" avatar>
-                        <q-icon style = "font-size: 14px;" name = "img:./../media/iconssvg/gorjeo.svg"/>
+                        <q-icon style = "font-size: 14px;" name = "img:media/iconssvg/gorjeo.svg"/>
                       </q-item-section>
                       <q-item-section style = "height: 14px;" class = "titulo">Twitter</q-item-section>
                     </q-item>
@@ -128,7 +129,7 @@
                   <a _target="blank" :href="propperfilmutable.facebook">
                     <q-item>
                       <q-item-section class = "icono" avatar>
-                        <q-icon name = "img:./../media/iconssvg/facebook.svg"/>
+                        <q-icon name = "img:media/iconssvg/facebook.svg"/>
                       </q-item-section>
                       <q-item-section style="margin-left: 10px; color:#000000;" class = "titulo">Facebook</q-item-section>
                     </q-item>
@@ -136,7 +137,7 @@
                   <!-- <q-item-label caption>
                     <q-item>
                       <q-item-section style = "height: 14px;" class = "icono" avatar>
-                        <q-icon style = "font-size: 14px;" name = "img:./../media/iconssvg/facebook.svg"/>
+                        <q-icon style = "font-size: 14px;" name = "img:media/iconssvg/facebook.svg"/>
                       </q-item-section>
                       <q-item-section :href="propperfilmutable.facebook" style = "height: 14px;" class = "titulo">Facebook</q-item-section>
                     </q-item>
@@ -154,7 +155,7 @@
                   <a _target="blank" :href="propperfilmutable.instagram">
                     <q-item>
                       <q-item-section class = "icono" avatar>
-                        <q-icon name = "img:./../media/iconssvg/instagram.svg"/>
+                        <q-icon name = "img:media/iconssvg/instagram.svg"/>
                       </q-item-section>
                       <q-item-section style="margin-left: 10px;color:#000000;" class = "titulo">Instagram</q-item-section>
                     </q-item>
@@ -163,7 +164,7 @@
                   <q-item-label caption>
                     <q-item>
                       <q-item-section style = "height: 14px;" class = "icono" avatar>
-                        <q-icon style = "font-size: 14px;" name = "img:./../media/iconssvg/instagram.svg"/>
+                        <q-icon style = "font-size: 14px;" name = "img:media/iconssvg/instagram.svg"/>
                       </q-item-section>
                       <q-item-section style = "height: 14px;" class = "titulo">Instagram</q-item-section>
                     </q-item>
@@ -183,17 +184,10 @@
 
       <template v-slot:after>
         <div class="q-pa-lg">
-          <q-toolbar>
-            <q-toolbar-title size="30px" style="padding-left: 14px;color:#000000;font-weight: bolder;font-size: 30px;height: 29px;">{{propperfilmutable.nombreempresa}}</q-toolbar-title>
-            <!-- <q-btn flat @click="drawer = !drawer" round dense icon="menu" /> -->
-            <!-- <q-icon  style="font-size: 3em;" v-on:click="navigate()" name="arrow_back" /> -->
-            <q-btn v-on:click="navigate()" outline color="primary" >
-              <q-icon left size="3em" name="arrow_back" />
-              <div>Atras</div>
-            </q-btn>
-            <!-- <q-btn style="margin-left: 15px;" v-on:click="navigate()" size="15px" class="q-px-xl q-py-xs" color="primary" label="Atras" /> -->
-          </q-toolbar>
 
+          <div class="text-h4">
+            {{propperfilmutable.nombreempresa}}
+          </div>
           <div v-if="propperfilmutable.imgcarrusel" class="q-pa-md">
             <q-carousel
                 swipeable
@@ -208,7 +202,7 @@
               <q-carousel-slide :name="4" img-src="https://cdn.quasar.dev/img/quasar.jpg" /> -->
             </q-carousel>
           </div>
-          <div v-else class="q-pa-md">
+          <div v-if="false" class="q-pa-md">
             <q-carousel
                 swipeable
                 animated
