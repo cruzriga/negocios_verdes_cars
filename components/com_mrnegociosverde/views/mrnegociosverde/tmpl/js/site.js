@@ -3401,6 +3401,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'ListaEmpresas',
@@ -55386,10 +55388,13 @@ var render = function() {
             { attrs: { align: "right" } },
             [
               _c("q-btn", {
+                staticClass: "q-px-md",
                 attrs: {
-                  flat: "",
-                  label: "Ver perfil",
-                  "icon-right": "arrow_right"
+                  outline: "",
+                  rounded: "",
+                  color: "teal",
+                  size: "sm",
+                  label: "Ver perfil"
                 },
                 on: {
                   click: function($event) {
@@ -57473,9 +57478,9 @@ var render = function() {
               _c(
                 "div",
                 [
-                  _c("span", { staticClass: "q-mr-md" }, [
+                  _c("span", { staticClass: "q-mr-md text-teal text-body2" }, [
                     _vm._v(
-                      " " +
+                      "\n            " +
                         _vm._s(
                           this.$store.state.listado.ListaEmpresas.data.pagina +
                             1
@@ -57484,7 +57489,7 @@ var render = function() {
                         _vm._s(
                           this.$store.state.listado.ListaEmpresas.data.total
                         ) +
-                        " "
+                        "\n          "
                     )
                   ]),
                   _vm._v(" "),
@@ -57493,7 +57498,8 @@ var render = function() {
                       flat: "",
                       round: "",
                       dense: "",
-                      icon: "arrow_back_ios"
+                      icon: "arrow_back_ios",
+                      color: "teal"
                     },
                     on: {
                       click: function($event) {
@@ -57507,7 +57513,8 @@ var render = function() {
                       flat: "",
                       round: "",
                       dense: "",
-                      icon: "arrow_forward_ios"
+                      icon: "arrow_forward_ios",
+                      color: "teal"
                     },
                     on: {
                       click: function($event) {

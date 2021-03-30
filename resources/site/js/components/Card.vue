@@ -59,7 +59,7 @@
         </div>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat label="Ver perfil" icon-right="arrow_right" @click="openPerfil(prop.idempresa,prop)"/>
+        <q-btn outline rounded color="teal" size="sm" class="q-px-md" label="Ver perfil"  @click="openPerfil(prop.idempresa,prop)"/>
       </q-card-actions>
     </q-card>
   </div>

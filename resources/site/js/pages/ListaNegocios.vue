@@ -12,7 +12,9 @@
         </q-input>
         <q-space/>
         <div>
-            <span class="q-mr-md"> {{this.$store.state.listado.ListaEmpresas.data.pagina+1}} - {{this.$store.state.listado.ListaEmpresas.data.total}} </span> <q-btn @click="backPage(-1)" flat round dense icon="arrow_back_ios" class=""/> <q-btn @click="nextPage(1)" flat round dense icon="arrow_forward_ios" />
+            <span class="q-mr-md text-teal text-body2">
+              {{this.$store.state.listado.ListaEmpresas.data.pagina+1}} - {{this.$store.state.listado.ListaEmpresas.data.total}}
+            </span> <q-btn @click="backPage(-1)" flat round dense icon="arrow_back_ios"  color="teal"/> <q-btn @click="nextPage(1)" flat round dense icon="arrow_forward_ios" color="teal" />
         </div>
       </q-toolbar>
     </q-item-label>
