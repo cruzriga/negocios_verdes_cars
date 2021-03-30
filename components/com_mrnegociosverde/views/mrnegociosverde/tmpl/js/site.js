@@ -3801,6 +3801,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Perfil',
   props: {
@@ -58178,6 +58183,44 @@ var render = function() {
                           "\n        "
                       )
                     ]),
+                    _vm._v(" "),
+                    _c(
+                      "div",
+                      [
+                        _vm.propperfilmutable.categoria.nombre
+                          ? _c("q-chip", [
+                              _vm._v(
+                                _vm._s(_vm.propperfilmutable.categoria.nombre) +
+                                  " "
+                              )
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.propperfilmutable.subcategoria.nombre
+                          ? _c("q-chip", [
+                              _vm._v(
+                                _vm._s(
+                                  _vm.propperfilmutable.subcategoria.nombre
+                                ) + " "
+                              )
+                            ])
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.propperfilmutable.tiposubcategoria.nombre
+                          ? _c("q-chip", [
+                              _vm._v(
+                                " " +
+                                  _vm._s(
+                                    _vm.propperfilmutable.tiposubcategoria
+                                      .nombre
+                                  ) +
+                                  " "
+                              )
+                            ])
+                          : _vm._e()
+                      ],
+                      1
+                    ),
                     _vm._v(" "),
                     _vm.propperfilmutable.imgcarrusel
                       ? _c(

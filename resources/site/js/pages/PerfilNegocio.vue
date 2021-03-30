@@ -188,6 +188,11 @@
           <div class="text-h4 q-pb-lg">
             {{propperfilmutable.nombreempresa}}
           </div>
+          <div>
+            <q-chip v-if="propperfilmutable.categoria.nombre">{{propperfilmutable.categoria.nombre}} </q-chip>
+            <q-chip v-if="propperfilmutable.subcategoria.nombre">{{propperfilmutable.subcategoria.nombre}} </q-chip>
+            <q-chip v-if="propperfilmutable.tiposubcategoria.nombre"> {{propperfilmutable.tiposubcategoria.nombre}} </q-chip>
+          </div>
           <div v-if="propperfilmutable.imgcarrusel" class="q-pa-md">
             <q-carousel
                 swipeable
