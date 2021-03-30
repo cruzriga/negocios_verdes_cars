@@ -3782,6 +3782,29 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Perfil',
   props: {
@@ -3808,13 +3831,18 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     console.log(this.propperfil);
 
     if (this.propperfil == null) {
+      console.log('Entro');
       this.cargarempresa(this.idEmpresa);
     } else {
-      this.video_id = this.propperfilmutable.linkvideo.split('v=')[1];
-      var ampersandPosition = this.video_id.indexOf('&');
+      if (this.propperfilmutable.linkvideo != null && this.propperfilmutable.linkvideo.split('v=').length > 1) {
+        this.video_id = this.propperfilmutable.linkvideo.split('v=')[1];
+        var ampersandPosition = this.video_id.indexOf('&');
 
-      if (ampersandPosition != -1 && this.propperfilmutable.linkvideo != null) {
-        this.video_id = this.video_id.substring(0, ampersandPosition);
+        if (ampersandPosition != -1 && this.propperfilmutable.linkvideo != null) {
+          this.video_id = this.video_id.substring(0, ampersandPosition);
+        } else {
+          this.video_id = 'rfD-UKuod18';
+        }
       } else {
         this.video_id = 'rfD-UKuod18';
       }
@@ -3839,21 +3867,26 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 2:
                 _this.propperfilmutable = _context.sent;
-                _this.video_id = _this.propperfilmutable.linkvideo.split('v=')[1];
-                ampersandPosition = _this.video_id.indexOf('&');
 
-                if (ampersandPosition != -1 && _this.propperfilmutable.linkvideo != null) {
-                  _this.video_id = _this.video_id.substring(0, ampersandPosition);
+                if (_this.propperfilmutable.linkvideo != null && _this.propperfilmutable.linkvideo.split('v=').length > 1) {
+                  _this.video_id = _this.propperfilmutable.linkvideo.split('v=')[1];
+                  ampersandPosition = _this.video_id.indexOf('&');
+
+                  if (ampersandPosition != -1 && _this.propperfilmutable.linkvideo != null) {
+                    _this.video_id = _this.video_id.substring(0, ampersandPosition);
+                  } else {
+                    _this.video_id = 'rfD-UKuod18';
+                  }
                 } else {
                   _this.video_id = 'rfD-UKuod18';
                 }
 
                 _this.propperfilmutable.cumplimiento = parseInt(_this.propperfilmutable.cumplimiento);
-                _this.propperfilmutable.adic = parseInt(_this.propperfilmutable.adic);
-                console.log(_this.propperfilmutable);
+                _this.propperfilmutable.adic = parseInt(_this.propperfilmutable.adic); // console.log(this.propperfilmutable);
+
                 return _context.abrupt("return");
 
-              case 10:
+              case 7:
               case "end":
                 return _context.stop();
             }
@@ -55443,7 +55476,7 @@ var render = function() {
                 attrs: {
                   slot: "initial",
                   crossOrigin: "anonymous",
-                  src: _vm.url
+                  src: "verdes/" + _vm.url
                 },
                 slot: "initial"
               })
@@ -57906,17 +57939,15 @@ var render = function() {
                                       "q-item-section",
                                       { staticClass: "perfilempresa" },
                                       [
-                                        _c("q-item-label", [
-                                          _vm._v(
-                                            _vm._s(
-                                              _vm.propperfilmutable.twitter
-                                            )
-                                          )
-                                        ]),
-                                        _vm._v(" "),
                                         _c(
-                                          "q-item-label",
-                                          { attrs: { caption: "" } },
+                                          "a",
+                                          {
+                                            attrs: {
+                                              _target: "blank",
+                                              href:
+                                                _vm.propperfilmutable.twitter
+                                            }
+                                          },
                                           [
                                             _c(
                                               "q-item",
@@ -57925,16 +57956,10 @@ var render = function() {
                                                   "q-item-section",
                                                   {
                                                     staticClass: "icono",
-                                                    staticStyle: {
-                                                      height: "14px"
-                                                    },
                                                     attrs: { avatar: "" }
                                                   },
                                                   [
                                                     _c("q-icon", {
-                                                      staticStyle: {
-                                                        "font-size": "14px"
-                                                      },
                                                       attrs: {
                                                         name:
                                                           "img:./../media/iconssvg/gorjeo.svg"
@@ -57949,7 +57974,8 @@ var render = function() {
                                                   {
                                                     staticClass: "titulo",
                                                     staticStyle: {
-                                                      height: "14px"
+                                                      "margin-left": "10px",
+                                                      color: "#000000"
                                                     }
                                                   },
                                                   [_vm._v("Twitter")]
@@ -57960,8 +57986,7 @@ var render = function() {
                                           ],
                                           1
                                         )
-                                      ],
-                                      1
+                                      ]
                                     )
                                   ],
                                   1
@@ -57986,17 +58011,15 @@ var render = function() {
                                       "q-item-section",
                                       { staticClass: "perfilempresa" },
                                       [
-                                        _c("q-item-label", [
-                                          _vm._v(
-                                            _vm._s(
-                                              _vm.propperfilmutable.facebook
-                                            )
-                                          )
-                                        ]),
-                                        _vm._v(" "),
                                         _c(
-                                          "q-item-label",
-                                          { attrs: { caption: "" } },
+                                          "a",
+                                          {
+                                            attrs: {
+                                              _target: "blank",
+                                              href:
+                                                _vm.propperfilmutable.facebook
+                                            }
+                                          },
                                           [
                                             _c(
                                               "q-item",
@@ -58005,16 +58028,10 @@ var render = function() {
                                                   "q-item-section",
                                                   {
                                                     staticClass: "icono",
-                                                    staticStyle: {
-                                                      height: "14px"
-                                                    },
                                                     attrs: { avatar: "" }
                                                   },
                                                   [
                                                     _c("q-icon", {
-                                                      staticStyle: {
-                                                        "font-size": "14px"
-                                                      },
                                                       attrs: {
                                                         name:
                                                           "img:./../media/iconssvg/facebook.svg"
@@ -58029,7 +58046,8 @@ var render = function() {
                                                   {
                                                     staticClass: "titulo",
                                                     staticStyle: {
-                                                      height: "14px"
+                                                      "margin-left": "10px",
+                                                      color: "#000000"
                                                     }
                                                   },
                                                   [_vm._v("Facebook")]
@@ -58040,8 +58058,7 @@ var render = function() {
                                           ],
                                           1
                                         )
-                                      ],
-                                      1
+                                      ]
                                     )
                                   ],
                                   1
@@ -58066,17 +58083,15 @@ var render = function() {
                                       "q-item-section",
                                       { staticClass: "perfilempresa" },
                                       [
-                                        _c("q-item-label", [
-                                          _vm._v(
-                                            _vm._s(
-                                              _vm.propperfilmutable.instagram
-                                            )
-                                          )
-                                        ]),
-                                        _vm._v(" "),
                                         _c(
-                                          "q-item-label",
-                                          { attrs: { caption: "" } },
+                                          "a",
+                                          {
+                                            attrs: {
+                                              _target: "blank",
+                                              href:
+                                                _vm.propperfilmutable.instagram
+                                            }
+                                          },
                                           [
                                             _c(
                                               "q-item",
@@ -58085,16 +58100,10 @@ var render = function() {
                                                   "q-item-section",
                                                   {
                                                     staticClass: "icono",
-                                                    staticStyle: {
-                                                      height: "14px"
-                                                    },
                                                     attrs: { avatar: "" }
                                                   },
                                                   [
                                                     _c("q-icon", {
-                                                      staticStyle: {
-                                                        "font-size": "14px"
-                                                      },
                                                       attrs: {
                                                         name:
                                                           "img:./../media/iconssvg/instagram.svg"
@@ -58109,7 +58118,8 @@ var render = function() {
                                                   {
                                                     staticClass: "titulo",
                                                     staticStyle: {
-                                                      height: "14px"
+                                                      "margin-left": "10px",
+                                                      color: "#000000"
                                                     }
                                                   },
                                                   [_vm._v("Instagram")]
@@ -58120,8 +58130,7 @@ var render = function() {
                                           ],
                                           1
                                         )
-                                      ],
-                                      1
+                                      ]
                                     )
                                   ],
                                   1
@@ -58509,7 +58518,7 @@ var render = function() {
                                     _c(
                                       "q-item-label",
                                       { attrs: { caption: "" } },
-                                      [_vm._v("5 min ago")]
+                                      [_vm._v(_vm._s(producto.fechaCreacion))]
                                     )
                                   ],
                                   1

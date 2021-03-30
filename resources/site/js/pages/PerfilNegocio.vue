@@ -98,15 +98,23 @@
               <q-separator spaced inset/>
               <q-item>
                 <q-item-section class = "perfilempresa">
-                  <q-item-label>{{ propperfilmutable.twitter }}</q-item-label>
-                  <q-item-label caption>
+                  <!-- <q-item-label>{{ propperfilmutable.twitter }}</q-item-label> -->
+                  <a _target="blank" :href="propperfilmutable.twitter">
+                    <q-item>
+                      <q-item-section class = "icono" avatar>
+                        <q-icon name = "img:./../media/iconssvg/gorjeo.svg"/>
+                      </q-item-section>
+                      <q-item-section style="margin-left: 10px;color:#000000;" class = "titulo">Twitter</q-item-section>
+                    </q-item>
+                   </a>
+                  <!-- <q-item-label caption>
                     <q-item>
                       <q-item-section style = "height: 14px;" class = "icono" avatar>
                         <q-icon style = "font-size: 14px;" name = "img:./../media/iconssvg/gorjeo.svg"/>
                       </q-item-section>
                       <q-item-section style = "height: 14px;" class = "titulo">Twitter</q-item-section>
                     </q-item>
-                  </q-item-label>
+                  </q-item-label> -->
                 </q-item-section>
 
 
@@ -117,15 +125,22 @@
               <q-separator spaced inset/>
               <q-item>
                 <q-item-section class = "perfilempresa">
-                  <q-item-label>{{ propperfilmutable.facebook }}</q-item-label>
-                  <q-item-label caption>
+                  <a _target="blank" :href="propperfilmutable.facebook">
+                    <q-item>
+                      <q-item-section class = "icono" avatar>
+                        <q-icon name = "img:./../media/iconssvg/facebook.svg"/>
+                      </q-item-section>
+                      <q-item-section style="margin-left: 10px; color:#000000;" class = "titulo">Facebook</q-item-section>
+                    </q-item>
+                   </a>
+                  <!-- <q-item-label caption>
                     <q-item>
                       <q-item-section style = "height: 14px;" class = "icono" avatar>
                         <q-icon style = "font-size: 14px;" name = "img:./../media/iconssvg/facebook.svg"/>
                       </q-item-section>
-                      <q-item-section style = "height: 14px;" class = "titulo">Facebook</q-item-section>
+                      <q-item-section :href="propperfilmutable.facebook" style = "height: 14px;" class = "titulo">Facebook</q-item-section>
                     </q-item>
-                  </q-item-label>
+                  </q-item-label> -->
                 </q-item-section>
 
 
@@ -136,7 +151,15 @@
               <q-separator spaced inset/>
               <q-item>
                 <q-item-section class = "perfilempresa">
-                  <q-item-label>{{ propperfilmutable.instagram }}</q-item-label>
+                  <a _target="blank" :href="propperfilmutable.instagram">
+                    <q-item>
+                      <q-item-section class = "icono" avatar>
+                        <q-icon name = "img:./../media/iconssvg/instagram.svg"/>
+                      </q-item-section>
+                      <q-item-section style="margin-left: 10px;color:#000000;" class = "titulo">Instagram</q-item-section>
+                    </q-item>
+                   </a>
+                  <!-- <q-item-label>{{ propperfilmutable.instagram }}</q-item-label>
                   <q-item-label caption>
                     <q-item>
                       <q-item-section style = "height: 14px;" class = "icono" avatar>
@@ -144,7 +167,7 @@
                       </q-item-section>
                       <q-item-section style = "height: 14px;" class = "titulo">Instagram</q-item-section>
                     </q-item>
-                  </q-item-label>
+                  </q-item-label> -->
                 </q-item-section>
 
 
@@ -278,7 +301,7 @@
                 </q-item-section>
 
                 <q-item-section side top>
-                  <q-item-label caption>5 min ago</q-item-label>
+                  <q-item-label caption>{{producto.fechaCreacion}}</q-item-label>
                 </q-item-section>
               </q-item>
               <q-separator v-if="propperfilmutable.productos.length!=count+1" spaced />
@@ -323,13 +346,18 @@ export default {
     this.propperfilmutable = this.propperfil
     console.log(this.propperfil);
     if (this.propperfil == null) {
+      console.log('Entro')
       this.cargarempresa(this.idEmpresa);
     } else {
-      this.video_id = this.propperfilmutable.linkvideo.split('v=')[1];
-      var ampersandPosition = this.video_id.indexOf('&');
-      if (ampersandPosition != -1 && this.propperfilmutable.linkvideo != null) {
-        this.video_id = this.video_id.substring(0, ampersandPosition);
-      } else {
+      if (this.propperfilmutable.linkvideo!=null && this.propperfilmutable.linkvideo.split('v=').length>1) {        
+        this.video_id = this.propperfilmutable.linkvideo.split('v=')[1];
+        var ampersandPosition = this.video_id.indexOf('&');
+        if (ampersandPosition != -1 && this.propperfilmutable.linkvideo != null) {
+          this.video_id = this.video_id.substring(0, ampersandPosition);
+        } else {
+          this.video_id = 'rfD-UKuod18'
+        }
+      }else{
         this.video_id = 'rfD-UKuod18'
       }
       this.propperfilmutable.cumplimiento = parseInt(this.propperfilmutable.cumplimiento)
@@ -341,16 +369,20 @@ export default {
   methods: {
     async cargarempresa(idempresa) {
       this.propperfilmutable = await this.buscar(idempresa);
-      this.video_id = this.propperfilmutable.linkvideo.split('v=')[1];
-      var ampersandPosition = this.video_id.indexOf('&');
-      if (ampersandPosition != -1 && this.propperfilmutable.linkvideo != null) {
-        this.video_id = this.video_id.substring(0, ampersandPosition);
-      } else {
+      if (this.propperfilmutable.linkvideo!=null && this.propperfilmutable.linkvideo.split('v=').length>1) {        
+        this.video_id = this.propperfilmutable.linkvideo.split('v=')[1];
+        var ampersandPosition = this.video_id.indexOf('&');
+        if (ampersandPosition != -1 && this.propperfilmutable.linkvideo != null) {
+          this.video_id = this.video_id.substring(0, ampersandPosition);
+        } else {
+          this.video_id = 'rfD-UKuod18'
+        }
+      }else{
         this.video_id = 'rfD-UKuod18'
       }
       this.propperfilmutable.cumplimiento = parseInt(this.propperfilmutable.cumplimiento)
       this.propperfilmutable.adic = parseInt(this.propperfilmutable.adic)
-      console.log(this.propperfilmutable);
+      // console.log(this.propperfilmutable);
       return
     },
     buscar(idempresa) {

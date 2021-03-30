@@ -56938,7 +56938,7 @@ var render = function() {
                 attrs: {
                   slot: "initial",
                   crossOrigin: "anonymous",
-                  src: _vm.url
+                  src: "verdes/" + _vm.url
                 },
                 slot: "initial"
               })
