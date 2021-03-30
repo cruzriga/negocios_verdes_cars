@@ -7,7 +7,7 @@
     >
 
       <template v-slot:before>
-        <q-btn to="/" outline color="teal" round icon="arrow_back"/>
+        <q-btn to="/" outline color="teal" round icon="arrow_back" class="q-mb-md"/>
         <q-img
             :src="propperfilmutable.imagenlogo"
             style="height: 250px; max-width: 250px"
@@ -183,9 +183,9 @@
       </template>
 
       <template v-slot:after>
-        <div class="q-pa-lg">
+        <div class="q-px-lg q-py-md">
 
-          <div class="text-h4">
+          <div class="text-h4 q-pb-lg">
             {{propperfilmutable.nombreempresa}}
           </div>
           <div v-if="propperfilmutable.imgcarrusel" class="q-pa-md">
@@ -202,7 +202,7 @@
               <q-carousel-slide :name="4" img-src="https://cdn.quasar.dev/img/quasar.jpg" /> -->
             </q-carousel>
           </div>
-          <div v-if="false" class="q-pa-md">
+          <div v-if="false" class="q-pa-lg">
             <q-carousel
                 swipeable
                 animated
@@ -217,7 +217,7 @@
               <q-carousel-slide :name="3" img-src="https://cdn.quasar.dev/img/quasar.jpg" />
             </q-carousel>
           </div>
-          <p>
+          <p class="q-py-lg">
             {{propperfilmutable.descripcion}}
           </p>
           <div class="row" style="padding: 30px 0px">

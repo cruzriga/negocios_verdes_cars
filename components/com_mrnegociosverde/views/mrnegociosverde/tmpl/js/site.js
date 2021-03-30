@@ -57580,6 +57580,7 @@ var render = function() {
             fn: function() {
               return [
                 _c("q-btn", {
+                  staticClass: "q-mb-md",
                   attrs: {
                     to: "/",
                     outline: "",
@@ -58161,9 +58162,9 @@ var render = function() {
               return [
                 _c(
                   "div",
-                  { staticClass: "q-pa-lg" },
+                  { staticClass: "q-px-lg q-py-md" },
                   [
-                    _c("div", { staticClass: "text-h4" }, [
+                    _c("div", { staticClass: "text-h4 q-pb-lg" }, [
                       _vm._v(
                         "\n          " +
                           _vm._s(_vm.propperfilmutable.nombreempresa) +
@@ -58216,7 +58217,7 @@ var render = function() {
                       ? 0
                       : _vm._e(),
                     _vm._v(" "),
-                    _c("p", [
+                    _c("p", { staticClass: "q-py-lg" }, [
                       _vm._v(
                         "\n          " +
                           _vm._s(_vm.propperfilmutable.descripcion) +
