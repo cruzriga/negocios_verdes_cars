@@ -11,6 +11,9 @@
 defined('_JEXEC') or die('Restricted access');
 ?>
 <div style="min-height: calc(100vh - 172px);">
+    <script>
+        const  base_url  = '<?=JURI::base()?>';
+    </script>
     <link href="<?=JURI::base()?>components/com_mrnegociosverde/views/mrnegociosverde/tmpl/css/site.css" rel="stylesheet">
     <div id="appsite"></div>
     <script src="<?=JURI::base()?>components/com_mrnegociosverde/views/mrnegociosverde/tmpl/js/site.js?v=2.<?= time()?>"></script>
