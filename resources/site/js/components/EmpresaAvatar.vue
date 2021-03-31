@@ -12,7 +12,7 @@
         :loading-size="50"
         :disable-drag-and-drop="false"
         :disable-drag-to-move="moveimg!=true?false:moveimg"
-        accept=".jpeg,.png"
+        accept=".jpeg,.png, .jpg"
         initial-size="cover"
         initial-position="center"
         :show-remove-button="false"
