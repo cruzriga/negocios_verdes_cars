@@ -2761,7 +2761,7 @@ __webpack_require__.r(__webpack_exports__);
     // console.log(this.urlImg)
     // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
     // console.log(this.urlImg)
-    this.url = this.urlImg != null ? 'http://' + document.location.host + '/' + this.urlImg : null; // var image = new Image()
+    this.url = this.urlImg != null ? 'http://' + document.location.host + '/verdes/' + this.urlImg : null; // var image = new Image()
     // // Notice: it's necessary to set "crossorigin" attribute before "src" attribute.
     // image.setAttribute('crossorigin', 'anonymous')
     // image.src = this.url!=null?this.url:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'
