@@ -22,7 +22,7 @@
         <q-item>
           <q-item-section avatar style="width: 90px;">
             <q-img
-                :src="'../'+empresa.imagenlogo"
+                :src="root_url+empresa.imagenlogo"
                 style="height: 80px;"
             >
               <template v-slot:error>
@@ -215,7 +215,8 @@ export default {
       pagina:0,
       numlist: 50,
       labeladic:this.adic,
-      labelcump:this.cump
+      labelcump:this.cump,
+      root_url
     }
   },
   beforeMount () {

@@ -9,10 +9,13 @@
  
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
+use Joomla\CMS\Uri\Uri;
+$uri = Uri::getInstance();
 ?>
 <div style="min-height: calc(100vh - 172px);">
     <script>
         const  base_url  = '<?=JURI::base()?>';
+        const  root_url  = '<?=$uri->root();?>';
     </script>
     <link href="<?=JURI::base()?>components/com_mrnegociosverde/views/mrnegociosverde/tmpl/css/site.css" rel="stylesheet">
     <div id="appsite"></div>

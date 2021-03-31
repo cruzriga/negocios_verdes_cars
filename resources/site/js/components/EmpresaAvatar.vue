@@ -67,11 +67,10 @@ export default {
         // console.log(this.urlImg)
         // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
         // console.log(this.urlImg)
-        let pathname = new URL(this.urlImg).pathname
 
-        console.log(pathname)
-        this.url =this.urlImg!=null?'http://'+document.location.host+'/verdes/'+pathname:null;
 
+
+        this.url =this.urlImg!=null?root_url+this.urlImg:null;
 
         // var image = new Image()
         // // Notice: it's necessary to set "crossorigin" attribute before "src" attribute.
