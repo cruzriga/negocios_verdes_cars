@@ -2677,84 +2677,68 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
  // import { mapState } from 'vuex'
 
 var optionsmunicipios = [{
   label: 'Albania',
   value: 'Albania',
-  icon: 'img:./../media/iconospng/Flag_of_Albania.png'
+  icon: 'img:media/iconospng/Flag_of_Albania.png'
 }, {
   label: 'Barrancas',
   value: 'Barrancas',
-  icon: 'img:./../media/iconospng/Flag_of_Barrancas.png'
+  icon: 'img:media/iconospng/Flag_of_Barrancas.png'
 }, {
   label: 'Dibulla',
   value: 'Dibulla',
-  icon: 'img:./../media/iconospng/Flag_of_Dibulla.png'
+  icon: 'img:media/iconospng/Flag_of_Dibulla.png'
 }, {
   label: 'Distracción',
   value: 'Distracción',
-  icon: 'img:./../media/iconospng/Flag_of_Distracción.png'
+  icon: 'img:media/iconospng/Flag_of_Distracción.png'
 }, {
   label: 'El Molino',
   value: 'El Molino',
-  icon: 'img:./../media/iconospng/Flag_of_El_Molino.png'
+  icon: 'img:media/iconospng/Flag_of_El_Molino.png'
 }, {
   label: 'Fonseca',
   value: 'Fonseca',
-  icon: 'img:./../media/iconospng/Flag_of_Fonseca.png'
+  icon: 'img:media/iconospng/Flag_of_Fonseca.png'
 }, {
   label: 'Hatonuevo',
   value: 'Hatonuevo',
-  icon: 'img:./../media/iconospng/Flag_of_Hatonuevo.png'
+  icon: 'img:media/iconospng/Flag_of_Hatonuevo.png'
 }, {
   label: 'La Jagua del Pilar',
   value: 'La Jagua del Pilar',
-  icon: 'img:./../media/iconospng/Flag_of_La_Jagua_del_Pilar.png'
+  icon: 'img:media/iconospng/Flag_of_La_Jagua_del_Pilar.png'
 }, {
   label: 'Maicao',
   value: 'Maicao',
-  icon: 'img:./../media/iconospng/Flag_of_Maicao.png'
+  icon: 'img:media/iconospng/Flag_of_Maicao.png'
 }, {
   label: 'Manaure',
   value: 'Manaure',
-  icon: 'img:./../media/iconospng/Flag_of_Manaure.png'
+  icon: 'img:media/iconospng/Flag_of_Manaure.png'
 }, {
   label: 'Riohacha',
   value: 'Riohacha',
-  icon: 'img:./../media/iconospng/Flag_of_Riohacha.png'
+  icon: 'img:media/iconospng/Flag_of_Riohacha.png'
 }, {
   label: 'San Juan del Cesar',
   value: 'San Juan del Cesar',
-  icon: 'img:./../media/iconospng/Flag_of_San_Juan_del_Cesar.png'
+  icon: 'img:media/iconospng/Flag_of_San_Juan_del_Cesar.png'
 }, {
   label: 'Uribia',
   value: 'Uribia',
-  icon: 'img:./../media/iconospng/Flag_of_Uribia.png'
+  icon: 'img:media/iconospng/Flag_of_Uribia.png'
 }, {
   label: 'Urumita',
   value: 'Urumita',
-  icon: 'img:./../media/iconospng/Flag_of_Urumita.png'
+  icon: 'img:media/iconospng/Flag_of_Urumita.png'
 }, {
   label: 'Villanueva',
   value: 'Villanueva',
-  icon: 'img:./../media/iconospng/Flag_of_Villanueva.png'
+  icon: 'img:media/iconospng/Flag_of_Villanueva.png'
 }];
 var anexofile = [{
   name: 'fFichaInscripcion',
@@ -55504,7 +55488,7 @@ var render = function() {
                 attrs: {
                   outline: "",
                   round: "",
-                  color: "primary",
+                  color: "teal",
                   icon: "zoom_in"
                 },
                 on: {
@@ -55521,7 +55505,7 @@ var render = function() {
                 attrs: {
                   outline: "",
                   round: "",
-                  color: "primary",
+                  color: "teal",
                   icon: "zoom_out"
                 },
                 on: {
@@ -55538,7 +55522,7 @@ var render = function() {
                 attrs: {
                   outline: "",
                   round: "",
-                  color: "primary",
+                  color: "teal",
                   icon: "cameraswitch"
                 },
                 on: {
@@ -55551,7 +55535,7 @@ var render = function() {
           _vm._v(" "),
           _c("q-btn", {
             staticStyle: { margin: "10px" },
-            attrs: { outline: "", round: "", color: "primary", icon: "delete" },
+            attrs: { outline: "", round: "", color: "teal", icon: "delete" },
             on: {
               click: function($event) {
                 return _vm.croppa.remove()
@@ -56007,8 +55991,7 @@ var render = function() {
                                     return [
                                       _c("q-icon", {
                                         attrs: {
-                                          name:
-                                            "img:./../media/iconssvg/gorjeo.svg"
+                                          name: "img:media/iconssvg/gorjeo.svg"
                                         }
                                       })
                                     ]
@@ -56055,7 +56038,7 @@ var render = function() {
                                       _c("q-icon", {
                                         attrs: {
                                           name:
-                                            "img:./../media/iconssvg/facebook.svg"
+                                            "img:media/iconssvg/facebook.svg"
                                         }
                                       })
                                     ]
@@ -56102,7 +56085,7 @@ var render = function() {
                                       _c("q-icon", {
                                         attrs: {
                                           name:
-                                            "img:./../media/iconssvg/instagram.svg"
+                                            "img:media/iconssvg/instagram.svg"
                                         }
                                       })
                                     ]
@@ -56152,8 +56135,7 @@ var render = function() {
                                     return [
                                       _c("q-icon", {
                                         attrs: {
-                                          name:
-                                            "img:./../media/iconssvg/youtube.svg"
+                                          name: "img:media/iconssvg/youtube.svg"
                                         }
                                       })
                                     ]
@@ -56516,30 +56498,26 @@ var render = function() {
                   _c("q-card-section", [
                     _c(
                       "div",
-                      { staticClass: "row justify-center items-center" },
+                      { staticClass: "row fit justify-between" },
                       [
-                        _c("div", { staticClass: "col-12 col-md-3" }, [
-                          _c("div", { staticClass: "text-h6" }, [
-                            _vm._v("Productos")
-                          ])
+                        _c("span", { staticClass: "text-h6" }, [
+                          _vm._v("Productos")
                         ]),
                         _vm._v(" "),
-                        _c(
-                          "div",
-                          { staticClass: "col-12 col-md-9" },
-                          [
-                            _c("q-icon", {
-                              attrs: {
-                                size: "2rem",
-                                color: "primary",
-                                name: "add"
-                              },
-                              on: { click: _vm.addVisa }
-                            })
-                          ],
-                          1
-                        )
-                      ]
+                        _c("q-btn", {
+                          attrs: {
+                            size: "",
+                            outline: "",
+                            rounded: "",
+                            label: "Agregar",
+                            "no-caps": "",
+                            color: "teal",
+                            icon: "add"
+                          },
+                          on: { click: _vm.addVisa }
+                        })
+                      ],
+                      1
                     )
                   ]),
                   _vm._v(" "),
@@ -56547,121 +56525,125 @@ var render = function() {
                   _vm._v(" "),
                   _c(
                     "q-card-section",
+                    { staticClass: "q-pa-none" },
                     [
-                      _vm._l(
-                        _vm.formulario.productos.filter(function(post) {
-                          return post.activo == 1
-                        }),
-                        function(applicant, counter) {
-                          return _c(
-                            "q-item",
-                            {
-                              key: counter,
-                              staticClass: "row justify-center items-center"
-                            },
-                            [
-                              _c(
-                                "q-item-section",
-                                { attrs: { top: "" } },
-                                [
-                                  _c(
-                                    "q-item-label",
-                                    { attrs: { lines: "1" } },
-                                    [
-                                      _c("q-input", {
-                                        attrs: {
-                                          label: "Nombrel del producto",
-                                          type: "text",
-                                          rules: [
-                                            function(val) {
-                                              return (
-                                                (val && val.length > 0) ||
-                                                "Campo vacio"
-                                              )
-                                            }
-                                          ]
-                                        },
-                                        model: {
-                                          value: applicant.nombre,
-                                          callback: function($$v) {
-                                            _vm.$set(applicant, "nombre", $$v)
+                      _c(
+                        "q-list",
+                        { attrs: { bordered: "", separator: "" } },
+                        _vm._l(
+                          _vm.formulario.productos.filter(function(post) {
+                            return post.activo == 1
+                          }),
+                          function(applicant, counter) {
+                            return _c(
+                              "q-item",
+                              {
+                                key: counter,
+                                staticClass: "row justify-center items-center"
+                              },
+                              [
+                                _c(
+                                  "q-item-section",
+                                  { attrs: { top: "" } },
+                                  [
+                                    _c(
+                                      "q-item-label",
+                                      { attrs: { lines: "1" } },
+                                      [
+                                        _c("q-input", {
+                                          attrs: {
+                                            label: "Nombrel del producto",
+                                            type: "text",
+                                            rules: [
+                                              function(val) {
+                                                return (
+                                                  (val && val.length > 0) ||
+                                                  "Campo vacio"
+                                                )
+                                              }
+                                            ]
                                           },
-                                          expression: "applicant.nombre"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  ),
-                                  _vm._v(" "),
-                                  _c(
-                                    "q-item-label",
-                                    { attrs: { lines: "1" } },
-                                    [
-                                      _c("q-input", {
-                                        attrs: {
-                                          label: "Descripcion",
-                                          type: "text",
-                                          rules: [
-                                            function(val) {
-                                              return (
-                                                (val && val.length > 0) ||
-                                                "Campo vacio"
-                                              )
-                                            }
-                                          ]
-                                        },
-                                        model: {
-                                          value: applicant.descripcion,
-                                          callback: function($$v) {
-                                            _vm.$set(
-                                              applicant,
-                                              "descripcion",
-                                              $$v
-                                            )
-                                          },
-                                          expression: "applicant.descripcion"
-                                        }
-                                      })
-                                    ],
-                                    1
-                                  )
-                                ],
-                                1
-                              ),
-                              _vm._v(" "),
-                              _c(
-                                "q-item-section",
-                                { attrs: { top: "", side: "" } },
-                                [
-                                  counter >= 1
-                                    ? _c("q-icon", {
-                                        staticStyle: {
-                                          margin: "0px 5px 17px 5px"
-                                        },
-                                        attrs: {
-                                          size: "2rem",
-                                          color: "red",
-                                          name: "delete"
-                                        },
-                                        on: {
-                                          click: function($event) {
-                                            return _vm.deleteVisa(counter)
+                                          model: {
+                                            value: applicant.nombre,
+                                            callback: function($$v) {
+                                              _vm.$set(applicant, "nombre", $$v)
+                                            },
+                                            expression: "applicant.nombre"
                                           }
-                                        }
-                                      })
-                                    : _vm._e()
-                                ],
-                                1
-                              )
-                            ],
-                            1
-                          )
-                        }
-                      ),
-                      _vm._v(" "),
-                      _c("q-separator", { attrs: { spaced: "" } })
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "q-item-label",
+                                      { attrs: { lines: "1" } },
+                                      [
+                                        _c("q-input", {
+                                          attrs: {
+                                            label: "Descripción",
+                                            type: "text",
+                                            rules: [
+                                              function(val) {
+                                                return (
+                                                  (val && val.length > 0) ||
+                                                  "Campo vacio"
+                                                )
+                                              }
+                                            ]
+                                          },
+                                          model: {
+                                            value: applicant.descripcion,
+                                            callback: function($$v) {
+                                              _vm.$set(
+                                                applicant,
+                                                "descripcion",
+                                                $$v
+                                              )
+                                            },
+                                            expression: "applicant.descripcion"
+                                          }
+                                        })
+                                      ],
+                                      1
+                                    ),
+                                    _vm._v(" "),
+                                    _c(
+                                      "q-item-label",
+                                      { staticClass: "text-right" },
+                                      [
+                                        counter >= 1
+                                          ? _c("q-btn", {
+                                              attrs: {
+                                                outline: "",
+                                                rounded: "",
+                                                color: "negative",
+                                                icon: "delete",
+                                                label: "Eliminar",
+                                                "no-caps": ""
+                                              },
+                                              on: {
+                                                click: function($event) {
+                                                  return _vm.deleteVisa(counter)
+                                                }
+                                              }
+                                            })
+                                          : _vm._e()
+                                      ],
+                                      1
+                                    )
+                                  ],
+                                  1
+                                )
+                              ],
+                              1
+                            )
+                          }
+                        ),
+                        1
+                      )
                     ],
-                    2
+                    1
                   )
                 ],
                 1
@@ -56776,7 +56758,7 @@ var render = function() {
                                                       attrs: {
                                                         size: "2rem",
                                                         name:
-                                                          "img:./../media/iconssvg/" +
+                                                          "img:media/iconssvg/" +
                                                           item.urlActual
                                                             .split(".")
                                                             .pop() +
@@ -56811,7 +56793,7 @@ var render = function() {
                                                 attrs: {
                                                   size: "2rem",
                                                   name:
-                                                    "img:./../media/iconssvg/" +
+                                                    "img:media/iconssvg/" +
                                                     item.icon +
                                                     ".svg"
                                                 }
@@ -57247,9 +57229,11 @@ var render = function() {
                   _c("q-btn", {
                     staticClass: "q-px-xl q-py-xs",
                     attrs: {
+                      outline: "",
+                      rounded: "",
                       type: "submit",
-                      size: "22px",
-                      color: "primary",
+                      size: "lg",
+                      color: "teal",
                       label: "Enviar Formulario"
                     }
                   })

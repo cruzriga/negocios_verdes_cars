@@ -19,10 +19,7 @@
             <q-tab-panels v-model="tab" animated >
                 <q-tab-panel v-for="(img , count) in imgref" v-bind:key="count" :name="img.name">
                     <!-- <div class="text-h6">Imagen 1</div> -->
-                    <q-btn v-on:click="navigate()" outline color="primary" style="margin:10px">
-                        <q-icon left size="3em" name="arrow_back" />
-                        <div>Atras</div>
-                    </q-btn>
+                  <q-btn style="margin: 15px;" v-on:click="navigate()" outline color="teal" round icon="arrow_back" />
                     <!-- <q-btn v-on:click="upload(tab)" outline color="primary" style="margin:10px">
                         <q-icon left size="3em" name="publish" />
                         <div>Subir Imagen</div>

@@ -139,7 +139,7 @@
                   <q-input v-model="formulario.twitter.data" label="Twitter" :dense="dense" :rules="formulario.twitter.rules">
                     <template v-slot:prepend>
                         <!-- <q-icon name="fab fa-twitter-square" /> -->
-                        <q-icon name="img:./../media/iconssvg/gorjeo.svg" />
+                        <q-icon name="img:media/iconssvg/gorjeo.svg" />
                     </template>
                   </q-input>
               </div>
@@ -152,7 +152,7 @@
                   <q-input v-model="formulario.facebook.data" label="Facebook" :dense="dense" :rules="formulario.facebook.rules">
                   <template v-slot:prepend>
                       <!-- <q-icon name="facebook" /> -->
-                      <q-icon name="img:./../media/iconssvg/facebook.svg" />
+                      <q-icon name="img:media/iconssvg/facebook.svg" />
                   </template>
                   </q-input>
               </div>
@@ -165,7 +165,7 @@
                   <q-input v-model="formulario.instagram.data" label="Instagram" :dense="dense" :rules="formulario.instagram.rules">
                   <template v-slot:prepend>
                       <!-- <q-icon name="fab fa-instagram" /> -->
-                      <q-icon name="img:./../media/iconssvg/instagram.svg" />
+                      <q-icon name="img:media/iconssvg/instagram.svg" />
                   </template>
                   </q-input>
               </div>
@@ -178,7 +178,7 @@
                 <q-input v-model="formulario.linkvideo.data" label="Link Video YouTube" :dense="dense" :rules="formulario.twitter.rules">
                 <template v-slot:prepend>
                     <!-- <q-icon name="ondemand_video" /> -->
-                    <q-icon name="img:./../media/iconssvg/youtube.svg" />
+                    <q-icon name="img:media/iconssvg/youtube.svg" />
                 </template>
                 </q-input>
               </div>
@@ -298,59 +298,41 @@
           </q-card>        
           <q-card class="my-card q-ma-md">
           </q-card>
-          <q-card class="my-card q-ma-md">
-            <q-card-section>
-                <div class="row justify-center items-center">
-                <div class="col-12 col-md-3">
-                    <div class="text-h6">Productos</div>
-                </div>
-                <div class="col-12 col-md-9">
-                    <q-icon size="2rem" color="primary" @click="addVisa" name="add" />
-                </div>
-                </div>
-            </q-card-section>
-            <q-separator />
-            <!-- <div>
-                <q-btn @click="addVisa" label="Agregar Producto" color="primary"/>
-            </div> -->
-            <q-card-section>           
-                <!-- <q-separator spaced />  -->
-              
-                <!-- Wrapping only one DOM element, defined by QBtn -->
-
-                <q-item
-                 v-for="(applicant, counter) in formulario.productos.filter(post => { return post.activo == 1})" v-bind:key="counter"
-                 class="row justify-center items-center">
-                  <!-- <q-item-section avatar top>
-                    <q-icon name="account_tree" color="black" size="34px" />
-                  </q-item-section>
-
-                  <q-item-section top class="col-2 gt-sm">
-                    <q-item-label class="q-mt-sm">GitHub</q-item-label>
-                  </q-item-section> -->
-                  <q-item-section top>
-                    <q-item-label lines="1">
-                      <q-input v-model="applicant.nombre" label="Nombrel del producto" type="text" :rules="[ val => val && val.length > 0 || 'Campo vacio']">
-                      </q-input>
-                    </q-item-label>
-                    <q-item-label lines="1">
-                      <q-input v-model="applicant.descripcion" label="Descripcion" type="text" :rules="[ val => val && val.length > 0 || 'Campo vacio']">
-                      </q-input>
-                    </q-item-label>
-                  </q-item-section>
-
-                  <q-item-section top side>
-                      <q-icon v-if="counter>=1" style="margin: 0px 5px 17px 5px" size="2rem" color="red" @click="deleteVisa(counter)" name="delete" />
-                    <!-- <div class="text-grey-8 q-gutter-xs">
-                      <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
-                      <q-btn class="gt-xs" size="12px" flat dense round icon="done" />
-                      <q-btn size="12px" flat dense round icon="more_vert" />
-                    </div> -->
-                  </q-item-section>
-                </q-item>
-                <q-separator spaced />
-            </q-card-section>
-          </q-card>
+        <q-card class = "my-card q-ma-md">
+          <q-card-section>
+            <div class = "row fit justify-between">
+              <span class = "text-h6">Productos</span>
+              <q-btn size = "" outline rounded label = "Agregar" no-caps color = "teal" @click = "addVisa" icon = "add"/>
+            </div>
+          </q-card-section>
+          <q-separator/>
+          <!-- <div>
+              <q-btn @click="addVisa" label="Agregar Producto" color="primary"/>
+          </div> -->
+          <q-card-section class="q-pa-none">
+            <!-- <q-separator spaced />  -->
+            <!-- Wrapping only one DOM element, defined by QBtn -->
+            <q-list bordered separator>
+              <q-item
+                  v-for = "(applicant, counter) in formulario.productos.filter(post => { return post.activo == 1})" v-bind:key = "counter"
+                  class = "row justify-center items-center">
+                <q-item-section top>
+                  <q-item-label lines = "1">
+                    <q-input v-model = "applicant.nombre" label = "Nombrel del producto" type = "text" :rules = "[ val => val && val.length > 0 || 'Campo vacio']">
+                    </q-input>
+                  </q-item-label>
+                  <q-item-label lines = "1">
+                    <q-input v-model = "applicant.descripcion" label = "Descripción" type = "text" :rules = "[ val => val && val.length > 0 || 'Campo vacio']">
+                    </q-input>
+                  </q-item-label>
+                  <q-item-label class = "text-right">
+                    <q-btn outline rounded color = "negative" v-if = "counter>=1" @click = "deleteVisa(counter)" icon = "delete" label = "Eliminar" no-caps/>
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+        </q-card>
           <q-card class="my-card q-ma-md">
           </q-card>
           <q-card class="my-card q-ma-md">
@@ -391,11 +373,11 @@
                       </div>
                       <div v-if="item.urlActual!=null">
                         <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="'../'+item.urlActual" class="sppb-btn sppb-btn-dark sppb-btn-round">
-                          <q-icon size="2rem" :name="'img:./../media/iconssvg/'+item.urlActual.split('.').pop()+'.svg'"/>
+                          <q-icon size="2rem" :name="'img:media/iconssvg/'+item.urlActual.split('.').pop()+'.svg'"/>
                         </a>
                       </div>
                       <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="'/media/attachments/2021/03/08/'+item.doc" class="sppb-btn sppb-btn-dark sppb-btn-round">
-                        <q-icon size="2rem" :name="'img:./../media/iconssvg/'+item.icon+'.svg'"/>
+                        <q-icon size="2rem" :name="'img:media/iconssvg/'+item.icon+'.svg'"/>
                       </a>
                       <q-btn v-if="scope.canAddFiles" type="a" icon="add_box" round dense flat>
                         <q-uploader-add-trigger />
@@ -560,10 +542,12 @@
                       justify-content: center;
                   ">
               <q-btn
+                  outline
+                  rounded
                 type="submit"
-                size="22px"
+                size="lg"
                 class="q-px-xl q-py-xs"
-                color="primary"
+                color="teal"
                 label="Enviar Formulario"
               />
               <!-- {{formulario.municipio}} -->
@@ -596,77 +580,77 @@ const optionsmunicipios = [
           {
               label: 'Albania',
               value: 'Albania',
-              icon: 'img:./../media/iconospng/Flag_of_Albania.png'
+              icon: 'img:media/iconospng/Flag_of_Albania.png'
           },
           {
               label: 'Barrancas',
               value: 'Barrancas',
-              icon: 'img:./../media/iconospng/Flag_of_Barrancas.png'
+              icon: 'img:media/iconospng/Flag_of_Barrancas.png'
           },
           {
               label: 'Dibulla',
               value: 'Dibulla',
-              icon: 'img:./../media/iconospng/Flag_of_Dibulla.png'
+              icon: 'img:media/iconospng/Flag_of_Dibulla.png'
           },
           {
               label: 'Distracción',
               value: 'Distracción',
-              icon: 'img:./../media/iconospng/Flag_of_Distracción.png'
+              icon: 'img:media/iconospng/Flag_of_Distracción.png'
           },
           {
               label: 'El Molino',
               value: 'El Molino',
-              icon: 'img:./../media/iconospng/Flag_of_El_Molino.png'
+              icon: 'img:media/iconospng/Flag_of_El_Molino.png'
           },
           {
               label: 'Fonseca',
               value: 'Fonseca',
-              icon: 'img:./../media/iconospng/Flag_of_Fonseca.png'
+              icon: 'img:media/iconospng/Flag_of_Fonseca.png'
           },
           {
               label: 'Hatonuevo',
               value: 'Hatonuevo',
-              icon: 'img:./../media/iconospng/Flag_of_Hatonuevo.png'
+              icon: 'img:media/iconospng/Flag_of_Hatonuevo.png'
           },
           {
               label: 'La Jagua del Pilar',
               value: 'La Jagua del Pilar',
-              icon: 'img:./../media/iconospng/Flag_of_La_Jagua_del_Pilar.png'
+              icon: 'img:media/iconospng/Flag_of_La_Jagua_del_Pilar.png'
           },
           {
               label: 'Maicao',
               value: 'Maicao',
-              icon: 'img:./../media/iconospng/Flag_of_Maicao.png'
+              icon: 'img:media/iconospng/Flag_of_Maicao.png'
           },
           {
               label: 'Manaure',
               value: 'Manaure',
-              icon: 'img:./../media/iconospng/Flag_of_Manaure.png'
+              icon: 'img:media/iconospng/Flag_of_Manaure.png'
           },
           {
               label: 'Riohacha',
               value: 'Riohacha',
-              icon: 'img:./../media/iconospng/Flag_of_Riohacha.png'
+              icon: 'img:media/iconospng/Flag_of_Riohacha.png'
           },
           {
               label: 'San Juan del Cesar',
               value: 'San Juan del Cesar',
-              icon: 'img:./../media/iconospng/Flag_of_San_Juan_del_Cesar.png'
+              icon: 'img:media/iconospng/Flag_of_San_Juan_del_Cesar.png'
           },
           {
               label: 'Uribia',
               value: 'Uribia',
-              icon: 'img:./../media/iconospng/Flag_of_Uribia.png'
+              icon: 'img:media/iconospng/Flag_of_Uribia.png'
           },
           {
               label: 'Urumita',
               value: 'Urumita',
-              icon: 'img:./../media/iconospng/Flag_of_Urumita.png'
+              icon: 'img:media/iconospng/Flag_of_Urumita.png'
           },
           {
               label: 'Villanueva',
               value: 'Villanueva',
-              icon: 'img:./../media/iconospng/Flag_of_Villanueva.png'
+              icon: 'img:media/iconospng/Flag_of_Villanueva.png'
           }
 ];
 const anexofile = [

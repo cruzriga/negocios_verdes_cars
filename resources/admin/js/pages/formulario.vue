@@ -1,18 +1,7 @@
 <template>
     <q-page style="display: flex;justify-content: center;">
         <div id="app-site-container">
-            <q-btn style="margin-left: 15px;" v-on:click="navigate()" outline color="primary" >
-                <q-icon left size="4em" name="arrow_back" />
-                <div>Atras</div>
-            </q-btn>
-                <!-- <q-btn
-                    style="margin-left: 15px;"
-                    v-on:click="navigate()"
-                    size="22px"
-                    class="q-px-xl q-py-xs"
-                    color="primary"
-                    label="Atras"
-                /> -->
+            <q-btn style="margin-left: 15px;" v-on:click="navigate()" outline color="teal" round icon="arrow_back" />
             <FormularioNegocios v-bind:propformulario="prop" v-bind:thisadminroute="this.$router"/>
         </div>
     </q-page >
