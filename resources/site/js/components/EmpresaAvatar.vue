@@ -22,7 +22,7 @@
         @new-image="newimg"
         @image-remove="removeimg"
         >
-        <img v-if="urlImg!=null" crossOrigin="anonymous" :src="'verdes/'+url" slot="initial">
+        <img v-if="urlImg!=null" crossOrigin="anonymous" :src="url" slot="initial">
     </croppa>
     <!-- :initial-image="urlImg!=null?urlImg:'https://zhanziyang.github.io/vue-croppa/static/500.jpeg'"-->
     <!-- <input v-if="!moveimg" color="primary" type="range" @input="onSliderChange" :min="sliderMin" :max="sliderMax" step=".001" v-model="sliderVal"> -->
@@ -67,7 +67,11 @@ export default {
         // console.log(this.urlImg)
         // this.url =this.urlImg!=null?'http://'+document.location.host+'/'+this.urlImg:null;
         // console.log(this.urlImg)
-        this.url =this.urlImg!=null?'http://'+document.location.host+'/verdes/'+this.urlImg:null;
+        let pathname = new URL(this.urlImg).pathname
+
+        console.log(pathname)
+        this.url =this.urlImg!=null?'http://'+document.location.host+'/verdes/'+pathname:null;
+
 
         // var image = new Image()
         // // Notice: it's necessary to set "crossorigin" attribute before "src" attribute.
