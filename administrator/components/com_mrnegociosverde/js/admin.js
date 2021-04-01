@@ -1856,7 +1856,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _site_js_components_EmpresaAvatar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../../../site/js/components/EmpresaAvatar */ "./resources/site/js/components/EmpresaAvatar.vue");
 //
 //
 //
@@ -1895,17 +1894,26 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  name: 'ModalImg',
-  components: {
-    Img: _site_js_components_EmpresaAvatar__WEBPACK_IMPORTED_MODULE_0__.default
-  },
+  name: 'ModalAdjunto',
   data: function data() {
     return {
       dialog: false,
+      documentos: null,
+      // documentosa:null,
       maximizedToggle: true
     };
+  },
+  created: function created() {// documentos.forEach(element => {
+    //     // var index =  file.map(function(item) { return item.ref; }).indexOf(element.$attrs.name);
+    //     console.log(element)
+    // });
   }
 });
 
@@ -2524,11 +2532,14 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
   components: {
-    ModalImg: _components_Modal__WEBPACK_IMPORTED_MODULE_0__.default
+    ModalAdjunto: _components_Modal__WEBPACK_IMPORTED_MODULE_0__.default
   },
   data: function data() {
     return {
@@ -2672,15 +2683,25 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
       });
     },
-    openModalImg: function openModalImg(idempresa) {
-      this.$router.push({
-        name: 'imgcarrusel',
-        params: {
-          idempresa: idempresa.idempresa,
-          imgCarrusel: idempresa.imgcarrusel
+    openModalAdjunto: function openModalAdjunto(doc) {
+      anexofile.forEach(function (element, key) {
+        // console.log(key)
+        anexofile[key].urlActual = null;
+      });
+      doc.forEach(function (element) {
+        // console.log(element)
+        var indexaa = anexofile.map(function (item) {
+          return item.name;
+        }).indexOf(element.ref);
+
+        if (indexaa >= 0) {
+          anexofile[indexaa].urlActual = element.urldocumento;
         }
-      }); // this.$refs.modalimg.dialog=true
-      // console.log(this.$refs.modalimg.dialog);
+      }); // console.log(anexofile)
+      // console.log(anexarfile)
+
+      this.$refs.modalAdjunto.documentos = anexofile;
+      this.$refs.modalAdjunto.dialog = true; // console.log(this.$refs.modalimg.dialog);
     },
     openPerfil: function openPerfil(idEmpresa, empresa) {
       this.$router.push({
@@ -2693,6 +2714,55 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     }
   }
 });
+var anexofile = [{
+  name: 'fFichaInscripcion',
+  label: 'Formato - Ficha de inscripción',
+  doc: 'ficha_inscripcion_nv_v2020.xlsx',
+  icon: 'xlsx',
+  urlActual: null
+}, {
+  name: 'aListadoAsociados',
+  label: 'Anexo - Listado de asociados',
+  doc: 'anexo-listado_asociados.xlsx',
+  icon: 'xlsx',
+  urlActual: null
+}, {
+  name: 'aCartaConsentimiento',
+  label: 'Anexo - Carta de consentimiento',
+  doc: 'carta_de_consentimiento_informado_v2020.docx',
+  icon: 'docx',
+  urlActual: null
+}, {
+  name: 'aCartaIntencion',
+  label: 'Anexo - Carta de intención',
+  doc: 'carta-de-intencion-nodo--aliados.docx',
+  icon: 'docx',
+  urlActual: null
+}, {
+  name: 'cExistenciaRepresentacionLegalVigente',
+  label: 'Certificado de existencia y representación legal vigente',
+  urlActual: null
+}, {
+  name: 'cDisponeEmpresa',
+  label: 'Certificaciones con las que dispone actualmente la empresa',
+  urlActual: null
+}, {
+  name: 'prActualEmpresa',
+  label: 'Permisos o registros con los que cuenta actualmente la empresa',
+  urlActual: null
+}, {
+  name: 'rutFacturacionDian',
+  label: 'RUT o resolución de facturación DIAN',
+  urlActual: null
+}, {
+  name: 'listadoAsociadosDiligenciado',
+  label: 'Listado de asociados diligenciado',
+  urlActual: null
+}, {
+  name: 'cartaConcentimientoInformadoFirma',
+  label: 'Carta de consentimiento informado diligenciada y firmada - Anexo 2',
+  urlActual: null
+}];
 
 /***/ }),
 
@@ -5441,7 +5511,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -56394,93 +56464,75 @@ var render = function() {
     [
       _c(
         "q-card",
+        { staticStyle: { width: "350px", "max-width": "80vw" } },
         [
           _c("q-card-section", [
-            _c("div", { staticClass: "text-h6" }, [
-              _vm._v("Terms of Agreement")
-            ])
+            _c("div", { staticClass: "text-h6" }, [_vm._v("Adjuntos")])
           ]),
           _vm._v(" "),
-          _c("q-separator"),
-          _vm._v(" "),
-          _c(
-            "q-card-section",
-            { staticClass: "scroll", staticStyle: { "max-height": "50vh" } },
-            [
-              _c("div", { staticClass: "q-pa-md" }, [
-                _c("div", { staticClass: "row" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md" },
-                    [
-                      _c("Img", {
-                        ref: "img1",
-                        attrs: { moveimg: true, width: 600, height: 350 }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md" },
-                    [
-                      _c("Img", {
-                        ref: "img2",
-                        attrs: { moveimg: true, width: 600, height: 350 }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md" },
-                    [
-                      _c("Img", {
-                        ref: "img3",
-                        attrs: { moveimg: true, width: 600, height: 350 }
-                      })
-                    ],
-                    1
-                  )
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "row" }, [
-                  _c(
-                    "div",
-                    { staticClass: "col-12 col-md" },
-                    [
-                      _c("Img", {
-                        ref: "img4",
-                        attrs: { moveimg: true, width: 600, height: 350 }
-                      })
-                    ],
-                    1
-                  )
+          _c("q-card-section", { staticClass: "q-pt-none" }, [
+            _c(
+              "div",
+              { staticClass: "q-pa-md", staticStyle: { "max-width": "350px" } },
+              _vm._l(_vm.documentos, function(item, count) {
+                return _c("q-list", { key: count, attrs: { bordered: "" } }, [
+                  item.urlActual != null
+                    ? _c(
+                        "a",
+                        {
+                          attrs: {
+                            target: "_blank",
+                            href: "../" + item.urlActual
+                          }
+                        },
+                        [
+                          _c(
+                            "q-item",
+                            {
+                              directives: [
+                                { name: "ripple", rawName: "v-ripple" }
+                              ],
+                              attrs: { clickable: "" }
+                            },
+                            [
+                              _c(
+                                "q-item-section",
+                                { attrs: { avatar: "" } },
+                                [
+                                  _c("q-icon", {
+                                    attrs: {
+                                      size: "2rem",
+                                      name:
+                                        "img:media/iconssvg/" +
+                                        item.urlActual.split(".").pop() +
+                                        ".svg"
+                                    }
+                                  })
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _c("q-item-section", [_vm._v(_vm._s(item.label))])
+                            ],
+                            1
+                          )
+                        ],
+                        1
+                      )
+                    : _vm._e()
                 ])
-              ])
-            ]
-          ),
-          _vm._v(" "),
-          _c("q-separator"),
+              }),
+              1
+            )
+          ]),
           _vm._v(" "),
           _c(
             "q-card-actions",
-            { attrs: { align: "right" } },
+            { staticClass: "bg-white text-teal", attrs: { align: "right" } },
             [
               _c("q-btn", {
                 directives: [{ name: "close-popup", rawName: "v-close-popup" }],
-                attrs: { flat: "", label: "Decline", color: "primary" }
-              }),
-              _vm._v(" "),
-              _c("q-btn", {
-                directives: [{ name: "close-popup", rawName: "v-close-popup" }],
-                attrs: { flat: "", label: "Accept", color: "primary" }
+                attrs: { flat: "", label: "OK" }
               })
             ],
             1
@@ -57684,6 +57736,26 @@ var render = function() {
                                             ])
                                           ],
                                           1
+                                        ),
+                                        _vm._v(" "),
+                                        _c(
+                                          "q-item",
+                                          {
+                                            attrs: { clickable: "" },
+                                            on: {
+                                              click: function($event) {
+                                                return _vm.openModalAdjunto(
+                                                  empresa.documentos
+                                                )
+                                              }
+                                            }
+                                          },
+                                          [
+                                            _c("q-item-section", [
+                                              _vm._v("Adjuntos")
+                                            ])
+                                          ],
+                                          1
                                         )
                                       ],
                                       1
@@ -57764,7 +57836,7 @@ var render = function() {
         1
       ),
       _vm._v(" "),
-      _c("ModalImg", { ref: "modalimg" })
+      _c("ModalAdjunto", { ref: "modalAdjunto" })
     ],
     1
   )

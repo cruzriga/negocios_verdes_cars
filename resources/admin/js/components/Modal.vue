@@ -1,52 +1,65 @@
 <template>
-    <q-dialog v-model="dialog">
-      <q-card>
+     <q-dialog
+      v-model="dialog"
+    >
+      <q-card style="width: 350px; max-width: 80vw;">
         <q-card-section>
-          <div class="text-h6">Terms of Agreement</div>
+          <div class="text-h6">Adjuntos</div>
         </q-card-section>
 
-        <q-separator />
+        <q-card-section class="q-pt-none">
+            <!-- {{documentos}} -->
+            <div class="q-pa-md" style="max-width: 350px">
+                <q-list v-for="(item, count) in documentos" v-bind:key="count" bordered >
+                    <a v-if="item.urlActual!=null" target="_blank" :href="'../'+item.urlActual" >
+                        <q-item clickable v-ripple>
+                            <q-item-section avatar>
+                                <q-icon size="2rem" :name="'img:media/iconssvg/'+item.urlActual.split('.').pop()+'.svg'"/>
+                            </q-item-section>
 
-        <q-card-section style="max-height: 50vh" class="scroll">
-            <div class="q-pa-md">
+                            <q-item-section>{{item.label}}</q-item-section>
+                        </q-item>
+                    </a>
+                </q-list>
+                <!-- <q-list v-for="(item, counta) in documentosa" v-bind:key="counta" bordered>
+                    <a v-if="item.urlActual!=null" target="_blank" :href="'../'+item.urlActual" >
+                        <q-item clickable v-ripple>
+                            <q-item-section avatar>
+                                <q-icon size="2rem" :name="'img:media/iconssvg/'+item.urlActual.split('.').pop()+'.svg'"/>
+                            </q-item-section>
 
-                <div class="row">
-                    <div class="col-12 col-md"><Img ref="img1" v-bind:moveimg="true" v-bind:width="600" v-bind:height="350"/></div>
-                </div>
-                <div class="row">                    
-                    <div class="col-12 col-md"><Img ref="img2" v-bind:moveimg="true" v-bind:width="600" v-bind:height="350"/></div>
-                </div>
-                <div class="row">                    
-                    <div class="col-12 col-md"><Img ref="img3" v-bind:moveimg="true" v-bind:width="600" v-bind:height="350"/></div>
-                </div>
-                <div class="row">                    
-                    <div class="col-12 col-md"><Img ref="img4" v-bind:moveimg="true" v-bind:width="600" v-bind:height="350"/></div>
-                </div>
-
+                            <q-item-section>{{item.label}}</q-item-section>
+                        </q-item>
+                    </a>
+                </q-list> -->
             </div>
         </q-card-section>
 
-        <q-separator />
-
-        <q-card-actions align="right">
-          <q-btn flat label="Decline" color="primary" v-close-popup />
-          <q-btn flat label="Accept" color="primary" v-close-popup />
+        <q-card-actions align="right" class="bg-white text-teal">
+          <q-btn flat label="OK" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
 </template>
 
 <script>
-import Img from './../../../site/js/components/EmpresaAvatar'
+
 export default {
-    name: 'ModalImg',
-    components:{Img},
+    name: 'ModalAdjunto',
     data() {
         return {
             dialog: false,
+            documentos:null,
+            // documentosa:null,
             maximizedToggle: true
         }
     },
+    created(){
+        // documentos.forEach(element => {
+        //     // var index =  file.map(function(item) { return item.ref; }).indexOf(element.$attrs.name);
+        //     console.log(element)
+        // });
+    }
 }
 </script>
 

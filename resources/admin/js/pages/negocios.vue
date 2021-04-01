@@ -174,6 +174,9 @@
                   <q-item clickable @click="openModalImg(empresa)">
                     <q-item-section>Insertar Imagen</q-item-section>
                   </q-item>
+                  <q-item clickable @click="openModalAdjunto(empresa.documentos)">
+                    <q-item-section>Adjuntos</q-item-section>
+                  </q-item>
                 </q-list>
               </q-menu>
             </q-btn>
@@ -196,15 +199,15 @@
     <q-inner-loading :showing="this.$store.state.admin.cargando">
       <q-spinner-hourglass size="5.5em" color="green" />
     </q-inner-loading>
-    <ModalImg ref="modalimg"/>
+    <ModalAdjunto ref="modalAdjunto"/>
   </q-page>
 </template>
 
 <script>
-import ModalImg from './../components/Modal'
+import ModalAdjunto from './../components/Modal'
 export default {
   name: 'Negocios',
-  components:{ ModalImg },
+  components:{ ModalAdjunto },
   data(){
     return {
       debug: false,
@@ -342,9 +345,22 @@ export default {
     openFormulario (empresa){
       this.$router.push({name: 'formulario', params: {prop:empresa}});
     },
-    openModalImg(idempresa){
-      this.$router.push({name: 'imgcarrusel', params: {idempresa:idempresa.idempresa,imgCarrusel:idempresa.imgcarrusel}});
-      // this.$refs.modalimg.dialog=true
+    openModalAdjunto(doc){
+      anexofile.forEach((element,key) => {
+        // console.log(key)
+        anexofile[key].urlActual = null;
+      });
+      doc.forEach(element => {
+        // console.log(element)
+        var indexaa =  anexofile.map(function(item) { return item.name; }).indexOf(element.ref);
+        if (indexaa>=0) {          
+          anexofile[indexaa].urlActual = element.urldocumento;
+        }
+      });
+      // console.log(anexofile)
+      // console.log(anexarfile)
+      this.$refs.modalAdjunto.documentos=anexofile
+      this.$refs.modalAdjunto.dialog=true
       // console.log(this.$refs.modalimg.dialog);
     },
     openPerfil (idEmpresa,empresa){
@@ -352,6 +368,66 @@ export default {
     }
   }
 }
+const anexofile = [
+  {
+    name:'fFichaInscripcion',
+    label:'Formato - Ficha de inscripción',
+    doc:'ficha_inscripcion_nv_v2020.xlsx',
+    icon: 'xlsx',
+    urlActual:null
+  },
+  {
+    name:'aListadoAsociados',
+    label:'Anexo - Listado de asociados',
+    doc:'anexo-listado_asociados.xlsx',
+    icon: 'xlsx',
+    urlActual:null
+  },
+  {
+    name:'aCartaConsentimiento',
+    label:'Anexo - Carta de consentimiento',
+    doc:'carta_de_consentimiento_informado_v2020.docx',
+    icon: 'docx',
+    urlActual:null
+  },
+  {
+    name:'aCartaIntencion',
+    label:'Anexo - Carta de intención',
+    doc:'carta-de-intencion-nodo--aliados.docx',
+    icon: 'docx',
+    urlActual:null
+  },
+  {
+    name:'cExistenciaRepresentacionLegalVigente',
+    label:'Certificado de existencia y representación legal vigente',
+    urlActual:null
+  },
+  {
+    name:'cDisponeEmpresa',
+    label:'Certificaciones con las que dispone actualmente la empresa',
+    urlActual:null
+  },
+  {
+    name:'prActualEmpresa',
+    label:'Permisos o registros con los que cuenta actualmente la empresa',
+    urlActual:null
+  },
+  {
+    name:'rutFacturacionDian',
+    label:'RUT o resolución de facturación DIAN',
+    urlActual:null
+  },
+  {
+    name:'listadoAsociadosDiligenciado',
+    label:'Listado de asociados diligenciado',
+    urlActual:null
+  },
+  {
+    name:'cartaConcentimientoInformadoFirma',
+    label:'Carta de consentimiento informado diligenciada y firmada - Anexo 2',
+    urlActual:null
+  }
+];
 </script>
 
 <style scoped>
