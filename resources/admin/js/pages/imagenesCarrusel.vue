@@ -20,12 +20,13 @@
                 <q-tab-panel v-for="(img , count) in imgref" v-bind:key="count" :name="img.name">
                     <!-- <div class="text-h6">Imagen 1</div> -->
                   <q-btn style="margin: 15px;" v-on:click="navigate()" outline color="teal" round icon="arrow_back" />
-                    <!-- <q-btn v-on:click="upload(tab)" outline color="primary" style="margin:10px">
+                    <q-btn color="teal" v-on:click="upload(tab)" outline style="margin:10px">
                         <q-icon left size="3em" name="publish" />
                         <div>Subir Imagen</div>
-                    </q-btn> -->
+                    </q-btn>
                     <!-- {{idempresa}} -->
-                    <Img @removeimgFromComponentCroopa="removeimg(tab)" @newimgFromComponentCroopa="newimg(tab)" :ref="img.name" v-bind:urlImg="img.imgurl" v-bind:moveimg="true" v-bind:width="700" v-bind:height="350"/>
+                    <!-- <Img @removeimgFromComponentCroopa="removeimg(tab)" @newimgFromComponentCroopa="newimg(tab)" :ref="img.name" v-bind:urlImg="img.imgurl" v-bind:moveimg="false" v-bind:width="700" v-bind:height="350"/> -->
+                    <Img @removeimgFromComponentCroopa="removeimg(tab)" :ref="img.name" v-bind:urlImg="img.imgurl" v-bind:moveimg="false" v-bind:width="700" v-bind:height="350"/>
                 </q-tab-panel>
             </q-tab-panels>
         </q-card>

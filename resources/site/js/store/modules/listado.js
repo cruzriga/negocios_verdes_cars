@@ -49,7 +49,7 @@ const store =
             },
             async BUSCAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
-                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&buscar='+datos.buscar+'&campo='+datos.campo)
+                let resp = await request('../?option=com_mrnegociosverde&task=getempresassite&format=json&buscar='+datos.buscar+'&campo='+datos.campo)
                 // console.log(resp)
                 if(resp.ok){
                     commit(CARGANDO,false)

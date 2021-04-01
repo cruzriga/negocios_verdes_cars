@@ -35,7 +35,7 @@
 
           <q-item-section top>
             <q-item-label lines = "1">
-              <span class = "q-mt-xs text-body2 text-weight-bold text-uppercase">{{empresa.nombreempresa}}</span>
+              <a style="cursor: pointer;color:#000000;" @click="openPerfil(empresa.idempresa,empresa)" ><span class = "q-mt-xs text-body2 text-weight-bold text-uppercase">{{empresa.nombreempresa}}</span></a>
             </q-item-label>
             <q-item-label lines="1">  <span class = "text-grey-8"> <q-icon name="date_range"/>{{empresa.fechaCreacion}}</span></q-item-label>
             <q-item-label caption lines = "1">
@@ -53,11 +53,14 @@
               <div class="q-pr-xs">
                 | <q-icon name="mail" /> {{empresa.email}}
               </div>
+              <div v-if="empresa.documentos.length>1" class="q-pr-xs">
+                | <q-icon name="attach_file" /> {{empresa.documentos.length}}
+              </div>              
             </q-item-label>
             <q-item-label lines = "1" class = "q-mt-xs text-body2 text-weight-bold text-uppercase">
-              <span v-if="empresa.categoria.nombre  != '' "> - {{empresa.categoria.nombre}}</span>
-              <span v-if="empresa.subcategoria.nombre  != '' "> - {{empresa.subcategoria.nombre}}</span>
-              <span v-if="empresa.tiposubcategoria.nombre  != '' "> - {{empresa.tiposubcategoria.nombre}}</span>
+              <span v-if="empresa.categoria.nombre  != ''  && empresa.categoria.nombre  != null"> - {{empresa.categoria.nombre}}</span>
+              <span v-if="empresa.subcategoria.nombre  != '' && empresa.subcategoria.nombre  != null "> - {{empresa.subcategoria.nombre}}</span>
+              <span v-if="empresa.tiposubcategoria.nombre  != ''  && empresa.tiposubcategoria.nombre  != null"> - {{empresa.tiposubcategoria.nombre}}</span>
             </q-item-label>
           </q-item-section>
           <q-item-section side style="align-items: center;" top>
@@ -343,6 +346,9 @@ export default {
       this.$router.push({name: 'imgcarrusel', params: {idempresa:idempresa.idempresa,imgCarrusel:idempresa.imgcarrusel}});
       // this.$refs.modalimg.dialog=true
       // console.log(this.$refs.modalimg.dialog);
+    },
+    openPerfil (idEmpresa,empresa){
+      this.$router.push({name: 'perfiladmin', params: {idEmpresa:idEmpresa,propperfil:empresa}});
     }
   }
 }

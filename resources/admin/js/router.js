@@ -5,6 +5,7 @@ import categorias from "./pages/categorias";
 import archivos from "./pages/archivos";
 
 import formulario from "./pages/formulario";
+import perfiladmin from "./pages/perfiladmin";
 import imgcarrusel from "./pages/imagenesCarrusel";
 
 Vue.use(VueRouter);
@@ -67,6 +68,11 @@ const router = new VueRouter(
                      },*/
                 ]
             },
+            {
+                path: '/perfilAdmin/:idEmpresa',
+                name: 'perfiladmin',
+                component: perfiladmin, props:true
+            }
         ]
     }
 );

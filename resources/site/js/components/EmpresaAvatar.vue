@@ -1,7 +1,6 @@
 <template>
 <div style="display: flex;flex-direction: column;">
-    <!-- {{url}}
-    {{urlImg}} -->
+    <!-- {{url}} {{urlImg}} -->
     <croppa v-model="croppa"
         :width="width!=null?width:250"
         :height="height!=null?height:250"

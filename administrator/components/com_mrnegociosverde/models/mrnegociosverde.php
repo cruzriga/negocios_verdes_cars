@@ -165,6 +165,8 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
             ->from($db->quoteName('#__negocios_v_documentos','d'))
             // ->group($db->quoteName('a.idtiposubcategoria'))
             // ->order('d.nombre DESC')
+            ->where($db->quoteName('d.ref') . ' not like "img%" ')
+            
         ;
         if ($idempresa!=null) {
             $query->where($db->quoteName('d.idempresa') . ' = ' . $db->quote($idempresa));

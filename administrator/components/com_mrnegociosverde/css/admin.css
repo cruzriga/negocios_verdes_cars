@@ -12281,3 +12281,12 @@ body.body--dark {
 .q-menu.q-position-engine.q-popup-edit .row {
   margin-left: 0px !important;
 }
+
+.perfilempresa .q-item.q-item-type.row {
+  min-height: 0px;
+  padding: 0px;
+}
+.perfilempresa .q-item__section.column {
+  min-width: 0px !important;
+  padding: 0 !important;
+}

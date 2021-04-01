@@ -45,3 +45,20 @@
     margin-left: 0px !important;
   }
 }
+
+.perfilempresa {
+  .q-item{
+    &.q-item-type{
+      &.row{
+        min-height: 0px;
+        padding: 0px;
+      }
+    }
+  }
+  .q-item__section{
+    &.column{
+      min-width: 0px !important;
+      padding: 0 !important;
+    }
+  }
+}

@@ -2005,7 +2005,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'EmpresaAvatar',
   props: {
@@ -3796,6 +3795,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     propperfil: {
       type: Object,
       "default": null
+    },
+    idEmpresa: {
+      type: Number,
+      "default": null
     }
   },
   data: function data() {
@@ -3811,9 +3814,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     };
   },
   created: function created() {
-    this.idEmpresa = this.$route.params.idEmpresa;
-    this.propperfilmutable = this.propperfil;
-    console.log(this.propperfil);
+    this.idEmpresa = this.$route.params.idEmpresa == null ? this.idEmpresa : this.$route.params.idEmpresa; // console.log(this.idEmpresa)
+
+    this.propperfilmutable = this.propperfil; // console.log(this.propperfil);
 
     if (this.propperfil == null) {
       console.log('Entro');
@@ -4473,7 +4476,7 @@ var store = {
                 commit = _ref2.commit;
                 commit(CARGANDO, true);
                 _context2.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('../?option=com_mrnegociosverde&task=getempresassite&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo);
 
               case 4:
                 resp = _context2.sent;

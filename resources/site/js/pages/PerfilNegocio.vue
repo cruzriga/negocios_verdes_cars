@@ -326,6 +326,10 @@ export default {
     propperfil: {
       type   : Object,
       default: null
+    },
+    idEmpresa: {
+      type   : Number,
+      default: null
     }
   },
   data() {
@@ -341,9 +345,10 @@ export default {
     }
   },
   created() {
-    this.idEmpresa = this.$route.params.idEmpresa;
+    this.idEmpresa = this.$route.params.idEmpresa==null?this.idEmpresa:this.$route.params.idEmpresa;
+    // console.log(this.idEmpresa)
     this.propperfilmutable = this.propperfil
-    console.log(this.propperfil);
+    // console.log(this.propperfil);
     if (this.propperfil == null) {
       console.log('Entro')
       this.cargarempresa(this.idEmpresa);
