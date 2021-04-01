@@ -346,22 +346,24 @@ export default {
       this.$router.push({name: 'formulario', params: {prop:empresa}});
     },
     openModalAdjunto(doc){
-      anexofile.forEach((element,key) => {
-        // console.log(key)
-        anexofile[key].urlActual = null;
-      });
-      doc.forEach(element => {
-        // console.log(element)
-        var indexaa =  anexofile.map(function(item) { return item.name; }).indexOf(element.ref);
-        if (indexaa>=0) {          
-          anexofile[indexaa].urlActual = element.urldocumento;
-        }
-      });
-      // console.log(anexofile)
-      // console.log(anexarfile)
-      this.$refs.modalAdjunto.documentos=anexofile
-      this.$refs.modalAdjunto.dialog=true
-      // console.log(this.$refs.modalimg.dialog);
+      if (doc.length >1) {        
+        anexofile.forEach((element,key) => {
+          // console.log(key)
+          anexofile[key].urlActual = null;
+        });
+        doc.forEach(element => {
+          // console.log(element)
+          var indexaa =  anexofile.map(function(item) { return item.name; }).indexOf(element.ref);
+          if (indexaa>=0) {          
+            anexofile[indexaa].urlActual = element.urldocumento;
+          }
+        });
+        // console.log(anexofile)
+        // console.log(anexarfile)
+        this.$refs.modalAdjunto.documentos=anexofile
+        this.$refs.modalAdjunto.dialog=true
+        // console.log(this.$refs.modalimg.dialog);
+      }
     },
     openPerfil (idEmpresa,empresa){
       this.$router.push({name: 'perfiladmin', params: {idEmpresa:idEmpresa,propperfil:empresa}});
