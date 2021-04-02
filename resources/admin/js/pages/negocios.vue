@@ -345,6 +345,9 @@ export default {
     openFormulario (empresa){
       this.$router.push({name: 'formulario', params: {prop:empresa}});
     },
+    openModalImg(idempresa){
+      this.$router.push({name: 'imgcarrusel', params: {idempresa:idempresa.idempresa,imgCarrusel:idempresa.imgcarrusel}});
+    },
     openModalAdjunto(doc){
       if (doc.length >1) {        
         anexofile.forEach((element,key) => {
