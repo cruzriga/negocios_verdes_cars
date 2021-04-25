@@ -3,7 +3,7 @@
     <q-list bordered class="rounded-borders fit"  >
       <q-item-label  header>
         <q-toolbar class="text-primary" style="height: 50px">
-          <q-input class="GPL__toolbar-input" dense standout="bg-primary" v-model="search" placeholder="Buscar">
+          <q-input @keyup.enter="buscar" class="GPL__toolbar-input" dense standout="bg-primary" v-model="search" placeholder="Buscar">
             <template v-slot:prepend>
               <q-icon v-if="search === ''" name="search" />
               <q-icon v-else name="clear" class="cursor-pointer" @click="search = ''" />
@@ -233,6 +233,14 @@ export default {
     this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
   },
   methods: {
+    buscar(){
+
+      let obj = {
+        buscar: this.search,
+        campo: 'e.nombreempresa'
+      }
+      this.$store.dispatch('admin/BUSCAR_EMPRESAS',obj);
+    },
     backPage(n){
       let actual = this.$store.state.admin.empresas.data.pagina+1
       if(actual!=1){

@@ -59,16 +59,19 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $data = new stdClass();
         echo json_encode($item);
     }
-    public function getEmpresas()
+    public function getEmpresasAdmin()
     {
         $app = JFactory::getApplication();
 
         $model= $this->getModel('mrnegociosverde');
         $input = $app->input;
         $pagina = $input->get("pagina", 0, "int");
-        $numList = $input->get("numlist", 15, "int");
+        $numList = $input->get("numlist", 50, "int");
         $buscar = $input->get("buscar", '', "string");
-        $empresas= $model->getEmpresas($pagina,$numList,$buscar);
+        $campo = $input->get("campo", '', "string");
+        // print_r($numList);
+        $empresas= $model->getEmpresas($pagina,$numList,$buscar,$campo);
+        if (empty($empresas)){ echo false;die;}
         foreach ($empresas as $key => $value) {
             $categoria          = $model->getCategorias($value->idcategoria)[0];
             $subcategoria       = [];

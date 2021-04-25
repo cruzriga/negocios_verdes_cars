@@ -205,7 +205,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
 	}
 
-    public function getEmpresas($pagina=0,$limite=15,$buscar=null) {
+    public function getEmpresas($pagina=0,$limite=50,$buscar=null,$campo='e.nombreempresa') {
         $app = JFactory::getApplication();
         $db = JFactory::getDbo();
         // $query = $db->getQuery(true);
@@ -221,12 +221,15 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
             ->order('e.nombreempresa DESC')
         ;
 
-        if (!empty($buscar)) {
-            $query->where($db->quoteName('e.nombreempresa') . ' like ' . $db->quote($buscar).'%');
+        // if (!empty($buscar)) {
+        //     $query->where($db->quoteName('e.nombreempresa') . ' like ' . $db->quote($buscar).'%');
+        // }
+        if (!empty($buscar) && !empty($campo)) {
+            $query->where($db->quoteName($campo) .( ($campo=='e.idempresa')?' = '. $db->quote($db->escape($buscar)):' like '. $db->quote($db->escape($buscar.'%')) ));
         }
 
+        // print_r($query->__toString());
         $db->setQuery($query,$limitstart, $limit);
-        
         // $db->setQuery($queryCount);
         $rows = $db->loadObjectList();
         if ($rows) {

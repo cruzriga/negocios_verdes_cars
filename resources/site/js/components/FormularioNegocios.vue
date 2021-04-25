@@ -722,6 +722,10 @@ export default {
     propformulario: {
       type: Object
       // default: () => {}
+    },
+    admiurl: {
+      type: Boolean,
+      default: false
     }
   },
   // computed: {
@@ -1075,7 +1079,8 @@ export default {
           formulario: submitResult,
           productos: this.formulario.productos,
           documentos: formDataDocument,
-          imagenlogo: img
+          imagenlogo: img,
+          admiurl:admiurl
         }
         // console.log(obj);
         // return;

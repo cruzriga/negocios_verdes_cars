@@ -62,7 +62,8 @@ const store =
                 commit(CARGANDO,true)         
                 var datopost = 'json='+encodeURIComponent(JSON.stringify(datos.formulario));
                 // console.log(datopost); return;
-                let resp = await request('../?option=com_mrnegociosverde&task=savedatosempresa&format=json',datopost)
+                let puntos = datos.admiurl?'../':'';
+                let resp = await request(puntos+'?option=com_mrnegociosverde&task=savedatosempresa&format=json',datopost)
                 // console.log(resp);
                 // return resp
                 if(resp.ok){
@@ -79,10 +80,11 @@ const store =
                             return resppro
                         }
                         if (datos.imagenlogo!=null) {
-                            // console.log(datos.formulario.idempresa);
+                            console.log(datos.formulario.idempresa);
                             let obj = {
                                 idempresa: (resp.resp==null||resp.resp=='')?datos.formulario.idempresa:resp.resp,
-                                file: datos.imagenlogo
+                                file: datos.imagenlogo,
+                                admiurl: datos.admiurl
                             }
                             let respdoc = await this.dispatch('formulario/GUARDAR_FILE', obj);
                             // console.log(respdoc)
@@ -92,7 +94,8 @@ const store =
                             if (datos.documentos!=null) {
                                 let obj = {
                                     idempresa: (resp.resp==null||resp.resp=='')?datos.formulario.idempresa:resp.resp,
-                                    file: datos.documentos
+                                    file: datos.documentos,
+                                    admiurl: datos.admiurl
                                 }
                                 respdoc = await this.dispatch('formulario/GUARDAR_FILE', obj);
                             }
@@ -107,7 +110,8 @@ const store =
             async GUARDAR_PRODUCTOS ({ commit },datos){                
                 commit(CARGANDO,true)
                 var datopost = 'json='+JSON.stringify(datos.productos);
-                let resp = await request('../?option=com_mrnegociosverde&task=addproductos&format=json',datopost)
+                let puntos = datos.admiurl?'../':'';
+                let resp = await request(puntos+'?option=com_mrnegociosverde&task=addproductos&format=json',datopost)
                 if(resp.ok){                
                     return resp
                 }
@@ -116,7 +120,8 @@ const store =
             async GUARDAR_DOCUMENTOS ({ commit },datos){                
                 commit(CARGANDO,true)
                 var datopost = 'json='+JSON.stringify(datos.prop4);
-                let resp = await request('?option=com_mrnegociosverde&task=adddocumentos&format=json',datopost)
+                let puntos = datos.admiurl?'../':'';
+                let resp = await request(puntos+'?option=com_mrnegociosverde&task=adddocumentos&format=json',datopost)
                 if(resp.ok){
                     commit(CARGANDO,false)
                     return resp
@@ -125,7 +130,8 @@ const store =
             },
             async CARGAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
-                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
+                let puntos = datos.admiurl?'../':'';
+                let resp = await request(puntos+'index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
                 // console.log(resp)
                 if(resp.ok){
                     commit(EMPRESAS,resp.resp)

@@ -38,11 +38,25 @@ const store =
         actions:{
             async CARGAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
-                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresas&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
+                // console.log(datos);
+                let resp = await request('index.php?option=com_mrnegociosverde&task=getEmpresasAdmin&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
                 // console.log(resp)
                 if(resp.ok){
                     commit(EMPRESAS,resp.resp)
                     commit(CARGANDO,false)
+                }
+            },
+            async BUSCAR_EMPRESAS ({ commit },datos){
+                commit(CARGANDO,true)
+                let resp = await request('?option=com_mrnegociosverde&task=getEmpresasAdmin&format=json&buscar='+datos.buscar+'&campo='+datos.campo)
+                // console.log(resp)
+                if(resp.ok){
+                    commit(CARGANDO,false)
+                    if (datos.campo=='e.idempresa') {                        
+                        return(resp.resp.data.empresas[0])
+                    }else{
+                        commit(EMPRESAS,resp.resp)
+                    }
                 }
             },
             async CAMBIAR_ESTADO_EMPRESA ({ commit },datos){

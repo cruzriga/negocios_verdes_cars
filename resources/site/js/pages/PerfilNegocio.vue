@@ -201,7 +201,7 @@
                 thumbnails
                 infinite
             >
-              <q-carousel-slide  v-for="(img , count) in propperfilmutable.imgcarrusel" v-bind:key="count"  :name="count" :img-src="img.urldocumento" />
+              <q-carousel-slide  v-for="(img , count) in propperfilmutable.imgcarrusel" v-bind:key="count"  :name="count" :img-src="admiurl?'../'+img.urldocumento:img.urldocumento" />
               <!-- <q-carousel-slide :name="2" img-src="https://cdn.quasar.dev/img/parallax1.jpg" />
               <q-carousel-slide :name="3" img-src="https://cdn.quasar.dev/img/parallax2.jpg" />
               <q-carousel-slide :name="4" img-src="https://cdn.quasar.dev/img/quasar.jpg" /> -->
@@ -330,6 +330,10 @@ export default {
     idEmpresa: {
       type   : Number,
       default: null
+    },
+    admiurl: {
+      type   : Boolean,
+      default: false
     }
   },
   data() {

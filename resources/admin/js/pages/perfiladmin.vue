@@ -2,7 +2,7 @@
     <q-page style="display: flex;justify-content: center;">
         <div id="app-site-container">
             <!-- <q-btn style="margin-left: 15px;" v-on:click="navigate()" outline color="teal" round icon="arrow_back" /> -->
-            <PerfilNegocio v-bind:propperfil="propperfil" v-bind:idEmpresa="this.$route.params.idEmpresa" />
+            <PerfilNegocio v-bind:propperfil="propperfil" v-bind:admiurl="true" v-bind:idEmpresa="this.$route.params.idEmpresa" />
         </div>
     </q-page >
 </template>

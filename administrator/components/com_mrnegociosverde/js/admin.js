@@ -2566,6 +2566,13 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
   },
   methods: {
+    buscar: function buscar() {
+      var obj = {
+        buscar: this.search,
+        campo: 'e.nombreempresa'
+      };
+      this.$store.dispatch('admin/BUSCAR_EMPRESAS', obj);
+    },
     backPage: function backPage(n) {
       var actual = this.$store.state.admin.empresas.data.pagina + 1;
 
@@ -3670,6 +3677,10 @@ var anexarfile = [{
     propformulario: {
       type: Object // default: () => {}
 
+    },
+    admiurl: {
+      type: Boolean,
+      "default": false
     }
   },
   // computed: {
@@ -4072,7 +4083,8 @@ var anexarfile = [{
           formulario: submitResult,
           productos: _this3.formulario.productos,
           documentos: formDataDocument,
-          imagenlogo: img
+          imagenlogo: img,
+          admiurl: admiurl
         }; // console.log(obj);
         // return;
 
@@ -4480,6 +4492,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     idEmpresa: {
       type: Number,
       "default": null
+    },
+    admiurl: {
+      type: Boolean,
+      "default": false
     }
   },
   data: function data() {
@@ -4801,9 +4817,10 @@ var store = {
             switch (_context.prev = _context.next) {
               case 0:
                 commit = _ref.commit;
-                commit(CARGANDO, true);
+                commit(CARGANDO, true); // console.log(datos);
+
                 _context.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresas&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getEmpresasAdmin&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
 
               case 4:
                 resp = _context.sent;
@@ -4822,30 +4839,39 @@ var store = {
         }, _callee);
       }))();
     },
-    CAMBIAR_ESTADO_EMPRESA: function CAMBIAR_ESTADO_EMPRESA(_ref2, datos) {
+    BUSCAR_EMPRESAS: function BUSCAR_EMPRESAS(_ref2, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
-        var commit, datopost, resp;
+        var commit, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 commit = _ref2.commit;
                 commit(CARGANDO, true);
-                datopost = 'json=' + JSON.stringify(datos);
-                _context2.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=updateEstadorEmpresa&format=json', datopost);
+                _context2.next = 4;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=getEmpresasAdmin&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo);
 
-              case 5:
+              case 4:
                 resp = _context2.sent;
 
                 if (!resp.ok) {
-                  _context2.next = 8;
+                  _context2.next = 12;
                   break;
                 }
 
-                return _context2.abrupt("return", resp);
+                commit(CARGANDO, false);
 
-              case 8:
+                if (!(datos.campo == 'e.idempresa')) {
+                  _context2.next = 11;
+                  break;
+                }
+
+                return _context2.abrupt("return", resp.resp.data.empresas[0]);
+
+              case 11:
+                commit(EMPRESAS, resp.resp);
+
+              case 12:
               case "end":
                 return _context2.stop();
             }
@@ -4853,7 +4879,7 @@ var store = {
         }, _callee2);
       }))();
     },
-    REMOVER_IMG_CARRUSEL: function REMOVER_IMG_CARRUSEL(_ref3, datos) {
+    CAMBIAR_ESTADO_EMPRESA: function CAMBIAR_ESTADO_EMPRESA(_ref3, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
@@ -4862,9 +4888,9 @@ var store = {
               case 0:
                 commit = _ref3.commit;
                 commit(CARGANDO, true);
-                datopost = 'json=' + encodeURIComponent(JSON.stringify(datos));
+                datopost = 'json=' + JSON.stringify(datos);
                 _context3.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=removeImgCarrusel&format=json', datopost);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=updateEstadorEmpresa&format=json', datopost);
 
               case 5:
                 resp = _context3.sent;
@@ -4882,6 +4908,37 @@ var store = {
             }
           }
         }, _callee3);
+      }))();
+    },
+    REMOVER_IMG_CARRUSEL: function REMOVER_IMG_CARRUSEL(_ref4, datos) {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
+        var commit, datopost, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
+          while (1) {
+            switch (_context4.prev = _context4.next) {
+              case 0:
+                commit = _ref4.commit;
+                commit(CARGANDO, true);
+                datopost = 'json=' + encodeURIComponent(JSON.stringify(datos));
+                _context4.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=removeImgCarrusel&format=json', datopost);
+
+              case 5:
+                resp = _context4.sent;
+
+                if (!resp.ok) {
+                  _context4.next = 8;
+                  break;
+                }
+
+                return _context4.abrupt("return", resp);
+
+              case 8:
+              case "end":
+                return _context4.stop();
+            }
+          }
+        }, _callee4);
       }))();
     }
   }
@@ -5097,7 +5154,7 @@ var store = {
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
-        var commit, datopost, resp, resppro, obj, respdoc, _obj;
+        var commit, datopost, puntos, resp, resppro, obj, respdoc, _obj;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
@@ -5107,19 +5164,20 @@ var store = {
                 commit(CARGANDO, true);
                 datopost = 'json=' + encodeURIComponent(JSON.stringify(datos.formulario)); // console.log(datopost); return;
 
-                _context3.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('../?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
+                puntos = datos.admiurl ? '../' : '';
+                _context3.next = 6;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)(puntos + '?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
 
-              case 5:
+              case 6:
                 resp = _context3.sent;
 
                 if (!resp.ok) {
-                  _context3.next = 31;
+                  _context3.next = 33;
                   break;
                 }
 
                 if (!(datos.productos != null)) {
-                  _context3.next = 29;
+                  _context3.next = 31;
                   break;
                 }
 
@@ -5130,73 +5188,75 @@ var store = {
                 }); // console.log(datos)
                 // console.log(datos.formulario.idempresa);
 
-                _context3.next = 11;
+                _context3.next = 12;
                 return _this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
 
-              case 11:
+              case 12:
                 resppro = _context3.sent;
 
                 if (resppro.ok) {
-                  _context3.next = 14;
+                  _context3.next = 15;
                   break;
                 }
 
                 return _context3.abrupt("return", resppro);
 
-              case 14:
+              case 15:
                 if (!(datos.imagenlogo != null)) {
-                  _context3.next = 27;
+                  _context3.next = 29;
                   break;
                 }
 
-                // console.log(datos.formulario.idempresa);
+                console.log(datos.formulario.idempresa);
                 obj = {
                   idempresa: resp.resp == null || resp.resp == '' ? datos.formulario.idempresa : resp.resp,
-                  file: datos.imagenlogo
+                  file: datos.imagenlogo,
+                  admiurl: datos.admiurl
                 };
-                _context3.next = 18;
+                _context3.next = 20;
                 return _this.dispatch('formulario/GUARDAR_FILE', obj);
 
-              case 18:
+              case 20:
                 respdoc = _context3.sent;
 
                 if (respdoc.ok) {
-                  _context3.next = 21;
+                  _context3.next = 23;
                   break;
                 }
 
                 return _context3.abrupt("return", respdoc);
 
-              case 21:
+              case 23:
                 if (!(datos.documentos != null)) {
-                  _context3.next = 26;
+                  _context3.next = 28;
                   break;
                 }
 
                 _obj = {
                   idempresa: resp.resp == null || resp.resp == '' ? datos.formulario.idempresa : resp.resp,
-                  file: datos.documentos
+                  file: datos.documentos,
+                  admiurl: datos.admiurl
                 };
-                _context3.next = 25;
+                _context3.next = 27;
                 return _this.dispatch('formulario/GUARDAR_FILE', _obj);
 
-              case 25:
+              case 27:
                 respdoc = _context3.sent;
 
-              case 26:
+              case 28:
                 return _context3.abrupt("return", respdoc);
 
-              case 27:
-                _context3.next = 30;
+              case 29:
+                _context3.next = 32;
                 break;
 
-              case 29:
+              case 31:
                 return _context3.abrupt("return", resp);
 
-              case 30:
+              case 32:
                 commit(CARGANDO, false);
 
-              case 31:
+              case 33:
               case "end":
                 return _context3.stop();
             }
@@ -5206,7 +5266,7 @@ var store = {
     },
     GUARDAR_PRODUCTOS: function GUARDAR_PRODUCTOS(_ref4, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
-        var commit, datopost, resp;
+        var commit, datopost, puntos, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
@@ -5214,23 +5274,24 @@ var store = {
                 commit = _ref4.commit;
                 commit(CARGANDO, true);
                 datopost = 'json=' + JSON.stringify(datos.productos);
-                _context4.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('../?option=com_mrnegociosverde&task=addproductos&format=json', datopost);
+                puntos = datos.admiurl ? '../' : '';
+                _context4.next = 6;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)(puntos + '?option=com_mrnegociosverde&task=addproductos&format=json', datopost);
 
-              case 5:
+              case 6:
                 resp = _context4.sent;
 
                 if (!resp.ok) {
-                  _context4.next = 8;
+                  _context4.next = 9;
                   break;
                 }
 
                 return _context4.abrupt("return", resp);
 
-              case 8:
+              case 9:
                 commit(CARGANDO, false);
 
-              case 9:
+              case 10:
               case "end":
                 return _context4.stop();
             }
@@ -5240,7 +5301,7 @@ var store = {
     },
     GUARDAR_DOCUMENTOS: function GUARDAR_DOCUMENTOS(_ref5, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
-        var commit, datopost, resp;
+        var commit, datopost, puntos, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -5248,24 +5309,25 @@ var store = {
                 commit = _ref5.commit;
                 commit(CARGANDO, true);
                 datopost = 'json=' + JSON.stringify(datos.prop4);
-                _context5.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=adddocumentos&format=json', datopost);
+                puntos = datos.admiurl ? '../' : '';
+                _context5.next = 6;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)(puntos + '?option=com_mrnegociosverde&task=adddocumentos&format=json', datopost);
 
-              case 5:
+              case 6:
                 resp = _context5.sent;
 
                 if (!resp.ok) {
-                  _context5.next = 9;
+                  _context5.next = 10;
                   break;
                 }
 
                 commit(CARGANDO, false);
                 return _context5.abrupt("return", resp);
 
-              case 9:
+              case 10:
                 commit(CARGANDO, false);
 
-              case 10:
+              case 11:
               case "end":
                 return _context5.stop();
             }
@@ -5275,17 +5337,18 @@ var store = {
     },
     CARGAR_EMPRESAS: function CARGAR_EMPRESAS(_ref6, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
-        var commit, resp;
+        var commit, puntos, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
                 commit = _ref6.commit;
                 commit(CARGANDO, true);
-                _context6.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
+                puntos = datos.admiurl ? '../' : '';
+                _context6.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)(puntos + 'index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
 
-              case 4:
+              case 5:
                 resp = _context6.sent;
 
                 // console.log(resp)
@@ -5294,7 +5357,7 @@ var store = {
                   commit(CARGANDO, false);
                 }
 
-              case 6:
+              case 7:
               case "end":
                 return _context6.stop();
             }
@@ -5402,37 +5465,38 @@ var store = {
     },
     BUSCAR_EMPRESAS: function BUSCAR_EMPRESAS(_ref2, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
-        var commit, resp;
+        var commit, puntos, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 commit = _ref2.commit;
                 commit(CARGANDO, true);
-                _context2.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('../?option=com_mrnegociosverde&task=getempresassite&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo);
+                puntos = datos.admiurl ? '../' : '';
+                _context2.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)(puntos + '?option=com_mrnegociosverde&task=getempresassite&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo);
 
-              case 4:
+              case 5:
                 resp = _context2.sent;
 
                 if (!resp.ok) {
-                  _context2.next = 12;
+                  _context2.next = 13;
                   break;
                 }
 
                 commit(CARGANDO, false);
 
                 if (!(datos.campo == 'e.idempresa')) {
-                  _context2.next = 11;
+                  _context2.next = 12;
                   break;
                 }
 
                 return _context2.abrupt("return", resp.resp.data.empresas[0]);
 
-              case 11:
+              case 12:
                 commit(EMPRESAS, resp.resp);
 
-              case 12:
+              case 13:
               case "end":
                 return _context2.stop();
             }
@@ -5522,7 +5586,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -56763,7 +56827,11 @@ var render = function() {
           }),
           _vm._v(" "),
           _c("FormularioNegocios", {
-            attrs: { propformulario: _vm.prop, thisadminroute: this.$router }
+            attrs: {
+              propformulario: _vm.prop,
+              admiurl: true,
+              thisadminroute: this.$router
+            }
           })
         ],
         1
@@ -56953,6 +57021,23 @@ var render = function() {
                       dense: "",
                       standout: "bg-primary",
                       placeholder: "Buscar"
+                    },
+                    on: {
+                      keyup: function($event) {
+                        if (
+                          !$event.type.indexOf("key") &&
+                          _vm._k(
+                            $event.keyCode,
+                            "enter",
+                            13,
+                            $event.key,
+                            "Enter"
+                          )
+                        ) {
+                          return null
+                        }
+                        return _vm.buscar($event)
+                      }
                     },
                     scopedSlots: _vm._u([
                       {
@@ -57886,6 +57971,7 @@ var render = function() {
           _c("PerfilNegocio", {
             attrs: {
               propperfil: _vm.propperfil,
+              admiurl: true,
               idEmpresa: this.$route.params.idEmpresa
             }
           })
@@ -60450,7 +60536,9 @@ var render = function() {
                                     key: count,
                                     attrs: {
                                       name: count,
-                                      "img-src": img.urldocumento
+                                      "img-src": _vm.admiurl
+                                        ? "../" + img.urldocumento
+                                        : img.urldocumento
                                     }
                                   })
                                 }
