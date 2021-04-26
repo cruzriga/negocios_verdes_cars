@@ -1932,6 +1932,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
+      base_url: base_url,
       adic: 60,
       cump: 80,
       expanded: false,
@@ -2929,7 +2930,7 @@ var anexarfile = [{
           nombre: 'categoria',
           type: null,
           data: null,
-          label: 'Categoria',
+          label: 'Categoría',
           rules: [function (val) {
             return val && val != null || 'Campo vacio';
           }]
@@ -55223,7 +55224,9 @@ var render = function() {
                       [
                         _c("q-img", {
                           attrs: {
-                            src: "images/logo-negocios-verdes-header.png"
+                            src:
+                              _vm.base_url +
+                              "images/logo-negocios-verdes-header.png"
                           }
                         })
                       ],

@@ -3808,7 +3808,7 @@ var anexarfile = [{
           nombre: 'categoria',
           type: null,
           data: null,
-          label: 'Categoria',
+          label: 'Categoría',
           rules: [function (val) {
             return val && val != null || 'Campo vacio';
           }]

@@ -836,7 +836,7 @@ export default {
           nombre: 'categoria',
           type: null,
           data: null,
-          label: 'Categoria',
+          label: 'Categoría',
           rules: [ val => val && val != null || 'Campo vacio']
         },
         subcategoria: {
