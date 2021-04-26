@@ -1077,7 +1077,7 @@ export default {
           productos: this.formulario.productos,
           documentos: formDataDocument,
           imagenlogo: img,
-          admiurl:admiurl
+          admiurl:this.admiurl
         }
         // console.log(obj);
         // return;

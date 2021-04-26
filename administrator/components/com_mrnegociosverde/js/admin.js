@@ -4081,7 +4081,7 @@ var anexarfile = [{
           productos: _this3.formulario.productos,
           documentos: formDataDocument,
           imagenlogo: img,
-          admiurl: admiurl
+          admiurl: _this3.admiurl
         }; // console.log(obj);
         // return;
 
