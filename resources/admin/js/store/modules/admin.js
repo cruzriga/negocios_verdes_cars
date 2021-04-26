@@ -39,7 +39,7 @@ const store =
             async CARGAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
                 // console.log(datos);
-                let resp = await request('index.php?option=com_mrnegociosverde&task=getEmpresasAdmin&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
+                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresasadmin&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
                 // console.log(resp)
                 if(resp.ok){
                     commit(EMPRESAS,resp.resp)
@@ -48,7 +48,7 @@ const store =
             },
             async BUSCAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
-                let resp = await request('?option=com_mrnegociosverde&task=getEmpresasAdmin&format=json&buscar='+datos.buscar+'&campo='+datos.campo)
+                let resp = await request('?option=com_mrnegociosverde&task=getempresasadmin&format=json&buscar='+datos.buscar+'&campo='+datos.campo)
                 // console.log(resp)
                 if(resp.ok){
                     commit(CARGANDO,false)
@@ -62,7 +62,7 @@ const store =
             async CAMBIAR_ESTADO_EMPRESA ({ commit },datos){
                 commit(CARGANDO,true)
                 var datopost = 'json='+JSON.stringify(datos);
-                let resp = await request('index.php?option=com_mrnegociosverde&task=updateEstadorEmpresa&format=json',datopost)
+                let resp = await request('index.php?option=com_mrnegociosverde&task=updateestadorempresa&format=json',datopost)
                 if(resp.ok){
                     return resp;
                 }
@@ -70,7 +70,7 @@ const store =
             async REMOVER_IMG_CARRUSEL ({ commit },datos){
                 commit(CARGANDO,true)
                 var datopost = 'json='+encodeURIComponent(JSON.stringify(datos));
-                let resp = await request('index.php?option=com_mrnegociosverde&task=removeImgCarrusel&format=json',datopost)
+                let resp = await request('index.php?option=com_mrnegociosverde&task=removeimgcarrusel&format=json',datopost)
                 if(resp.ok){
                     return resp;
                 }

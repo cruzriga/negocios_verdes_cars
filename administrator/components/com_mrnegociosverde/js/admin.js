@@ -4817,7 +4817,7 @@ var store = {
                 commit(CARGANDO, true); // console.log(datos);
 
                 _context.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getEmpresasAdmin&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresasadmin&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
 
               case 4:
                 resp = _context.sent;
@@ -4846,7 +4846,7 @@ var store = {
                 commit = _ref2.commit;
                 commit(CARGANDO, true);
                 _context2.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=getEmpresasAdmin&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=getempresasadmin&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo);
 
               case 4:
                 resp = _context2.sent;
@@ -4887,7 +4887,7 @@ var store = {
                 commit(CARGANDO, true);
                 datopost = 'json=' + JSON.stringify(datos);
                 _context3.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=updateEstadorEmpresa&format=json', datopost);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=updateestadorempresa&format=json', datopost);
 
               case 5:
                 resp = _context3.sent;
@@ -4918,7 +4918,7 @@ var store = {
                 commit(CARGANDO, true);
                 datopost = 'json=' + encodeURIComponent(JSON.stringify(datos));
                 _context4.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=removeImgCarrusel&format=json', datopost);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=removeimgcarrusel&format=json', datopost);
 
               case 5:
                 resp = _context4.sent;
