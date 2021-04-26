@@ -58170,7 +58170,7 @@ var render = function() {
                 [
                   _c("q-card-section", [
                     _c("div", { staticClass: "text-h6" }, [
-                      _vm._v("Informacion Empresa")
+                      _vm._v("Informacion de la empresa")
                     ])
                   ]),
                   _vm._v(" "),
@@ -59234,7 +59234,9 @@ var render = function() {
                 { staticClass: "my-card q-ma-md" },
                 [
                   _c("q-card-section", [
-                    _c("div", { staticClass: "text-h6" }, [_vm._v("Anexo")])
+                    _c("div", { staticClass: "text-h6" }, [
+                      _vm._v("Formatos & formularios")
+                    ])
                   ]),
                   _vm._v(" "),
                   _c("q-separator"),
@@ -59565,7 +59567,7 @@ var render = function() {
                 [
                   _c("q-card-section", [
                     _c("div", { staticClass: "text-h6" }, [
-                      _vm._v("Documentación que se debe anexar a la solicitud")
+                      _vm._v("Documentación ")
                     ])
                   ]),
                   _vm._v(" "),

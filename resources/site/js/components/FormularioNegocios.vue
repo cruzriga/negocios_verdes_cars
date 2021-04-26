@@ -10,7 +10,7 @@
       <masonry :cols="{default: 2, 1000: 2, 700: 1}" :gutter="10">
         <q-card class="my-card q-ma-md">
           <q-card-section>
-              <div class="text-h6">Informacion Empresa</div>
+              <div class="text-h6">Informacion de la empresa</div>
               <!-- <div class="text-subtitle2">by John Doe</div> -->
           </q-card-section>
           <q-separator />
@@ -341,7 +341,7 @@
           </q-card>
           <q-card class="my-card q-ma-md">
             <q-card-section>
-                <div class="text-h6">Anexo</div>
+                <div class="text-h6">Formatos & formularios</div>
                 <!-- <div class="text-subtitle2">by John Doe</div> -->
             </q-card-section>
             <q-separator />
@@ -444,7 +444,7 @@
           </q-card>
            <q-card class="my-card q-ma-md">
             <q-card-section>
-                <div class="text-h6">Documentación que se debe anexar a la solicitud</div>
+                <div class="text-h6">Documentación </div>
                 <!-- <div class="text-subtitle2">by John Doe</div> -->
             </q-card-section>
             <q-separator />
