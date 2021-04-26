@@ -371,12 +371,12 @@
                           </div>
                       </div>
                       <div v-if="item.urlActual!=null">
-                        <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="base_url+item.urlActual" class="sppb-btn sppb-btn-round">
+                        <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="root_url+item.urlActual" class="sppb-btn sppb-btn-round">
                           <q-icon size="1.4rem" :name="'img:media/iconssvg/'+item.urlActual.split('.').pop()+'.svg'"/>
                         </a>
                       </div>
-                      <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="base_url+'media/attachments/2021/03/08/'+item.doc" class="sppb-btn  sppb-btn-round">
-                        <q-icon size="1.4rem"  :name="'img:'+base_url+'media/iconssvg/'+item.icon+'.svg'">
+                      <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="root_url+'media/attachments/2021/03/08/'+item.doc" class="sppb-btn  sppb-btn-round">
+                        <q-icon size="1.4rem"  :name="'img:'+root_url+'media/iconssvg/'+item.icon+'.svg'">
                             <q-tooltip>
                               Descargar formato para diligenciar
                             </q-tooltip>
@@ -731,7 +731,7 @@ export default {
   
   data () {
     return {
-      base_url,
+      root_url,
       anexofile:anexofile,
       anexarfile:anexarfile,
       formData: new FormData(),

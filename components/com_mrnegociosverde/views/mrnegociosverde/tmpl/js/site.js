@@ -1932,7 +1932,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      base_url: base_url,
+      root_url: root_url,
       adic: 60,
       cump: 80,
       expanded: false,
@@ -2807,7 +2807,7 @@ var anexarfile = [{
   // },
   data: function data() {
     return {
-      base_url: base_url,
+      root_url: root_url,
       anexofile: anexofile,
       anexarfile: anexarfile,
       formData: new FormData(),
@@ -55225,7 +55225,7 @@ var render = function() {
                         _c("q-img", {
                           attrs: {
                             src:
-                              _vm.base_url +
+                              _vm.root_url +
                               "images/logo-negocios-verdes-header.png"
                           }
                         })
@@ -56772,7 +56772,7 @@ var render = function() {
                                                       target: "_blank",
                                                       id: "btn-1615192830423",
                                                       href:
-                                                        _vm.base_url +
+                                                        _vm.root_url +
                                                         item.urlActual
                                                     }
                                                   },
@@ -56807,7 +56807,7 @@ var render = function() {
                                                 target: "_blank",
                                                 id: "btn-1615192830423",
                                                 href:
-                                                  _vm.base_url +
+                                                  _vm.root_url +
                                                   "media/attachments/2021/03/08/" +
                                                   item.doc
                                               }
@@ -56820,7 +56820,7 @@ var render = function() {
                                                     size: "1.4rem",
                                                     name:
                                                       "img:" +
-                                                      _vm.base_url +
+                                                      _vm.root_url +
                                                       "media/iconssvg/" +
                                                       item.icon +
                                                       ".svg"
