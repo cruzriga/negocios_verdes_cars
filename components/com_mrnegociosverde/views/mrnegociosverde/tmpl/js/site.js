@@ -2671,11 +2671,6 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 //
 //
 //
-//
-//
-//
-//
-//
  // import { mapState } from 'vuex'
 
 var optionsmunicipios = [{
@@ -2811,6 +2806,7 @@ var anexarfile = [{
   // },
   data: function data() {
     return {
+      base_url: base_url,
       anexofile: anexofile,
       anexarfile: anexarfile,
       formData: new FormData(),
@@ -2846,7 +2842,8 @@ var anexarfile = [{
           nombre: 'descripcion',
           type: 'text',
           data: null,
-          label: 'Descripción',
+          label: 'Describe tu empresa',
+          hint: "Menciona el impacto ambiental positivo que genera tu empresa",
           rules: [function (val) {
             return val && val.length > 0 || 'Campo vacio';
           }]
@@ -2938,19 +2935,19 @@ var anexarfile = [{
           }]
         },
         subcategoria: {
-          nombre: 'Sectores',
+          nombre: 'Sector',
           type: null,
           data: null,
-          label: 'Sectores',
+          label: 'Sector',
           rules: [function (val) {
             return val && val.length > 0 || 'Campo vacio';
           }]
         },
         tiposubcategoria: {
-          nombre: 'Subsectores',
+          nombre: 'Subsector',
           type: null,
           data: null,
-          label: 'Subsectores'
+          label: 'Subsector'
         },
         productos: [{
           idproducto: null,
@@ -55706,11 +55703,12 @@ var render = function() {
                           [
                             _c("q-input", {
                               attrs: {
-                                label: "Descripcion",
+                                label: _vm.formulario.descripcion.label,
                                 type: "textarea",
                                 counter: "",
                                 maxlength: "500",
-                                rules: _vm.formulario.descripcion.rules
+                                rules: _vm.formulario.descripcion.rules,
+                                hint: _vm.formulario.descripcion.hint
                               },
                               model: {
                                 value: _vm.formulario.descripcion.data,
@@ -56225,7 +56223,7 @@ var render = function() {
                 [
                   _c("q-card-section", [
                     _c("div", { staticClass: "text-h6" }, [
-                      _vm._v("Clasificación de los Negocios Verdes")
+                      _vm._v("Clasificación del negocio")
                     ])
                   ]),
                   _vm._v(" "),
@@ -56759,7 +56757,7 @@ var render = function() {
                                                   "a",
                                                   {
                                                     staticClass:
-                                                      "sppb-btn sppb-btn-dark sppb-btn-round",
+                                                      "sppb-btn sppb-btn-round",
                                                     staticStyle: {
                                                       "margin-right": "20px"
                                                     },
@@ -56769,13 +56767,14 @@ var render = function() {
                                                       target: "_blank",
                                                       id: "btn-1615192830423",
                                                       href:
-                                                        "../" + item.urlActual
+                                                        _vm.base_url +
+                                                        item.urlActual
                                                     }
                                                   },
                                                   [
                                                     _c("q-icon", {
                                                       attrs: {
-                                                        size: "2rem",
+                                                        size: "1.4rem",
                                                         name:
                                                           "img:media/iconssvg/" +
                                                           item.urlActual
@@ -56794,7 +56793,7 @@ var render = function() {
                                             "a",
                                             {
                                               staticClass:
-                                                "sppb-btn sppb-btn-dark sppb-btn-round",
+                                                "sppb-btn  sppb-btn-round",
                                               staticStyle: {
                                                 "margin-right": "20px"
                                               },
@@ -56803,20 +56802,34 @@ var render = function() {
                                                 target: "_blank",
                                                 id: "btn-1615192830423",
                                                 href:
-                                                  "/media/attachments/2021/03/08/" +
+                                                  _vm.base_url +
+                                                  "media/attachments/2021/03/08/" +
                                                   item.doc
                                               }
                                             },
                                             [
-                                              _c("q-icon", {
-                                                attrs: {
-                                                  size: "2rem",
-                                                  name:
-                                                    "img:media/iconssvg/" +
-                                                    item.icon +
-                                                    ".svg"
-                                                }
-                                              })
+                                              _c(
+                                                "q-icon",
+                                                {
+                                                  attrs: {
+                                                    size: "1.4rem",
+                                                    name:
+                                                      "img:" +
+                                                      _vm.base_url +
+                                                      "media/iconssvg/" +
+                                                      item.icon +
+                                                      ".svg"
+                                                  }
+                                                },
+                                                [
+                                                  _c("q-tooltip", [
+                                                    _vm._v(
+                                                      "\n                          Descargar formato para diligenciar\n                        "
+                                                    )
+                                                  ])
+                                                ],
+                                                1
+                                              )
                                             ],
                                             1
                                           ),
@@ -56837,7 +56850,7 @@ var render = function() {
                                                   _c("q-uploader-add-trigger"),
                                                   _vm._v(" "),
                                                   _c("q-tooltip", [
-                                                    _vm._v("Pick Files")
+                                                    _vm._v("Buscar archivo")
                                                   ])
                                                 ],
                                                 1
@@ -56858,7 +56871,7 @@ var render = function() {
                                                 },
                                                 [
                                                   _c("q-tooltip", [
-                                                    _vm._v("Abort Upload")
+                                                    _vm._v("Cancelar subida")
                                                   ])
                                                 ],
                                                 1
@@ -57086,7 +57099,7 @@ var render = function() {
                                                   _c("q-uploader-add-trigger"),
                                                   _vm._v(" "),
                                                   _c("q-tooltip", [
-                                                    _vm._v("Pick Files")
+                                                    _vm._v("Buscar archivo")
                                                   ])
                                                 ],
                                                 1
@@ -57107,7 +57120,7 @@ var render = function() {
                                                 },
                                                 [
                                                   _c("q-tooltip", [
-                                                    _vm._v("Abort Upload")
+                                                    _vm._v("Cancelar")
                                                   ])
                                                 ],
                                                 1
@@ -57232,33 +57245,26 @@ var render = function() {
                   )
                 ],
                 1
-              ),
-              _vm._v(" "),
-              _c(
-                "div",
-                {
-                  staticStyle: {
-                    display: "flex",
-                    "flex-direction": "row",
-                    "align-content": "center",
-                    "justify-content": "center"
-                  }
-                },
-                [
-                  _c("q-btn", {
-                    staticClass: "q-px-xl q-py-xs",
-                    attrs: {
-                      outline: "",
-                      rounded: "",
-                      type: "submit",
-                      size: "lg",
-                      color: "teal",
-                      label: "Enviar Formulario"
-                    }
-                  })
-                ],
-                1
               )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "div",
+            { staticClass: "col-12" },
+            [
+              _c("q-btn", {
+                staticClass: "full-width",
+                attrs: {
+                  outline: "",
+                  rounded: "",
+                  type: "submit",
+                  size: "",
+                  color: "teal",
+                  label: "Enviar Formulario"
+                }
+              })
             ],
             1
           )

@@ -40,7 +40,9 @@
                   <div class="text-subtitle2">Descripcion</div>
               </div> -->
               <div class="col-12 col-md-9" style="width: 100%;">
-                  <q-input v-model="formulario.descripcion.data" label="Descripcion" type="textarea" counter maxlength="500" :rules="formulario.descripcion.rules">
+                  <q-input v-model="formulario.descripcion.data" :label="formulario.descripcion.label" type="textarea" counter maxlength="500" :rules="formulario.descripcion.rules"
+                    :hint="formulario.descripcion.hint"
+                  >
                   </q-input>
               </div>
             </div>
@@ -210,7 +212,7 @@
           <q-card class="my-card q-ma-md"></q-card>
           <q-card class="my-card q-ma-md">
             <q-card-section>
-                <div class="text-h6">Clasificación de los Negocios Verdes</div>
+                <div class="text-h6">Clasificación del negocio</div>
                 <!-- <div class="text-subtitle2">by John Doe</div> -->
             </q-card-section>
             <q-separator />
@@ -318,7 +320,9 @@
                   class = "row justify-center items-center">
                 <q-item-section top>
                   <q-item-label lines = "1">
-                    <q-input v-model = "applicant.nombre" label = "Nombrel del producto" type = "text" :rules = "[ val => val && val.length > 0 || 'Campo vacio']">
+                    <q-input v-model = "applicant.nombre" label = "Nombrel del producto" type = "text" :rules = "[ val => val && val.length > 0 || 'Campo vacio']"
+
+                    >
                     </q-input>
                   </q-item-label>
                   <q-item-label lines = "1">
@@ -358,12 +362,7 @@
                   >
                    <template v-slot:header="scope">
                     <div class="row no-wrap items-center q-pa-sm q-gutter-xs">
-                      <!-- <q-btn v-if="scope.queuedFiles.length > 0" icon="clear_all" @click="scope.removeQueuedFiles" round dense flat >
-                        <q-tooltip>Clear All</q-tooltip>
-                      </q-btn> -->
-                      <!-- <q-btn v-if="scope.uploadedFiles.length > 0" icon="done_all" @click="scope.removeUploadedFiles" round dense flat >
-                        <q-tooltip>Remove Uploaded Files</q-tooltip>
-                      </q-btn> -->
+
                       <q-spinner v-if="scope.isUploading" class="q-uploader__spinner" />
                       <div class="col">
                         <div class="q-uploader__title">{{item.label}}</div>
@@ -372,23 +371,27 @@
                           </div>
                       </div>
                       <div v-if="item.urlActual!=null">
-                        <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="'../'+item.urlActual" class="sppb-btn sppb-btn-dark sppb-btn-round">
-                          <q-icon size="2rem" :name="'img:media/iconssvg/'+item.urlActual.split('.').pop()+'.svg'"/>
+                        <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="base_url+item.urlActual" class="sppb-btn sppb-btn-round">
+                          <q-icon size="1.4rem" :name="'img:media/iconssvg/'+item.urlActual.split('.').pop()+'.svg'"/>
                         </a>
                       </div>
-                      <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="'/media/attachments/2021/03/08/'+item.doc" class="sppb-btn sppb-btn-dark sppb-btn-round">
-                        <q-icon size="2rem" :name="'img:media/iconssvg/'+item.icon+'.svg'"/>
+                      <a style="margin-right: 20px;" rel="noopener noreferrer" target="_blank"  id="btn-1615192830423" :href="base_url+'media/attachments/2021/03/08/'+item.doc" class="sppb-btn  sppb-btn-round">
+                        <q-icon size="1.4rem"  :name="'img:'+base_url+'media/iconssvg/'+item.icon+'.svg'">
+                            <q-tooltip>
+                              Descargar formato para diligenciar
+                            </q-tooltip>
+                        </q-icon>
                       </a>
                       <q-btn v-if="scope.canAddFiles" type="a" icon="add_box" round dense flat>
                         <q-uploader-add-trigger />
-                        <q-tooltip>Pick Files</q-tooltip>
+                        <q-tooltip>Buscar archivo</q-tooltip>
                       </q-btn>
                       <!-- <q-btn v-if="scope.canUpload" icon="cloud_upload" @click="scope.upload" round dense flat >
                         <q-tooltip>Upload Files</q-tooltip>
                       </q-btn> -->
 
                       <q-btn v-if="scope.isUploading" icon="clear" @click="scope.abort" round dense flat >
-                        <q-tooltip>Abort Upload</q-tooltip>
+                        <q-tooltip>Cancelar subida</q-tooltip>
                       </q-btn>
                     </div>
                   </template>
@@ -477,14 +480,14 @@
                       </div>
                       <q-btn v-if="scope.canAddFiles" type="a" icon="add_box" round dense flat>
                         <q-uploader-add-trigger />
-                        <q-tooltip>Pick Files</q-tooltip>
+                        <q-tooltip>Buscar archivo</q-tooltip>
                       </q-btn>
                       <!-- <q-btn v-if="scope.canUpload" icon="cloud_upload" @click="scope.upload" round dense flat >
                         <q-tooltip>Upload Files</q-tooltip>
                       </q-btn> -->
 
                       <q-btn v-if="scope.isUploading" icon="clear" @click="scope.abort" round dense flat >
-                        <q-tooltip>Abort Upload</q-tooltip>
+                        <q-tooltip>Cancelar</q-tooltip>
                       </q-btn>
                     </div>
                   </template>
@@ -535,28 +538,20 @@
               </div>
             </q-card-section>
           </q-card>
-            <div style="
-                      display: flex;
-                      flex-direction: row;
-                      align-content: center;
-                      justify-content: center;
-                  ">
-              <q-btn
-                  outline
-                  rounded
-                type="submit"
-                size="lg"
-                class="q-px-xl q-py-xs"
-                color="teal"
-                label="Enviar Formulario"
-              />
-              <!-- {{formulario.municipio}} -->
-            <!-- <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" /> -->
-          </div>
         </masonry>
             <!-- <q-toggle v-model="accept" label="I accept the license and terms" /> -->
 
-          
+          <div class="col-12">
+            <q-btn
+                outline
+                rounded
+                type="submit"
+                size=""
+                class="full-width"
+                color="teal"
+                label="Enviar Formulario"
+            />
+          </div>
         </q-form>
         <!-- {{this.$store.state.formulario.cargando}} -->
         <q-inner-loading :showing="this.$store.state.formulario.cargando">
@@ -736,6 +731,7 @@ export default {
   
   data () {
     return {
+      base_url,
       anexofile:anexofile,
       anexarfile:anexarfile,
       formData: new FormData(),
@@ -767,7 +763,8 @@ export default {
           nombre: 'descripcion',
           type: 'text',
           data: null,
-          label: 'Descripción',
+          label: 'Describe tu empresa',
+          hint: "Menciona el impacto ambiental positivo que genera tu empresa",
           rules: [ val => val && val.length > 0 || 'Campo vacio']
         },
         telefono: {
@@ -843,17 +840,17 @@ export default {
           rules: [ val => val && val != null || 'Campo vacio']
         },
         subcategoria: {
-          nombre: 'Sectores',
+          nombre: 'Sector',
           type: null,
           data: null,
-          label: 'Sectores',
+          label: 'Sector',
           rules: [ val => val && val.length > 0 || 'Campo vacio']
         },
         tiposubcategoria: {
-          nombre: 'Subsectores',
+          nombre: 'Subsector',
           type: null,
           data: null,
-          label: 'Subsectores'
+          label: 'Subsector'
         },
         productos: [
           {
