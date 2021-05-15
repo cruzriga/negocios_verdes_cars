@@ -441,6 +441,15 @@
                 </q-uploader>
               </div>
             </q-card-section>
+            <div class="q-pa-md">
+              <q-toggle class="q-mt-md" v-model="accept">
+                He leído y acepto el tratamiento de mis datos personales.
+              </q-toggle>
+
+              <div style="padding-left: 55px">
+                (<a href="https://corpoguajira.gov.co/wp/wp-content/uploads/2020/11/RESOLUCION-POLITICA-DE-TRATAMIENTO-DE-DATOS-NUEVO-7-DE-OCT-DE-2020-1.pdf">Política de tratamientos de datos </a>)
+              </div>
+            </div>
           </q-card>
            <q-card class="my-card q-ma-md">
             <q-card-section>
@@ -539,7 +548,7 @@
             </q-card-section>
           </q-card>
         </masonry>
-            <!-- <q-toggle v-model="accept" label="I accept the license and terms" /> -->
+
 
           <div class="col-12">
             <q-btn
@@ -550,6 +559,7 @@
                 class="full-width"
                 color="teal"
                 label="Enviar Formulario"
+                :disable="!accept"
             />
           </div>
         </q-form>
@@ -557,12 +567,6 @@
         <q-inner-loading :showing="this.$store.state.formulario.cargando">
           <q-spinner-hourglass size="5.5em" color="green" />
         </q-inner-loading>
-        <!-- <q-btn
-          size="35px"
-          round
-          icon="map"
-          @click="uploadimg" 
-        /> -->
 
     </div>
 </template>

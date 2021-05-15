@@ -3550,6 +3550,10 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 //
 //
 //
+//
+//
+//
+//
  // import { mapState } from 'vuex'
 
 var optionsmunicipios = [{
@@ -59556,6 +59560,47 @@ var render = function() {
                       )
                     }),
                     0
+                  ),
+                  _vm._v(" "),
+                  _c(
+                    "div",
+                    { staticClass: "q-pa-md" },
+                    [
+                      _c(
+                        "q-toggle",
+                        {
+                          staticClass: "q-mt-md",
+                          model: {
+                            value: _vm.accept,
+                            callback: function($$v) {
+                              _vm.accept = $$v
+                            },
+                            expression: "accept"
+                          }
+                        },
+                        [
+                          _vm._v(
+                            "\n            He leído y acepto el tratamiento de mis datos personales.\n          "
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c("div", { staticStyle: { "padding-left": "55px" } }, [
+                        _vm._v("\n            ("),
+                        _c(
+                          "a",
+                          {
+                            attrs: {
+                              href:
+                                "https://corpoguajira.gov.co/wp/wp-content/uploads/2020/11/RESOLUCION-POLITICA-DE-TRATAMIENTO-DE-DATOS-NUEVO-7-DE-OCT-DE-2020-1.pdf"
+                            }
+                          },
+                          [_vm._v("Política de tratamientos de datos ")]
+                        ),
+                        _vm._v(")\n          ")
+                      ])
+                    ],
+                    1
                   )
                 ],
                 1
@@ -59825,7 +59870,8 @@ var render = function() {
                   type: "submit",
                   size: "",
                   color: "teal",
-                  label: "Enviar Formulario"
+                  label: "Enviar Formulario",
+                  disable: !_vm.accept
                 }
               })
             ],
