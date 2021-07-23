@@ -13,65 +13,31 @@ Vue.use(VueRouter);
 
 const router = new VueRouter(
     {
-        routes :[
+        routes: [
             {
-                path    : '*',
+                path: '*',
                 redirect: '/',
             },
             {
-                path: '/', component: negocios, props:true,
-                children: [
-                    /* {
-                     path: '/',
-                     component: Business,
-                     name: 'main'
-                     },*/
-                ]
+                path: '/', component: negocios, props: true,
             },
             {
-                path: '/categorias', component: categorias, props:true,
-                children: [
-                    /* {s
-                     path: '/',
-                     component: Business,
-                     name: 'main'
-                     },*/
-                ]
+                path: '/categorias', component: categorias, props: true,
             },
             {
-                path: '/archivos', component: archivos, props:true,
-                children: [
-                    /* {
-                     path: '/',
-                     component: Business,
-                     name: 'main'
-                     },*/
-                ]
+                path: '/archivos', component: archivos, props: true,
+
             },
             {
-                path: '/formulario', name: 'formulario', component: formulario, props:true,
-                children: [
-                    /* {
-                     path: '/',
-                     component: Business,
-                     name: 'main'
-                     },*/
-                ]
+                path: '/formulario', component: formulario, props: true,  name: 'formulario'
+
             },
             {
-                path: '/imgcarrusel', name: 'imgcarrusel', component: imgcarrusel, props:true,
-                children: [
-                    /* {
-                     path: '/',
-                     component: Business,
-                     name: 'main'
-                     },*/
-                ]
+                path: '/imgcarrusel', component: imgcarrusel, props: true, name: 'imgcarrusel'
+
             },
             {
-                path: '/perfilAdmin/:idEmpresa',
-                name: 'perfiladmin',
-                component: perfiladmin, props:true
+                path: '/perfilAdmin/:idEmpresa', component: perfiladmin, props: true,name: 'perfiladmin',
             }
         ]
     }

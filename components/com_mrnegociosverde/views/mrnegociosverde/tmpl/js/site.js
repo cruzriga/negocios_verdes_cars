@@ -4174,7 +4174,7 @@ var store = {
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
-        var commit, datopost, puntos, resp, resppro, obj, respdoc, _obj;
+        var commit, datopost, resp, resppro, obj, respdoc, _obj;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
@@ -4184,20 +4184,19 @@ var store = {
                 commit(CARGANDO, true);
                 datopost = 'json=' + encodeURIComponent(JSON.stringify(datos.formulario)); // console.log(datopost); return;
 
-                puntos = datos.admiurl ? '../' : '';
-                _context3.next = 6;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)(puntos + '?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
+                _context3.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)(root_url + '?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
 
-              case 6:
+              case 5:
                 resp = _context3.sent;
 
                 if (!resp.ok) {
-                  _context3.next = 33;
+                  _context3.next = 32;
                   break;
                 }
 
                 if (!(datos.productos != null)) {
-                  _context3.next = 31;
+                  _context3.next = 30;
                   break;
                 }
 
@@ -4208,22 +4207,22 @@ var store = {
                 }); // console.log(datos)
                 // console.log(datos.formulario.idempresa);
 
-                _context3.next = 12;
+                _context3.next = 11;
                 return _this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
 
-              case 12:
+              case 11:
                 resppro = _context3.sent;
 
                 if (resppro.ok) {
-                  _context3.next = 15;
+                  _context3.next = 14;
                   break;
                 }
 
                 return _context3.abrupt("return", resppro);
 
-              case 15:
+              case 14:
                 if (!(datos.imagenlogo != null)) {
-                  _context3.next = 29;
+                  _context3.next = 28;
                   break;
                 }
 
@@ -4233,22 +4232,22 @@ var store = {
                   file: datos.imagenlogo,
                   admiurl: datos.admiurl
                 };
-                _context3.next = 20;
+                _context3.next = 19;
                 return _this.dispatch('formulario/GUARDAR_FILE', obj);
 
-              case 20:
+              case 19:
                 respdoc = _context3.sent;
 
                 if (respdoc.ok) {
-                  _context3.next = 23;
+                  _context3.next = 22;
                   break;
                 }
 
                 return _context3.abrupt("return", respdoc);
 
-              case 23:
+              case 22:
                 if (!(datos.documentos != null)) {
-                  _context3.next = 28;
+                  _context3.next = 27;
                   break;
                 }
 
@@ -4257,26 +4256,26 @@ var store = {
                   file: datos.documentos,
                   admiurl: datos.admiurl
                 };
-                _context3.next = 27;
+                _context3.next = 26;
                 return _this.dispatch('formulario/GUARDAR_FILE', _obj);
 
-              case 27:
+              case 26:
                 respdoc = _context3.sent;
 
-              case 28:
+              case 27:
                 return _context3.abrupt("return", respdoc);
 
-              case 29:
-                _context3.next = 32;
+              case 28:
+                _context3.next = 31;
                 break;
 
-              case 31:
+              case 30:
                 return _context3.abrupt("return", resp);
 
-              case 32:
+              case 31:
                 commit(CARGANDO, false);
 
-              case 33:
+              case 32:
               case "end":
                 return _context3.stop();
             }

@@ -28,6 +28,14 @@ const store =
         },
         mutations:{
             [EMPRESAS](state, empresas){
+                let emp = empresas.data.empresas.map(
+                    e => {
+                        e.adic = parseInt(e.adic);
+                        e.cumplimiento = parseInt(e.cumplimiento);
+                        return e
+                    }
+                )
+                empresas.data.empresas = emp;
                 state.empresas = empresas;
             },
             [CARGANDO](state, bool){

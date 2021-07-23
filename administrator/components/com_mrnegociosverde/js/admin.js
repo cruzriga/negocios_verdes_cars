@@ -2535,6 +2535,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
@@ -2555,7 +2560,20 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       numlist: 50,
       labeladic: this.adic,
       labelcump: this.cump,
-      root_url: root_url
+      root_url: root_url,
+      estados: [{
+        label: 'Preinscrito',
+        color: 'cyan-4'
+      }, {
+        label: 'En revision',
+        color: 'orange-5'
+      }, {
+        label: 'Rechazado',
+        color: 'deep-orange-5'
+      }, {
+        label: 'Aceptado',
+        color: 'green-5'
+      }]
     };
   },
   beforeMount: function beforeMount() {
@@ -2566,6 +2584,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
   },
   methods: {
+    status: function status(n) {
+      return this.estados[n];
+    },
     buscar: function buscar() {
       var obj = {
         buscar: this.search,
@@ -2636,25 +2657,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       });
     },
     onToggleChange: function onToggleChange(value, evt) {
-      // console.log(value)
-      // console.log(evt)
-      // console.log(evt.path[0].parentElement.firstChild.name) 
-      // console.log(evt.path.find(element => element > 'div.q-toggle__thumb.absolute.flex.flex-center.no-wrap'));
-      // evt.path.forEach((element,key) => {
-      //   console.log(element)
-      //   console.log(key)
-      // });
-      // var removeIndex = this.documentos.map(function(item) { return item.id; }).indexOf(file[0].lastModified);
-      // console.log(removeIndex)
       var data = {
         idempresa: evt.path[0].parentElement.firstChild.name != null ? evt.path[0].parentElement.firstChild.name : evt.path[1].parentElement.firstChild.name,
         activo: value
-      }; // console.log(data)
-      // return
-
+      };
       var app = this;
       this.$store.dispatch('admin/CAMBIAR_ESTADO_EMPRESA', data).then(function (resp) {
-        // app.onReset()            
         if (!resp.ok) {
           app.$q.notify({
             color: 'negative',
@@ -2674,14 +2682,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         }
 
         app.$store.commit('admin/CARGANDO', false);
-      }); // return new Promise((resolve) => {
-      //   resolve(resp)
-      // }) 
-      // [0].parentElement.firstChild.name
+      });
     },
-    toggleChange: function toggleChange(value, evt) {// console.log(value)
-      // console.log(evt)
-    },
+    toggleChange: function toggleChange(value, evt) {},
     openFormulario: function openFormulario(empresa) {
       this.$router.push({
         name: 'formulario',
@@ -2702,11 +2705,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     openModalAdjunto: function openModalAdjunto(doc) {
       if (doc.length > 1) {
         anexofile.forEach(function (element, key) {
-          // console.log(key)
           anexofile[key].urlActual = null;
         });
         doc.forEach(function (element) {
-          // console.log(element)
           var indexaa = anexofile.map(function (item) {
             return item.name;
           }).indexOf(element.ref);
@@ -2714,11 +2715,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
           if (indexaa >= 0) {
             anexofile[indexaa].urlActual = element.urldocumento;
           }
-        }); // console.log(anexofile)
-        // console.log(anexarfile)
-
+        });
         this.$refs.modalAdjunto.documentos = anexofile;
-        this.$refs.modalAdjunto.dialog = true; // console.log(this.$refs.modalimg.dialog);
+        this.$refs.modalAdjunto.dialog = true;
       }
     },
     openPerfil: function openPerfil(idEmpresa, empresa) {
@@ -4676,65 +4675,30 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_7__.default({
   }, {
     path: '/',
     component: _pages_negocios__WEBPACK_IMPORTED_MODULE_0__.default,
-    props: true,
-    children: [
-      /* {
-       path: '/',
-       component: Business,
-       name: 'main'
-       },*/
-    ]
+    props: true
   }, {
     path: '/categorias',
     component: _pages_categorias__WEBPACK_IMPORTED_MODULE_1__.default,
-    props: true,
-    children: [
-      /* {s
-       path: '/',
-       component: Business,
-       name: 'main'
-       },*/
-    ]
+    props: true
   }, {
     path: '/archivos',
     component: _pages_archivos__WEBPACK_IMPORTED_MODULE_2__.default,
-    props: true,
-    children: [
-      /* {
-       path: '/',
-       component: Business,
-       name: 'main'
-       },*/
-    ]
+    props: true
   }, {
     path: '/formulario',
-    name: 'formulario',
     component: _pages_formulario__WEBPACK_IMPORTED_MODULE_3__.default,
     props: true,
-    children: [
-      /* {
-       path: '/',
-       component: Business,
-       name: 'main'
-       },*/
-    ]
+    name: 'formulario'
   }, {
     path: '/imgcarrusel',
-    name: 'imgcarrusel',
     component: _pages_imagenesCarrusel__WEBPACK_IMPORTED_MODULE_5__.default,
     props: true,
-    children: [
-      /* {
-       path: '/',
-       component: Business,
-       name: 'main'
-       },*/
-    ]
+    name: 'imgcarrusel'
   }, {
     path: '/perfilAdmin/:idEmpresa',
-    name: 'perfiladmin',
     component: _pages_perfiladmin__WEBPACK_IMPORTED_MODULE_4__.default,
-    props: true
+    props: true,
+    name: 'perfiladmin'
   }]
 });
 router.beforeEach(function (to, from, next) {
@@ -4805,6 +4769,12 @@ var store = {
     }
   },
   mutations: (_mutations = {}, _defineProperty(_mutations, EMPRESAS, function (state, empresas) {
+    var emp = empresas.data.empresas.map(function (e) {
+      e.adic = parseInt(e.adic);
+      e.cumplimiento = parseInt(e.cumplimiento);
+      return e;
+    });
+    empresas.data.empresas = emp;
     state.empresas = empresas;
   }), _defineProperty(_mutations, CARGANDO, function (state, bool) {
     state.cargando = bool;
@@ -5155,7 +5125,7 @@ var store = {
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
-        var commit, datopost, puntos, resp, resppro, obj, respdoc, _obj;
+        var commit, datopost, resp, resppro, obj, respdoc, _obj;
 
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
@@ -5165,20 +5135,19 @@ var store = {
                 commit(CARGANDO, true);
                 datopost = 'json=' + encodeURIComponent(JSON.stringify(datos.formulario)); // console.log(datopost); return;
 
-                puntos = datos.admiurl ? '../' : '';
-                _context3.next = 6;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)(puntos + '?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
+                _context3.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)(root_url + '?option=com_mrnegociosverde&task=savedatosempresa&format=json', datopost);
 
-              case 6:
+              case 5:
                 resp = _context3.sent;
 
                 if (!resp.ok) {
-                  _context3.next = 33;
+                  _context3.next = 32;
                   break;
                 }
 
                 if (!(datos.productos != null)) {
-                  _context3.next = 31;
+                  _context3.next = 30;
                   break;
                 }
 
@@ -5189,22 +5158,22 @@ var store = {
                 }); // console.log(datos)
                 // console.log(datos.formulario.idempresa);
 
-                _context3.next = 12;
+                _context3.next = 11;
                 return _this.dispatch('formulario/GUARDAR_PRODUCTOS', datos);
 
-              case 12:
+              case 11:
                 resppro = _context3.sent;
 
                 if (resppro.ok) {
-                  _context3.next = 15;
+                  _context3.next = 14;
                   break;
                 }
 
                 return _context3.abrupt("return", resppro);
 
-              case 15:
+              case 14:
                 if (!(datos.imagenlogo != null)) {
-                  _context3.next = 29;
+                  _context3.next = 28;
                   break;
                 }
 
@@ -5214,22 +5183,22 @@ var store = {
                   file: datos.imagenlogo,
                   admiurl: datos.admiurl
                 };
-                _context3.next = 20;
+                _context3.next = 19;
                 return _this.dispatch('formulario/GUARDAR_FILE', obj);
 
-              case 20:
+              case 19:
                 respdoc = _context3.sent;
 
                 if (respdoc.ok) {
-                  _context3.next = 23;
+                  _context3.next = 22;
                   break;
                 }
 
                 return _context3.abrupt("return", respdoc);
 
-              case 23:
+              case 22:
                 if (!(datos.documentos != null)) {
-                  _context3.next = 28;
+                  _context3.next = 27;
                   break;
                 }
 
@@ -5238,26 +5207,26 @@ var store = {
                   file: datos.documentos,
                   admiurl: datos.admiurl
                 };
-                _context3.next = 27;
+                _context3.next = 26;
                 return _this.dispatch('formulario/GUARDAR_FILE', _obj);
 
-              case 27:
+              case 26:
                 respdoc = _context3.sent;
 
-              case 28:
+              case 27:
                 return _context3.abrupt("return", respdoc);
 
-              case 29:
-                _context3.next = 32;
+              case 28:
+                _context3.next = 31;
                 break;
 
-              case 31:
+              case 30:
                 return _context3.abrupt("return", resp);
 
-              case 32:
+              case 31:
                 commit(CARGANDO, false);
 
-              case 33:
+              case 32:
               case "end":
                 return _context3.stop();
             }
@@ -5587,7 +5556,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -57219,19 +57188,37 @@ var render = function() {
                               )
                             ]),
                             _vm._v(" "),
-                            _c("q-item-label", { attrs: { lines: "1" } }, [
-                              _c(
-                                "span",
-                                { staticClass: "text-grey-8" },
-                                [
-                                  _c("q-icon", {
-                                    attrs: { name: "date_range" }
-                                  }),
-                                  _vm._v(_vm._s(empresa.fechaCreacion))
-                                ],
-                                1
-                              )
-                            ]),
+                            _c(
+                              "q-item-label",
+                              { attrs: { lines: "1" } },
+                              [
+                                _c(
+                                  "span",
+                                  { staticClass: "text-grey-8" },
+                                  [
+                                    _c("q-icon", {
+                                      staticClass: "q-mr-md",
+                                      attrs: { name: "date_range" }
+                                    }),
+                                    _vm._v(
+                                      "\n              " +
+                                        _vm._s(empresa.fechaCreacion) +
+                                        "\n            "
+                                    )
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c("q-badge", {
+                                  staticClass: "q-ml-md",
+                                  attrs: {
+                                    label: _vm.estados[empresa.estado].label,
+                                    color: _vm.estados[empresa.estado].color
+                                  }
+                                })
+                              ],
+                              1
+                            ),
                             _vm._v(" "),
                             _c(
                               "q-item-label",

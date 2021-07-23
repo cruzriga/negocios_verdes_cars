@@ -21,10 +21,7 @@
         <q-separator spaced/>
         <q-item>
           <q-item-section avatar style="width: 90px;">
-            <q-img
-                :src="root_url+empresa.imagenlogo"
-                style="height: 80px;"
-            >
+            <q-img :src="root_url+empresa.imagenlogo" style="height: 80px;">
               <template v-slot:error>
                 <div class="absolute-full flex flex-center bg-grey-6 text-white rounded-borders">
                   <q-icon name="image" size="md"></q-icon>
@@ -35,9 +32,17 @@
 
           <q-item-section top>
             <q-item-label lines = "1">
-              <a style="cursor: pointer;color:#000000;" @click="openPerfil(empresa.idempresa,empresa)" ><span class = "q-mt-xs text-body2 text-weight-bold text-uppercase">{{empresa.nombreempresa}}</span></a>
+              <a style="cursor: pointer;color:#000000;" @click="openPerfil(empresa.idempresa,empresa)" >
+                <span class = "q-mt-xs text-body2 text-weight-bold text-uppercase">{{empresa.nombreempresa}}</span>
+              </a>
             </q-item-label>
-            <q-item-label lines="1">  <span class = "text-grey-8"> <q-icon name="date_range"/>{{empresa.fechaCreacion}}</span></q-item-label>
+            <q-item-label lines="1">
+              <span class = "text-grey-8">
+                <q-icon name="date_range" class="q-mr-md"/>
+                {{empresa.fechaCreacion}}
+              </span>
+              <q-badge :label="estados[empresa.estado].label" :color="estados[empresa.estado].color" class="q-ml-md"/>
+            </q-item-label>
             <q-item-label caption lines = "1">
               {{empresa.descripcion}}             
             </q-item-label>
@@ -222,7 +227,25 @@ export default {
       numlist: 50,
       labeladic:this.adic,
       labelcump:this.cump,
-      root_url
+      root_url,
+      estados: [
+        {
+          label: 'Preinscrito',
+          color: 'cyan-4'
+        },
+        {
+          label: 'En revision',
+          color: 'orange-5'
+        },
+        {
+          label: 'Rechazado',
+          color: 'deep-orange-5'
+        },
+        {
+          label: 'Aceptado',
+          color: 'green-5'
+        },
+      ]
     }
   },
   beforeMount () {
@@ -233,8 +256,10 @@ export default {
     this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
   },
   methods: {
+    status(n){
+      return this.estados[n]
+    },
     buscar(){
-
       let obj = {
         buscar: this.search,
         campo: 'e.nombreempresa'
@@ -303,25 +328,13 @@ export default {
         })
     },
     onToggleChange(value,evt){
-      // console.log(value)
-      // console.log(evt)
-      // console.log(evt.path[0].parentElement.firstChild.name) 
-      // console.log(evt.path.find(element => element > 'div.q-toggle__thumb.absolute.flex.flex-center.no-wrap'));
-      // evt.path.forEach((element,key) => {
-      //   console.log(element)
-      //   console.log(key)
-      // });
-      // var removeIndex = this.documentos.map(function(item) { return item.id; }).indexOf(file[0].lastModified);
-      // console.log(removeIndex)
       let data= {
         idempresa:evt.path[0].parentElement.firstChild.name!=null?evt.path[0].parentElement.firstChild.name:evt.path[1].parentElement.firstChild.name,
         activo:value
       }
-      // console.log(data)
-      // return
+
       let app=this;
       this.$store.dispatch('admin/CAMBIAR_ESTADO_EMPRESA',data).then(function(resp) {
-        // app.onReset()            
         if (!resp.ok) {             
           app.$q.notify({
             color: 'negative',
@@ -341,14 +354,10 @@ export default {
         }
         app.$store.commit('admin/CARGANDO',false)
       })
-      // return new Promise((resolve) => {
-      //   resolve(resp)
-      // }) 
-      // [0].parentElement.firstChild.name
+
     },
     toggleChange(value,evt){
-      // console.log(value)
-      // console.log(evt)
+
     },
     openFormulario (empresa){
       this.$router.push({name: 'formulario', params: {prop:empresa}});
@@ -359,21 +368,19 @@ export default {
     openModalAdjunto(doc){
       if (doc.length >1) {        
         anexofile.forEach((element,key) => {
-          // console.log(key)
           anexofile[key].urlActual = null;
         });
+
         doc.forEach(element => {
-          // console.log(element)
           var indexaa =  anexofile.map(function(item) { return item.name; }).indexOf(element.ref);
           if (indexaa>=0) {          
             anexofile[indexaa].urlActual = element.urldocumento;
           }
         });
-        // console.log(anexofile)
-        // console.log(anexarfile)
+
         this.$refs.modalAdjunto.documentos=anexofile
         this.$refs.modalAdjunto.dialog=true
-        // console.log(this.$refs.modalimg.dialog);
+
       }
     },
     openPerfil (idEmpresa,empresa){

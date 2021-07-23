@@ -62,8 +62,8 @@ const store =
                 commit(CARGANDO,true)         
                 var datopost = 'json='+encodeURIComponent(JSON.stringify(datos.formulario));
                 // console.log(datopost); return;
-                let puntos = datos.admiurl?'../':'';
-                let resp = await request(puntos+'?option=com_mrnegociosverde&task=savedatosempresa&format=json',datopost)
+
+                let resp = await request(root_url+'?option=com_mrnegociosverde&task=savedatosempresa&format=json',datopost)
                 // console.log(resp);
                 // return resp
                 if(resp.ok){
