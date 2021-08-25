@@ -2540,6 +2540,43 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
@@ -2556,21 +2593,59 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       items: [1],
       adic: 60,
       cump: 80,
+      nivelCumplimientoFiltro: [],
+      nivelCumplimiento: [{
+        id: 0,
+        start: 0,
+        end: 10,
+        label: 'Inicial'
+      }, {
+        id: 1,
+        start: 11,
+        end: 30,
+        label: 'Básico'
+      }, {
+        id: 2,
+        start: 31,
+        end: 50,
+        label: 'Intermedio'
+      }, {
+        id: 3,
+        start: 51,
+        end: 80,
+        label: 'Satisfactorio'
+      }, {
+        id: 4,
+        start: 81,
+        end: 100,
+        label: 'Avanzado'
+      }, {
+        id: 5,
+        start: 81,
+        end: 100,
+        label: 'Avanzado'
+      }],
       pagina: 0,
       numlist: 50,
       labeladic: this.adic,
       labelcump: this.cump,
       root_url: root_url,
+      categoriasFiltro: [],
+      estadosFiltro: [],
       estados: [{
+        id: 0,
         label: 'Preinscrito',
         color: 'cyan-4'
       }, {
+        id: 1,
         label: 'En revision',
         color: 'orange-5'
       }, {
+        id: 2,
         label: 'Rechazado',
         color: 'deep-orange-5'
       }, {
+        id: 3,
         label: 'Aceptado',
         color: 'green-5'
       }]
@@ -2582,6 +2657,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       numlist: this.numlist
     };
     this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
+    this.$store.dispatch('formulario/CARGAR_CATEGORIA');
   },
   methods: {
     status: function status(n) {
@@ -5556,7 +5632,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\r\n/* .no-results{\r\n\r\n} */\r\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* .no-results{\n\n} */\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -6213,7 +6289,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"name":"quasar","version":"1.15.5","description":"Build high-performance VueJS user interfaces (SPA, PWA, SSR, Mobile and Desktop) in record time","module":"src/index.esm.js","typings":"dist/types/index.d.ts","main":"dist/quasar.common.js","files":["dist","lang","icon-set","src","wrappers"],"scripts":{"clean":"node build/script.clean.js","dev":"cd ./dev && node ./script.dev.js dev && cd ..","dev:ssr":"cd ./dev && node ./script.dev.js dev -m ssr && cd ..","dev:cordova:ios":"cd ./dev && node ./script.dev.js dev -m cordova -T ios && cd ..","dev:cordova:android":"cd ./dev && node ./script.dev.js dev -m cordova -T android && cd ..","dev:capacitor:ios":"cd ./dev && node ./script.dev.js dev -m capacitor -T ios && cd ..","dev:capacitor:android":"cd ./dev && node ./script.dev.js dev -m capacitor -T android && cd ..","dev:umd":"node build/script.test-umd.js","dev:quploader":"cd dev/upload-server && yarn && cd ../.. && node dev/upload-server/server.js","build":"node build/script.build.js","test":"yarn lint && yarn build","lint":"eslint --ext .js,.vue src dev","lint-fix":"eslint --ext .js,.vue src dev --fix"},"repository":{"type":"git","url":"git+https://github.com/quasarframework/quasar.git"},"keywords":["vuejs","vue","quasar","js","phone","tablet","desktop","spa","pwa","website","electron"],"author":{"name":"Razvan Stoenescu","email":"razvan.stoenescu@gmail.com","url":"https://quasar.dev"},"license":"MIT","bugs":{"url":"https://github.com/quasarframework/quasar/issues"},"funding":{"type":"github","url":"https://donate.quasar.dev"},"homepage":"https://quasar.dev","devDependencies":{"@quasar/app":"^2.0.6","@quasar/extras":"^1.9.0","@rollup/plugin-buble":"^0.21.1","@rollup/plugin-json":"^4.0.2","@rollup/plugin-node-resolve":"^7.1.0","babel-eslint":"^10.0.2","babel-preset-es2015-rollup":"^3.0.0","eslint":"^7.4.0","eslint-config-standard":"^12.0.0","eslint-friendly-formatter":"^4.0.1","eslint-loader":"^4.0.2","eslint-plugin-import":"^2.18.2","eslint-plugin-node":"^9.1.0","eslint-plugin-promise":"^4.2.1","eslint-plugin-standard":"^4.0.1","eslint-plugin-vue":"^5.2.3","friendly-errors-webpack-plugin":"^1.7.0","json-beautify":"^1.1.1","module-alias":"^2.2.2","recast":"^0.18.5","rimraf":"^3.0.1","rollup":"^1.31.0","table":"^5.4.6","uglify-es":"^3.3.9"},"vetur":{"tags":"dist/vetur/quasar-tags.json","attributes":"dist/vetur/quasar-attributes.json"},"web-types":"dist/web-types/web-types.json","browserslist":["last 1 version, not dead, ie >= 11"],"engines":{"node":">= 10.0.0","npm":">= 5.6.0","yarn":">= 1.6.0"}}');
+module.exports = JSON.parse('{"_args":[["quasar@1.15.5","/Users/pedrozopayares/Documents/GitHub/negocios_verdes_cars"]],"_development":true,"_from":"quasar@1.15.5","_id":"quasar@1.15.5","_inBundle":false,"_integrity":"sha512-6A1o/kjFU72fJaQ+2flm7zK/NPDg/6z3oQ0twxZW/PxkMwZXANjq3fAXvzI3bpFXi4x8s4nQ6qiDFNAW8RTFjA==","_location":"/quasar","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"quasar@1.15.5","name":"quasar","escapedName":"quasar","rawSpec":"1.15.5","saveSpec":null,"fetchSpec":"1.15.5"},"_requiredBy":["#DEV:/"],"_resolved":"https://registry.npmjs.org/quasar/-/quasar-1.15.5.tgz","_spec":"1.15.5","_where":"/Users/pedrozopayares/Documents/GitHub/negocios_verdes_cars","author":{"name":"Razvan Stoenescu","email":"razvan.stoenescu@gmail.com","url":"https://quasar.dev"},"browserslist":["last 1 version, not dead, ie >= 11"],"bugs":{"url":"https://github.com/quasarframework/quasar/issues"},"description":"Build high-performance VueJS user interfaces (SPA, PWA, SSR, Mobile and Desktop) in record time","devDependencies":{"@quasar/app":"^2.0.6","@quasar/extras":"^1.9.0","@rollup/plugin-buble":"^0.21.1","@rollup/plugin-json":"^4.0.2","@rollup/plugin-node-resolve":"^7.1.0","babel-eslint":"^10.0.2","babel-preset-es2015-rollup":"^3.0.0","eslint":"^7.4.0","eslint-config-standard":"^12.0.0","eslint-friendly-formatter":"^4.0.1","eslint-loader":"^4.0.2","eslint-plugin-import":"^2.18.2","eslint-plugin-node":"^9.1.0","eslint-plugin-promise":"^4.2.1","eslint-plugin-standard":"^4.0.1","eslint-plugin-vue":"^5.2.3","friendly-errors-webpack-plugin":"^1.7.0","json-beautify":"^1.1.1","module-alias":"^2.2.2","recast":"^0.18.5","rimraf":"^3.0.1","rollup":"^1.31.0","table":"^5.4.6","uglify-es":"^3.3.9"},"engines":{"node":">= 10.0.0","npm":">= 5.6.0","yarn":">= 1.6.0"},"files":["dist","lang","icon-set","src","wrappers"],"funding":{"type":"github","url":"https://donate.quasar.dev"},"homepage":"https://quasar.dev","keywords":["vuejs","vue","quasar","js","phone","tablet","desktop","spa","pwa","website","electron"],"license":"MIT","main":"dist/quasar.common.js","module":"src/index.esm.js","name":"quasar","repository":{"type":"git","url":"git+https://github.com/quasarframework/quasar.git"},"scripts":{"build":"node build/script.build.js","clean":"node build/script.clean.js","dev":"cd ./dev && node ./script.dev.js dev && cd ..","dev:capacitor:android":"cd ./dev && node ./script.dev.js dev -m capacitor -T android && cd ..","dev:capacitor:ios":"cd ./dev && node ./script.dev.js dev -m capacitor -T ios && cd ..","dev:cordova:android":"cd ./dev && node ./script.dev.js dev -m cordova -T android && cd ..","dev:cordova:ios":"cd ./dev && node ./script.dev.js dev -m cordova -T ios && cd ..","dev:quploader":"cd dev/upload-server && yarn && cd ../.. && node dev/upload-server/server.js","dev:ssr":"cd ./dev && node ./script.dev.js dev -m ssr && cd ..","dev:umd":"node build/script.test-umd.js","lint":"eslint --ext .js,.vue src dev","lint-fix":"eslint --ext .js,.vue src dev --fix","test":"yarn lint && yarn build"},"typings":"dist/types/index.d.ts","version":"1.15.5","vetur":{"tags":"dist/vetur/quasar-tags.json","attributes":"dist/vetur/quasar-attributes.json"},"web-types":"dist/web-types/web-types.json"}');
 
 /***/ }),
 
@@ -56969,10 +57045,123 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "q-page",
+    { staticClass: "row" },
     [
       _c(
         "q-list",
-        { staticClass: "rounded-borders fit", attrs: { bordered: "" } },
+        {
+          staticClass: "rounded-borders col-3 q-mr-md",
+          attrs: { dense: "", bordered: "" }
+        },
+        [
+          _c(
+            "h6",
+            {
+              staticClass: "q-pl-md text-body2 text-weight-bold text-uppercase"
+            },
+            [_vm._v("Filtros")]
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "q-pl-md q-pt-md text-weight-medium" }, [
+            _vm._v("Estado")
+          ]),
+          _vm._v(" "),
+          _vm._l(_vm.estados, function(estado, index) {
+            return _c(
+              "q-item",
+              { key: index },
+              [
+                _c("q-checkbox", {
+                  attrs: {
+                    val: estado.id,
+                    label: estado.label,
+                    color: "teal",
+                    size: "xs"
+                  },
+                  model: {
+                    value: _vm.estadosFiltro,
+                    callback: function($$v) {
+                      _vm.estadosFiltro = $$v
+                    },
+                    expression: "estadosFiltro"
+                  }
+                })
+              ],
+              1
+            )
+          }),
+          _vm._v(" "),
+          _c("div", { staticClass: "q-pl-md  q-pt-md  text-weight-medium" }, [
+            _vm._v("Categoria")
+          ]),
+          _vm._v(" "),
+          _vm._l(this.$store.state.formulario.categoria.categorias, function(
+            categoria
+          ) {
+            return _c(
+              "q-item",
+              { key: categoria.idcategoria },
+              [
+                _c("q-checkbox", {
+                  attrs: {
+                    val: categoria.idcategoria,
+                    label: categoria.nombre,
+                    color: "teal",
+                    size: "xs"
+                  },
+                  model: {
+                    value: _vm.categoriasFiltro,
+                    callback: function($$v) {
+                      _vm.categoriasFiltro = $$v
+                    },
+                    expression: "categoriasFiltro"
+                  }
+                })
+              ],
+              1
+            )
+          }),
+          _vm._v(" "),
+          _c("div", { staticClass: "q-pl-md q-pt-md text-weight-medium" }, [
+            _vm._v("Cumplimiento")
+          ]),
+          _vm._v(" "),
+          _vm._l(_vm.nivelCumplimiento, function(cumplimiento) {
+            return _c(
+              "q-item",
+              { key: cumplimiento.id },
+              [
+                _c("q-checkbox", {
+                  attrs: {
+                    val: cumplimiento.id,
+                    label:
+                      cumplimiento.start +
+                      "-" +
+                      cumplimiento.end +
+                      " " +
+                      cumplimiento.label,
+                    color: "teal",
+                    size: "xs"
+                  },
+                  model: {
+                    value: _vm.nivelCumplimientoFiltro,
+                    callback: function($$v) {
+                      _vm.nivelCumplimientoFiltro = $$v
+                    },
+                    expression: "nivelCumplimientoFiltro"
+                  }
+                })
+              ],
+              1
+            )
+          })
+        ],
+        2
+      ),
+      _vm._v(" "),
+      _c(
+        "q-list",
+        { staticClass: "rounded-borders col-8", attrs: { bordered: "" } },
         [
           _c(
             "q-item-label",

@@ -1,6 +1,43 @@
 <template>
-  <q-page >
-    <q-list bordered class="rounded-borders fit"  >
+  <q-page class="row">
+     <q-list dense bordered class="rounded-borders col-3 q-mr-md"  >
+      <h6 class="q-pl-md text-body2 text-weight-bold text-uppercase">Filtros</h6>
+      
+      <div class="q-pl-md q-pt-md text-weight-medium">Estado</div>
+      <q-item v-for="(estado, index) in estados" :key="index" >
+        <q-checkbox 
+          v-model="estadosFiltro" 
+          :val="estado.id" 
+          :label="estado.label" 
+          color="teal" 
+          size="xs"
+        />
+      </q-item>
+
+      <div class="q-pl-md  q-pt-md  text-weight-medium">Categoria</div>
+      <q-item v-for="categoria in this.$store.state.formulario.categoria.categorias" :key="categoria.idcategoria" >
+        <q-checkbox 
+          v-model="categoriasFiltro" 
+          :val="categoria.idcategoria" 
+          :label="categoria.nombre" 
+          color="teal" 
+          size="xs"
+        />
+      </q-item>
+
+      <div class="q-pl-md q-pt-md text-weight-medium">Cumplimiento</div>
+      <q-item v-for="cumplimiento in nivelCumplimiento" :key="cumplimiento.id" >
+        <q-checkbox 
+          v-model="nivelCumplimientoFiltro" 
+          :val="cumplimiento.id" 
+          :label="cumplimiento.start + '-' + cumplimiento.end + ' ' + cumplimiento.label" 
+          color="teal" 
+          size="xs"
+        />
+      </q-item>
+     
+    </q-list>
+    <q-list bordered class="rounded-borders col-8"  >
       <q-item-label  header>
         <q-toolbar class="text-primary" style="height: 50px">
           <q-input @keyup.enter="buscar" class="GPL__toolbar-input" dense standout="bg-primary" v-model="search" placeholder="Buscar">
@@ -209,7 +246,8 @@
 </template>
 
 <script>
-import ModalAdjunto from './../components/Modal'
+import ModalAdjunto from './../components/Modal';
+
 export default {
   name: 'Negocios',
   components:{ ModalAdjunto },
@@ -223,25 +261,70 @@ export default {
       items : [1],
       adic: 60,
       cump : 80,
+      nivelCumplimientoFiltro: [],
+      nivelCumplimiento: [
+        {
+          id: 0,
+          start: 0,
+          end: 10,
+          label: 'Inicial',
+        },
+        {
+          id: 1,
+          start: 11,
+          end: 30,
+          label: 'Básico',
+        },
+        {
+          id: 2,
+          start: 31,
+          end: 50,
+          label: 'Intermedio',
+        },
+        {
+          id: 3,
+          start: 51,
+          end: 80,
+          label: 'Satisfactorio',
+        },
+        {
+          id:4,
+          start: 81,
+          end: 100,
+          label: 'Avanzado',
+        },
+        {
+          id:5,
+          start: 81,
+          end: 100,
+          label: 'Avanzado',
+        }
+      ],
       pagina:0,
       numlist: 50,
       labeladic:this.adic,
       labelcump:this.cump,
       root_url,
+      categoriasFiltro: [],
+      estadosFiltro: [],
       estados: [
         {
+          id: 0,
           label: 'Preinscrito',
           color: 'cyan-4'
         },
         {
+          id: 1,
           label: 'En revision',
           color: 'orange-5'
         },
         {
+          id: 2,
           label: 'Rechazado',
           color: 'deep-orange-5'
         },
         {
+          id: 3,
           label: 'Aceptado',
           color: 'green-5'
         },
@@ -254,6 +337,7 @@ export default {
       numlist: this.numlist
     }
     this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
+    this.$store.dispatch('formulario/CARGAR_CATEGORIA');
   },
   methods: {
     status(n){
