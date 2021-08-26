@@ -14,6 +14,7 @@ defined('_JEXEC') or die('Restricted access');
  * @since  0.0.1
  */
 class MrNegociosVerdeController extends JControllerLegacy {
+    protected $filtros = [];
     public function divide2($a, $b)  
     {
         if ($b == 0)
@@ -65,12 +66,16 @@ class MrNegociosVerdeController extends JControllerLegacy {
 
         $model= $this->getModel('mrnegociosverde');
         $input = $app->input;
+        $rawDataPost = $app->input->getArray($_POST);
+        $filtros = json_decode($rawDataPost['filtros']);
+        
         $pagina = $input->get("pagina", 0, "int");
         $numList = $input->get("numlist", 50, "int");
         $buscar = $input->get("buscar", '', "string");
         $campo = $input->get("campo", '', "string");
         // print_r($numList);
-        $empresas= $model->getEmpresas($pagina,$numList,$buscar,$campo);
+        $empresas= $model->getEmpresas($pagina,$numList,$buscar,$campo, $filtros);
+
         if (empty($empresas)){ echo false;die;}
         foreach ($empresas as $key => $value) {
             $categoria          = $model->getCategorias($value->idcategoria)[0];
@@ -91,8 +96,8 @@ class MrNegociosVerdeController extends JControllerLegacy {
             }
             unset($value->idcategoria);
             unset($value->idsubcategoria);
-            unset($value->idtiposubcategoria);
-            
+            unset($value->idtiposubcategoria); 
+
             $empresas[$key]->categoria = $categoria;
             $empresas[$key]->subcategoria = $subcategoria;
             $empresas[$key]->tiposubcategoria = $tiposubcategoria;

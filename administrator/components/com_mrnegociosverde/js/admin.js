@@ -2577,6 +2577,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
@@ -2654,7 +2657,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   beforeMount: function beforeMount() {
     var obj = {
       pagina: this.pagina,
-      numlist: this.numlist
+      numlist: this.numlist,
+      filtros: {
+        nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+        categoriasFiltro: this.categoriasFiltro,
+        estadosFiltro: this.estadosFiltro
+      }
     };
     this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
     this.$store.dispatch('formulario/CARGAR_CATEGORIA');
@@ -2663,10 +2671,29 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     status: function status(n) {
       return this.estados[n];
     },
+    filtrar: function filtrar() {
+      var obj = {
+        pagina: this.pagina,
+        numlist: this.numlist,
+        buscar: this.search,
+        campo: 'e.nombreempresa',
+        filtros: {
+          nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+          categoriasFiltro: this.categoriasFiltro,
+          estadosFiltro: this.estadosFiltro
+        }
+      };
+      this.$store.dispatch('admin/BUSCAR_EMPRESAS', obj);
+    },
     buscar: function buscar() {
       var obj = {
         buscar: this.search,
-        campo: 'e.nombreempresa'
+        campo: 'e.nombreempresa',
+        filtros: {
+          nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+          categoriasFiltro: this.categoriasFiltro,
+          estadosFiltro: this.estadosFiltro
+        }
       };
       this.$store.dispatch('admin/BUSCAR_EMPRESAS', obj);
     },
@@ -2676,7 +2703,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (actual != 1) {
         var obj = {
           pagina: this.$store.state.admin.empresas.data.pagina + n,
-          numlist: this.$store.state.admin.empresas.data.numList
+          numlist: this.$store.state.admin.empresas.data.numList,
+          filtros: {
+            nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+            categoriasFiltro: this.categoriasFiltro,
+            estadosFiltro: this.estadosFiltro
+          }
         };
         this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
       }
@@ -2688,7 +2720,12 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       if (actual != total) {
         var obj = {
           pagina: this.$store.state.admin.empresas.data.pagina + n,
-          numlist: this.$store.state.admin.empresas.data.numList
+          numlist: this.$store.state.admin.empresas.data.numList,
+          filtros: {
+            nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+            categoriasFiltro: this.categoriasFiltro,
+            estadosFiltro: this.estadosFiltro
+          }
         };
         this.$store.dispatch('admin/CARGAR_EMPRESAS', obj);
       }
@@ -4858,18 +4895,18 @@ var store = {
   actions: {
     CARGAR_EMPRESAS: function CARGAR_EMPRESAS(_ref, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var commit, resp;
+        var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 commit = _ref.commit;
-                commit(CARGANDO, true); // console.log(datos);
+                commit(CARGANDO, true);
+                datopost = 'filtros=' + JSON.stringify(datos.filtros);
+                _context.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresasadmin&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist, datopost);
 
-                _context.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresasadmin&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
-
-              case 4:
+              case 5:
                 resp = _context.sent;
 
                 // console.log(resp)
@@ -4878,7 +4915,7 @@ var store = {
                   commit(CARGANDO, false);
                 }
 
-              case 6:
+              case 7:
               case "end":
                 return _context.stop();
             }
@@ -4888,37 +4925,38 @@ var store = {
     },
     BUSCAR_EMPRESAS: function BUSCAR_EMPRESAS(_ref2, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
-        var commit, resp;
+        var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 commit = _ref2.commit;
                 commit(CARGANDO, true);
-                _context2.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=getempresasadmin&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo);
+                datopost = 'filtros=' + JSON.stringify(datos.filtros);
+                _context2.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('?option=com_mrnegociosverde&task=getempresasadmin&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo, datopost);
 
-              case 4:
+              case 5:
                 resp = _context2.sent;
 
                 if (!resp.ok) {
-                  _context2.next = 12;
+                  _context2.next = 13;
                   break;
                 }
 
                 commit(CARGANDO, false);
 
                 if (!(datos.campo == 'e.idempresa')) {
-                  _context2.next = 11;
+                  _context2.next = 12;
                   break;
                 }
 
                 return _context2.abrupt("return", resp.resp.data.empresas[0]);
 
-              case 11:
+              case 12:
                 commit(EMPRESAS, resp.resp);
 
-              case 12:
+              case 13:
               case "end":
                 return _context2.stop();
             }
@@ -5632,7 +5670,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* .no-results{\n\n} */\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* .no-results{\n\n} */\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -57078,6 +57116,7 @@ var render = function() {
                     color: "teal",
                     size: "xs"
                   },
+                  on: { input: _vm.filtrar },
                   model: {
                     value: _vm.estadosFiltro,
                     callback: function($$v) {
@@ -57109,6 +57148,7 @@ var render = function() {
                     color: "teal",
                     size: "xs"
                   },
+                  on: { input: _vm.filtrar },
                   model: {
                     value: _vm.categoriasFiltro,
                     callback: function($$v) {
@@ -57143,6 +57183,7 @@ var render = function() {
                     color: "teal",
                     size: "xs"
                   },
+                  on: { input: _vm.filtrar },
                   model: {
                     value: _vm.nivelCumplimientoFiltro,
                     callback: function($$v) {

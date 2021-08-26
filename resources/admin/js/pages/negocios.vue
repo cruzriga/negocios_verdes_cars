@@ -11,6 +11,7 @@
           :label="estado.label" 
           color="teal" 
           size="xs"
+          @input="filtrar"
         />
       </q-item>
 
@@ -22,6 +23,7 @@
           :label="categoria.nombre" 
           color="teal" 
           size="xs"
+          @input="filtrar"
         />
       </q-item>
 
@@ -33,6 +35,7 @@
           :label="cumplimiento.start + '-' + cumplimiento.end + ' ' + cumplimiento.label" 
           color="teal" 
           size="xs"
+          @input="filtrar"
         />
       </q-item>
      
@@ -200,7 +203,7 @@
                   v-model="empresa.activo"
                   :key="empresa.idempresa"
                   :name="empresa.idempresa"
-                  :ref="'activo'+empresa.idempresa"
+                  :ref="'activo' + empresa.idempresa"
                   color="green"
                   icon="check"
                   @input="onToggleChange"
@@ -334,7 +337,12 @@ export default {
   beforeMount () {
     let obj = {
       pagina: this.pagina,
-      numlist: this.numlist
+      numlist: this.numlist,
+      filtros: {
+        nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+        categoriasFiltro: this.categoriasFiltro,
+        estadosFiltro: this.estadosFiltro,
+      }
     }
     this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
     this.$store.dispatch('formulario/CARGAR_CATEGORIA');
@@ -343,10 +351,29 @@ export default {
     status(n){
       return this.estados[n]
     },
+    filtrar() {
+      let obj = {
+        pagina: this.pagina,
+        numlist: this.numlist,
+        buscar: this.search,
+        campo: 'e.nombreempresa',
+        filtros: {
+          nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+          categoriasFiltro: this.categoriasFiltro,
+          estadosFiltro: this.estadosFiltro,
+        }
+      }
+      this.$store.dispatch('admin/BUSCAR_EMPRESAS',obj);
+    },
     buscar(){
       let obj = {
         buscar: this.search,
-        campo: 'e.nombreempresa'
+        campo: 'e.nombreempresa',
+        filtros: {
+          nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+          categoriasFiltro: this.categoriasFiltro,
+          estadosFiltro: this.estadosFiltro,
+        }
       }
       this.$store.dispatch('admin/BUSCAR_EMPRESAS',obj);
     },
@@ -355,7 +382,12 @@ export default {
       if(actual!=1){
         let obj = {
           pagina: this.$store.state.admin.empresas.data.pagina+n,
-          numlist: this.$store.state.admin.empresas.data.numList
+          numlist: this.$store.state.admin.empresas.data.numList,
+          filtros: {
+            nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+            categoriasFiltro: this.categoriasFiltro,
+            estadosFiltro: this.estadosFiltro,
+          }
         }
         this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
       }
@@ -366,7 +398,12 @@ export default {
       if(actual!=total){
         let obj = {
           pagina: this.$store.state.admin.empresas.data.pagina+n,
-          numlist: this.$store.state.admin.empresas.data.numList
+          numlist: this.$store.state.admin.empresas.data.numList,
+          filtros: {
+            nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+            categoriasFiltro: this.categoriasFiltro,
+            estadosFiltro: this.estadosFiltro,
+          }
         }
         this.$store.dispatch('admin/CARGAR_EMPRESAS',obj);
       }

@@ -44,10 +44,10 @@ const store =
             
         },
         actions:{
-            async CARGAR_EMPRESAS ({ commit },datos){
+            async CARGAR_EMPRESAS ({ commit }, datos){
                 commit(CARGANDO,true)
-                // console.log(datos);
-                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresasadmin&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
+                var datopost = 'filtros=' + JSON.stringify(datos.filtros);
+                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresasadmin&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist, datopost)
                 // console.log(resp)
                 if(resp.ok){
                     commit(EMPRESAS,resp.resp)
@@ -56,7 +56,8 @@ const store =
             },
             async BUSCAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
-                let resp = await request('?option=com_mrnegociosverde&task=getempresasadmin&format=json&buscar='+datos.buscar+'&campo='+datos.campo)
+                var datopost = 'filtros=' + JSON.stringify(datos.filtros);
+                let resp = await request('?option=com_mrnegociosverde&task=getempresasadmin&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo, datopost)
                 // console.log(resp)
                 if(resp.ok){
                     commit(CARGANDO,false)

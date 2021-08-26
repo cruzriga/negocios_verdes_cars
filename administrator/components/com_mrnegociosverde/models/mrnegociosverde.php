@@ -205,7 +205,8 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
 	}
 
-    public function getEmpresas($pagina=0,$limite=50,$buscar=null,$campo='e.nombreempresa') {
+    public function getEmpresas($pagina=0,$limite=50,$buscar=null,$campo='e.nombreempresa', $filtros) {
+        
         $app = JFactory::getApplication();
         $db = JFactory::getDbo();
         // $query = $db->getQuery(true);
@@ -232,9 +233,14 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         $db->setQuery($query,$limitstart, $limit);
         // $db->setQuery($queryCount);
         $rows = $db->loadObjectList();
+        //var_dump($filtros->categoriasFiltro); die();
         if ($rows) {
+            $main = [];
             foreach ($rows as $row) {
-                $main[] = $row;            
+                if (in_array($row->idcategoria, $filtros->categoriasFiltro) || 
+                    empty($filtros->categoriasFiltros)) {
+                    $main[] = $row;
+                }          
             }
             return $main;
         }
@@ -263,9 +269,9 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
 
         $db = JFactory::getDBO();
         $updateNulls = true;
-        // print_r($item);
+        
         $result = $db->updateObject('#__negocios_v_empresas', $item , 'idempresa', $updateNulls);
-        // print_r($result);
+        
         if ($result) {
             return $result;
         }
