@@ -237,10 +237,12 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         if ($rows) {
             $main = [];
             foreach ($rows as $row) {
-                if (in_array($row->idcategoria, $filtros->categoriasFiltro) || 
-                    empty($filtros->categoriasFiltros)) {
-                    $main[] = $row;
-                }          
+                if (!empty($filtros->categoriasFiltro)) {
+                    if(!in_array($row->idcategoria, $filtros->categoriasFiltro)) {
+                        continue;
+                    }
+                }
+                $main[] = $row;
             }
             return $main;
         }
