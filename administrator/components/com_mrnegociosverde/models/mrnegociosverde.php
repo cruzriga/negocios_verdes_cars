@@ -251,12 +251,41 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
                         continue;
                     }
                 }
+
+                // Filtrar por Nivel de Cumplimiento
+                if (!empty($filtros->nivelCumplimientoFiltro)) {
+                    if (!$this->nivelDeCumplimiento($row, $filtros->nivelCumplimientoFiltro)) {
+                        continue;
+                    }
+                }
+
                 $main[] = $row;
             }
             return $main;
         }
         return false;
     }
+
+    private function nivelDeCumplimiento($empresa, $filtros) {
+        $value = $empresa->cumplimiento;
+        $cumple = 0;
+        foreach($filtros as $nivel) {
+            $min = $nivel->start;
+            $max = $nivel->end;
+            if($min == 'adic' && $cumple == 100) {
+                if( ($empresa->adic >= 50) && ($empresa->adic <= 100) ) {
+                    $cumple = 'ideal';
+                    return $cumple;
+                }
+            }
+            if (($min <= $value) && ($value <= $max)) {
+                $cumple = $max;
+            }
+
+        }
+        return $cumple;
+    }
+
     public function contarEmpresaQuery(Type $var = null)
     {
         $db = JFactory::getDbo();

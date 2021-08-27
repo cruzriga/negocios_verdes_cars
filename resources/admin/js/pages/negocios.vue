@@ -31,9 +31,9 @@
       <q-item v-for="cumplimiento in nivelCumplimiento" :key="cumplimiento.id" >
         <q-checkbox 
           v-model="nivelCumplimientoFiltro" 
-          :val="cumplimiento.id" 
+          :val="cumplimiento" 
           :label="cumplimiento.start + '-' + cumplimiento.end + ' ' + cumplimiento.label" 
-          color="teal" 
+          color="teal"
           size="xs"
           @input="filtrar"
         />
@@ -298,9 +298,9 @@ export default {
         },
         {
           id:5,
-          start: 81,
+          start: 'adic',
           end: 100,
-          label: 'Avanzado',
+          label: '81-100 - Ideal + Adicional (50-100)',
         }
       ],
       pagina:0,

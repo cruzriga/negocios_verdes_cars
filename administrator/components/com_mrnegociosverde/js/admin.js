@@ -2624,9 +2624,9 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         label: 'Avanzado'
       }, {
         id: 5,
-        start: 81,
+        start: 'adic',
         end: 100,
-        label: 'Avanzado'
+        label: '81-100 - Ideal + Adicional (50-100)'
       }],
       pagina: 0,
       numlist: 50,
@@ -57173,7 +57173,7 @@ var render = function() {
               [
                 _c("q-checkbox", {
                   attrs: {
-                    val: cumplimiento.id,
+                    val: cumplimiento,
                     label:
                       cumplimiento.start +
                       "-" +
