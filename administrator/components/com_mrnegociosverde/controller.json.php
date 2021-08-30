@@ -285,16 +285,9 @@ class MrNegociosVerdeController extends JControllerLegacy {
         echo '<table border="1" cellpadding="2" cellspacing="0" width="100%">
             <caption>Listado de Empresas</caption>';
         
-        $i = 0;
         echo '<tr>';
         foreach ($fields as $field => $value) {
-            echo '<td>' . $value;
-            if ($i < count($fields) - 1) {
-                echo '</td> <td>';
-            } else {
-                echo '</td>';
-            }
-            $i++;
+            echo '<td>' . $value . '</td>';
         }
         echo '</tr>';
         echo "\n";
