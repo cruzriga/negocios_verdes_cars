@@ -52,9 +52,10 @@
       <q-item class="q-mt-lg">
         <!-- download-excel :data="json_data">
           Descargar
-          <q-icon name="download" />
+          
         </download-excel -->
-        <a :href="getURLToDownload" target="_blank" class="btn">
+        <a :href="getURLToDownload" target="_blank" flat class="full-width btn bg-secondary text-white q-pa-md no-border text-subtitle2">
+          <q-icon name="download" />
           Descargar empresas
         </a>
       </q-item>
