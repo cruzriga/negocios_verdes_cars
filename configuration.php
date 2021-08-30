@@ -59,7 +59,7 @@ class JConfig {
 	public $feed_email = 'none';
 	public $log_path = '/home/vagrant/verdes/administrator/logs';
 	public $tmp_path = '/home/vagrant/verdes/tmp';
-	public $lifetime = '15';
+	public $lifetime = '30';
 	public $session_handler = 'database';
 	public $shared_session = '0';
 	public $memcache_persist = '1';

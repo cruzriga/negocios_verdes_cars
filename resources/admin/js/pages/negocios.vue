@@ -1,7 +1,11 @@
 <template>
   <q-page class="row">
+
+    <!-- BEGIN Filtros -->
      <q-list dense bordered class="rounded-borders col-3 q-mr-md"  >
       <h6 class="q-pl-md text-body2 text-weight-bold text-uppercase">Filtros</h6>
+
+      <q-separator />
       
       <div class="q-pl-md q-pt-md text-weight-medium">Estado</div>
       <q-item v-for="(estado, index) in estados" :key="index" >
@@ -15,6 +19,8 @@
         />
       </q-item>
 
+      <q-separator />
+
       <div class="q-pl-md  q-pt-md  text-weight-medium">Categoria</div>
       <q-item v-for="categoria in this.$store.state.formulario.categoria.categorias" :key="categoria.idcategoria" >
         <q-checkbox 
@@ -27,6 +33,8 @@
         />
       </q-item>
 
+      <q-separator />
+
       <div class="q-pl-md q-pt-md text-weight-medium">Cumplimiento</div>
       <q-item v-for="cumplimiento in nivelCumplimiento" :key="cumplimiento.id" >
         <q-checkbox 
@@ -38,8 +46,24 @@
           @input="filtrar"
         />
       </q-item>
+
+      <q-separator />
+
+      <q-item class="q-mt-lg">
+        <!-- download-excel :data="json_data">
+          Descargar
+          <q-icon name="download" />
+        </download-excel -->
+        <a :href="getURLToDownload" target="_blank" class="btn">
+          Descargar empresas
+        </a>
+      </q-item>
      
     </q-list>
+
+    <!-- END Filtros -->
+
+
     <q-list bordered class="rounded-borders col-8"  >
       <q-item-label  header>
         <q-toolbar class="text-primary" style="height: 50px">
@@ -331,8 +355,21 @@ export default {
           label: 'Aceptado',
           color: 'green-5'
         },
-      ]
+      ],
     }
+  },
+  computed: {
+    getURLToDownload: function() {
+      let filtros = {
+          nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
+          categoriasFiltro: this.categoriasFiltro,
+          estadosFiltro: this.estadosFiltro,
+      };
+      return "?option=com_mrnegociosverde&task=downloadempresas&format=json&buscar='"
+                + this.search
+                + '&campo=e.nombreempresa' 
+                + "&filtros=" + encodeURIComponent(JSON.stringify(filtros));
+    },
   },
   beforeMount () {
     let obj = {

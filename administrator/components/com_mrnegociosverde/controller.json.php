@@ -14,7 +14,7 @@ defined('_JEXEC') or die('Restricted access');
  * @since  0.0.1
  */
 class MrNegociosVerdeController extends JControllerLegacy {
-    protected $filtros = [];
+    
     public function divide2($a, $b)  
     {
         if ($b == 0)
@@ -168,5 +168,168 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $db->setQuery($query);
 
         $result = $db->execute();
+    }
+
+    public function downloadEmpresas()
+    {
+        $app = JFactory::getApplication();
+
+        $model = $this->getModel('mrnegociosverde');
+        $input = $app->input;
+        $rawDataPost = $app->input->getArray($_POST);
+        $filtros = json_decode($rawDataPost['filtros']);
+        
+        $empresas = $model->getEmpresasToDownload($filtros);
+
+        if (empty($empresas)) {
+            echo 'No existen datos para descargar. Por favor, revise los filtros o inicie sesión.';
+            die();
+        }
+        
+        foreach ($empresas as $key => $value) {
+            $categoria = (object)[
+                'idcategoria' => '',
+                'nombre' => ''
+            ];
+            $categoria          = $model->getCategorias($value->idcategoria)[0];
+            $subcategoria       = (object)[
+                'idsubcategoria' => '',
+                'nombre' => ''
+            ];
+            $tiposubcategoria   = (object)[
+                'idtiposubcategoria' => '',
+                'nombre' => ''
+            ];
+            $productos          = $model->getProductos($value->idempresa);
+            $documentos         = $model->getDocumentos($value->idempresa);
+            $imgcarrusel        = $model->getImgCarrusel($value->idempresa);
+
+            if ($value->idsubcategoria != null) {
+                $subcategoria = $model->getSubCategorias($value->idcategoria, $value->idsubcategoria)[0];
+            }
+            if ($value->idtiposubcategoria != null) {
+                $tiposubcategoria = $model->getTipoSubCategorias($value->idsubcategoria, $value->idtiposubcategoria)[0];
+            }
+            unset($value->idcategoria);
+            unset($value->idsubcategoria);
+            unset($value->idtiposubcategoria);
+
+            $empresas[$key]->nombrecategoria = $categoria->nombre;
+            $empresas[$key]->idcategoria = $categoria->idcategoria;
+            $empresas[$key]->idsubcategoria = $subcategoria->idsubcategoria;
+            $empresas[$key]->nombresubcategoria = $subcategoria->nombre;
+            $empresas[$key]->idtiposubcategoria = $tiposubcategoria->idtiposubcategoria;
+            $empresas[$key]->nombretiposubcategoria = $tiposubcategoria->nombre;
+            $empresas[$key]->productos = $productos;
+            $empresas[$key]->documentos = $documentos;
+            $empresas[$key]->imgcarrusel = $imgcarrusel;
+        }
+
+        $this->exportToExcel($empresas);
+    }
+
+    private function exportToExcel($empresas) {
+        $fields = [
+            'idempresa' => 'ID de empresa',
+            'nombreempresa' => 'Nombre de Empresa',
+            'estado' => 'Estado',
+            'representantelegal' => 'Representante Legal',
+            'descripcion' => 'Descripción',
+            'telefono' => 'Teléfono',
+            'direccion' => 'Dirección',
+            'municipio' => 'Municipio',
+            'email' => 'Email',
+            'twitter' => 'Twitter',
+            'facebook' => 'Facebook',
+            'instagram' => 'Instagram',
+            'linkvideo' => 'Link Video',
+            'imagenlogo' => 'Imágen Logo',
+            'idcategoria' => 'ID Categoría',
+            'nombrecategoria' => 'Categoría',
+            'idsubcategoria' => 'ID Subcategoría',
+            'nombresubcategoria' => 'Subcategoría',
+            'idtiposubcategoria' => 'ID Tipo subcategoría',
+            'nombretiposubcategoria' => 'Nombre Tipo subcategoría',
+            'cumplimiento' => 'Cumplimiento',
+            'adic' => 'Adicional',
+            'activo' => 'Activo',
+            'isActivo' => 'isActive',
+            'fechaCreacion' => 'Fecha de Creación',
+        ];
+
+        header('Content-type: application/vnd.ms-excel;charset=iso-8859-15');
+        header('Content-Disposition: attachment; filename=empresas.xls');
+
+        echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">
+                <head>
+                    <!--[if gte mso 9]>
+                    <xml>
+                        <x:ExcelWorkbook>
+                            <x:ExcelWorksheets>
+                                <x:ExcelWorksheet>
+                                    <x:Name>Sheet 1</x:Name>
+                                    <x:WorksheetOptions>
+                                        <x:Print>
+                                            <x:ValidPrinterInfo/>
+                                        </x:Print>
+                                    </x:WorksheetOptions>
+                                </x:ExcelWorksheet>
+                            </x:ExcelWorksheets>
+                        </x:ExcelWorkbook>
+                    </xml>
+                    <![endif]-->
+                </head>
+
+                <body>';
+
+        echo '<table border="1" cellpadding="2" cellspacing="0" width="100%">
+            <caption>Listado de Empresas</caption>';
+        
+        $i = 0;
+        echo '<tr>';
+        foreach ($fields as $field => $value) {
+            echo '<td>' . $value;
+            if ($i < count($fields) - 1) {
+                echo '</td> <td>';
+            } else {
+                echo '</td>';
+            }
+            $i++;
+        }
+        echo '</tr>';
+        echo "\n";
+
+        foreach ($empresas as $empresa) {
+            echo '<tr>';
+            echo '<td>' . $empresa->idempresa. '</td>';
+            echo '<td>' . $empresa->nombreempresa . '</td>';
+            echo '<td>' . $empresa->estado . '</td>';
+            echo '<td>' . $empresa->representantelegal . '</td>';
+            echo '<td>' . $empresa->descripcion . '</td>';
+            echo '<td>' . $empresa->telefono . '</td>';
+            echo '<td>' . $empresa->direccion . '</td>';
+            echo '<td>' . $empresa->municipio . '</td>';
+            echo '<td>' . $empresa->email . '</td>';
+            echo '<td>' . $empresa->twitter . '</td>';
+            echo '<td>' . $empresa->facebook . '</td>';
+            echo '<td>' . $empresa->instagram . '</td>';
+            echo '<td>' . $empresa->linkvideo . '</td>';
+            echo '<td>' . $empresa->imagenlogo . '</td>';
+            echo '<td>' . $empresa->idcategoria . '</td>';
+            echo '<td>' . $empresa->nombrecategoria . '</td>';
+            echo '<td>' . $empresa->idsubcategoria . '</td>';
+            echo '<td>' . $empresa->nombresubcategoria . '</td>';
+            echo '<td>' . $empresa->idtiposubcategoria . '</td>';
+            echo '<td>' . $empresa->nombretiposubcategoria . '</td>';
+            echo '<td>' . $empresa->cumplimiento . '</td>';
+            echo '<td>' . $empresa->adic . '</td>';
+            echo '<td>' . $empresa->activo . '</td>';
+            echo '<td>' . $empresa->isActivo . '</td>';
+            echo '<td>' . $empresa->fechaCreacion . '</td>';
+            echo "</tr>";
+            echo "\n";
+        }
+        
+        echo '</table></body></html>';
     }
 }

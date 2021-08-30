@@ -317,4 +317,51 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         }
         return false;
     }
+
+    public function getEmpresasToDownload($filtros)
+    {
+        $app = JFactory::getApplication();
+        $db = JFactory::getDbo();
+
+        $query = $db->getQuery(true)
+            ->select('*')
+            ->from($db->quoteName('#__negocios_v_empresas', 'e'))
+            ->where($db->quoteName('e.isActivo') . ' = ' . $db->quote('1'))
+            ->order('e.nombreempresa DESC');
+
+        $db->setQuery($query);
+
+        $rows = $db->loadObjectList();
+        
+        if ($rows) {
+            $main = [];
+            foreach ($rows as $row) {
+
+                // Filtrar por Categoría
+                if (!empty($filtros->categoriasFiltro)) {
+                    if (!in_array($row->idcategoria, $filtros->categoriasFiltro)) {
+                        continue;
+                    }
+                }
+
+                // Filtrar por Estado
+                if (!empty($filtros->estadosFiltro)) {
+                    if (!in_array($row->estado, $filtros->estadosFiltro)) {
+                        continue;
+                    }
+                }
+
+                // Filtrar por Nivel de Cumplimiento
+                if (!empty($filtros->nivelCumplimientoFiltro)) {
+                    if (!$this->nivelDeCumplimiento($row, $filtros->nivelCumplimientoFiltro)) {
+                        continue;
+                    }
+                }
+                $main[] = $row;
+            }
+            return $main;
+        }
+        return false;
+    }
+
 }

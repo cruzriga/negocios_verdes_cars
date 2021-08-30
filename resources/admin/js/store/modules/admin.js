@@ -68,6 +68,20 @@ const store =
                     }
                 }
             },
+            async DESCARGAR_EMPRESAS({ commit }, datos) {
+                commit(CARGANDO, true)
+                var datopost = 'filtros=' + JSON.stringify(datos.filtros);
+                let resp = await request('?option=com_mrnegociosverde&task=dempresasadmin&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo, datopost)
+                
+                if (resp.ok) {
+                    if (datos.campo == 'e.idempresa') {
+                        return (resp.resp.data.empresas[0])
+                    } else {
+                        commit(EMPRESAS, resp.resp)
+                    }
+                }
+                commit(CARGANDO, false);
+            },
             async CAMBIAR_ESTADO_EMPRESA ({ commit },datos){
                 commit(CARGANDO,true)
                 var datopost = 'json='+JSON.stringify(datos);
