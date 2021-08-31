@@ -106,14 +106,20 @@
                 <q-icon name="date_range" class="q-mr-md"/>
                 {{empresa.fechaCreacion}}
               </span>
-              <q-badge v-if="mostrarBtnCambioEstado==false" @click="mostrarBtnCambioEstado=true" :label="estados[empresa.estado].label" :color="estados[empresa.estado].color" class="q-ml-md" />
-              <q-menu v-if="mostrarBtnCambioEstado==true" auto-close rounded size='xs' padding='xs'>
-                <q-list style="min-width: 100px">
-                  <q-item v-for="estado in estados" :key="estado.id+'e'" @click="cambiarEstadoInterno(empresa.idempresa, estado.id)" clickable>
-                    <q-item-section>{{estado.label}}</q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
+                <q-badge @click="mostrarBtnCambioEstado=true" :color="estados[empresa.estado].color" class="q-ml-md">
+                  <template v-slot:default>
+                    <div>{{estados[empresa.estado].label}}</div>
+                    <q-menu v-if="mostrarBtnCambioEstado==true" auto-close rounded size='xs' padding='xs'>
+                      <q-list style="min-width: 100px">
+                        <q-item v-for="estado in estados" :key="estado.id+'e'" @click="cambiarEstadoInterno(empresa.idempresa, estado.id)" clickable>
+                          <q-item-section>{{estado.label}}</q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </template>
+                  
+                </q-badge>
+                
             </q-item-label>
             <q-item-label caption lines = "1">
               {{empresa.descripcion}}             
@@ -403,8 +409,24 @@ export default {
         estado:estadoInterno
       }
       let res = await this.$store.dispatch('admin/CAMBIAR_ESTADO_INTERNO', data);
+      let app = this;
       if (res.ok) {
         this.mostrarBtnCambioEstado = false;
+        app.$q.notify({
+          color: 'green-4',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: 'El estado ha sido actualizado.',
+          position:'top'
+        });
+      } else {
+         app.$q.notify({
+          color: 'negative',
+          textColor: 'white',
+          icon: 'cloud_done',
+          message: 'Error al actualizar estado',                
+          position:'top'
+        });
       }
     },
     filtrar() {

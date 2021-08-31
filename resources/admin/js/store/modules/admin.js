@@ -8,6 +8,7 @@ export const REMOVER_IMG_CARRUSEL = 'REMOVER_IMG_CARRUSEL'
 export const CAMBIAR_ESTADO_EMPRESA = 'CAMBIAR_ESTADO_EMPRESA'
 export const EMPRESAS = 'EMPRESAS'
 export const CARGANDO = 'CARGANDO'
+export const UPDATE_ESTADO_INTERNO = 'UPDATE_ESTADO_INTERNO'
 
 const store = 
     {
@@ -37,6 +38,13 @@ const store =
                 )
                 empresas.data.empresas = emp;
                 state.empresas = empresas;
+            },
+            [UPDATE_ESTADO_INTERNO](state, {id, estado}) {
+                state.empresas.data.empresas.forEach((e) => {
+                    if(e.idempresa == id) {
+                        e.estado = estado
+                    }
+                });
             },
             [CARGANDO](state, bool){
                 state.cargando = bool;
@@ -94,23 +102,10 @@ const store =
                 commit(CARGANDO, true)
                 var datopost = 'json=' + JSON.stringify(datos);
                 let resp = await request('index.php?option=com_mrnegociosverde&task=updateestadointernoempresa&format=json', datopost)
+                commit(CARGANDO, false)
                 if (resp.ok) {
-                    this.$q.notify({
-                        color: 'green-4',
-                        textColor: 'white',
-                        icon: 'cloud_done',
-                        message: 'Estado actualizado',
-                        position: 'top'
-                    })
-                    return resp;
+                    commit(UPDATE_ESTADO_INTERNO, datos)
                 }
-                this.$q.notify({
-                    color: 'negative',
-                    textColor: 'white',
-                    icon: 'cloud_done',
-                    message: 'Error ',
-                    position: 'top'
-                });
                 return resp;
             },
             async REMOVER_IMG_CARRUSEL ({ commit },datos){

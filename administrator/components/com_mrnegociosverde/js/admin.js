@@ -2620,6 +2620,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
@@ -2726,7 +2732,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var data, res;
+        var data, res, app;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -2740,12 +2746,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 3:
                 res = _context.sent;
+                app = _this;
 
                 if (res.ok) {
                   _this.mostrarBtnCambioEstado = false;
+                  app.$q.notify({
+                    color: 'green-4',
+                    textColor: 'white',
+                    icon: 'cloud_done',
+                    message: 'El estado ha sido actualizado.',
+                    position: 'top'
+                  });
+                } else {
+                  app.$q.notify({
+                    color: 'negative',
+                    textColor: 'white',
+                    icon: 'cloud_done',
+                    message: 'Error al actualizar estado',
+                    position: 'top'
+                  });
                 }
 
-              case 5:
+              case 6:
               case "end":
                 return _context.stop();
             }
@@ -4924,6 +4946,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "CAMBIAR_ESTADO_EMPRESA": () => (/* binding */ CAMBIAR_ESTADO_EMPRESA),
 /* harmony export */   "EMPRESAS": () => (/* binding */ EMPRESAS),
 /* harmony export */   "CARGANDO": () => (/* binding */ CARGANDO),
+/* harmony export */   "UPDATE_ESTADO_INTERNO": () => (/* binding */ UPDATE_ESTADO_INTERNO),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
@@ -4950,6 +4973,7 @@ var REMOVER_IMG_CARRUSEL = 'REMOVER_IMG_CARRUSEL';
 var CAMBIAR_ESTADO_EMPRESA = 'CAMBIAR_ESTADO_EMPRESA';
 var EMPRESAS = 'EMPRESAS';
 var CARGANDO = 'CARGANDO';
+var UPDATE_ESTADO_INTERNO = 'UPDATE_ESTADO_INTERNO';
 var store = {
   namespaced: true,
   state: {
@@ -4974,18 +4998,26 @@ var store = {
     });
     empresas.data.empresas = emp;
     state.empresas = empresas;
+  }), _defineProperty(_mutations, UPDATE_ESTADO_INTERNO, function (state, _ref) {
+    var id = _ref.id,
+        estado = _ref.estado;
+    state.empresas.data.empresas.forEach(function (e) {
+      if (e.idempresa == id) {
+        e.estado = estado;
+      }
+    });
   }), _defineProperty(_mutations, CARGANDO, function (state, bool) {
     state.cargando = bool;
   }), _mutations),
   actions: {
-    CARGAR_EMPRESAS: function CARGAR_EMPRESAS(_ref, datos) {
+    CARGAR_EMPRESAS: function CARGAR_EMPRESAS(_ref2, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                commit = _ref.commit;
+                commit = _ref2.commit;
                 commit(CARGANDO, true);
                 datopost = 'filtros=' + JSON.stringify(datos.filtros);
                 _context.next = 5;
@@ -5008,14 +5040,14 @@ var store = {
         }, _callee);
       }))();
     },
-    BUSCAR_EMPRESAS: function BUSCAR_EMPRESAS(_ref2, datos) {
+    BUSCAR_EMPRESAS: function BUSCAR_EMPRESAS(_ref3, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                commit = _ref2.commit;
+                commit = _ref3.commit;
                 commit(CARGANDO, true);
                 datopost = 'filtros=' + JSON.stringify(datos.filtros);
                 _context2.next = 5;
@@ -5049,14 +5081,14 @@ var store = {
         }, _callee2);
       }))();
     },
-    DESCARGAR_EMPRESAS: function DESCARGAR_EMPRESAS(_ref3, datos) {
+    DESCARGAR_EMPRESAS: function DESCARGAR_EMPRESAS(_ref4, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                commit = _ref3.commit;
+                commit = _ref4.commit;
                 commit(CARGANDO, true);
                 datopost = 'filtros=' + JSON.stringify(datos.filtros);
                 _context3.next = 5;
@@ -5091,14 +5123,14 @@ var store = {
         }, _callee3);
       }))();
     },
-    CAMBIAR_ESTADO_EMPRESA: function CAMBIAR_ESTADO_EMPRESA(_ref4, datos) {
+    CAMBIAR_ESTADO_EMPRESA: function CAMBIAR_ESTADO_EMPRESA(_ref5, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee4() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                commit = _ref4.commit;
+                commit = _ref5.commit;
                 commit(CARGANDO, true);
                 datopost = 'json=' + JSON.stringify(datos);
                 _context4.next = 5;
@@ -5122,16 +5154,14 @@ var store = {
         }, _callee4);
       }))();
     },
-    CAMBIAR_ESTADO_INTERNO: function CAMBIAR_ESTADO_INTERNO(_ref5, datos) {
-      var _this = this;
-
+    CAMBIAR_ESTADO_INTERNO: function CAMBIAR_ESTADO_INTERNO(_ref6, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
-                commit = _ref5.commit;
+                commit = _ref6.commit;
                 commit(CARGANDO, true);
                 datopost = 'json=' + JSON.stringify(datos);
                 _context5.next = 5;
@@ -5139,34 +5169,15 @@ var store = {
 
               case 5:
                 resp = _context5.sent;
+                commit(CARGANDO, false);
 
-                if (!resp.ok) {
-                  _context5.next = 9;
-                  break;
+                if (resp.ok) {
+                  commit(UPDATE_ESTADO_INTERNO, datos);
                 }
-
-                _this.$q.notify({
-                  color: 'green-4',
-                  textColor: 'white',
-                  icon: 'cloud_done',
-                  message: 'Estado actualizado',
-                  position: 'top'
-                });
 
                 return _context5.abrupt("return", resp);
 
               case 9:
-                _this.$q.notify({
-                  color: 'negative',
-                  textColor: 'white',
-                  icon: 'cloud_done',
-                  message: 'Error ',
-                  position: 'top'
-                });
-
-                return _context5.abrupt("return", resp);
-
-              case 11:
               case "end":
                 return _context5.stop();
             }
@@ -5174,14 +5185,14 @@ var store = {
         }, _callee5);
       }))();
     },
-    REMOVER_IMG_CARRUSEL: function REMOVER_IMG_CARRUSEL(_ref6, datos) {
+    REMOVER_IMG_CARRUSEL: function REMOVER_IMG_CARRUSEL(_ref7, datos) {
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
-                commit = _ref6.commit;
+                commit = _ref7.commit;
                 commit(CARGANDO, true);
                 datopost = 'json=' + encodeURIComponent(JSON.stringify(datos));
                 _context6.next = 5;
@@ -5849,7 +5860,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* .no-results{\n\n} */\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* .no-results{\n\n} */\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -58313,70 +58324,103 @@ var render = function() {
                                   1
                                 ),
                                 _vm._v(" "),
-                                _vm.mostrarBtnCambioEstado == false
-                                  ? _c("q-badge", {
-                                      staticClass: "q-ml-md",
-                                      attrs: {
-                                        label:
-                                          _vm.estados[empresa.estado].label,
-                                        color: _vm.estados[empresa.estado].color
-                                      },
-                                      on: {
-                                        click: function($event) {
-                                          _vm.mostrarBtnCambioEstado = true
-                                        }
-                                      }
-                                    })
-                                  : _vm._e(),
-                                _vm._v(" "),
-                                _vm.mostrarBtnCambioEstado == true
-                                  ? _c(
-                                      "q-menu",
+                                _c("q-badge", {
+                                  staticClass: "q-ml-md",
+                                  attrs: {
+                                    color: _vm.estados[empresa.estado].color
+                                  },
+                                  on: {
+                                    click: function($event) {
+                                      _vm.mostrarBtnCambioEstado = true
+                                    }
+                                  },
+                                  scopedSlots: _vm._u(
+                                    [
                                       {
-                                        attrs: {
-                                          "auto-close": "",
-                                          rounded: "",
-                                          size: "xs",
-                                          padding: "xs"
-                                        }
-                                      },
-                                      [
-                                        _c(
-                                          "q-list",
-                                          {
-                                            staticStyle: {
-                                              "min-width": "100px"
-                                            }
-                                          },
-                                          _vm._l(_vm.estados, function(estado) {
-                                            return _c(
-                                              "q-item",
-                                              {
-                                                key: estado.id + "e",
-                                                attrs: { clickable: "" },
-                                                on: {
-                                                  click: function($event) {
-                                                    return _vm.cambiarEstadoInterno(
-                                                      empresa.idempresa,
-                                                      estado.id
+                                        key: "default",
+                                        fn: function() {
+                                          return [
+                                            _c("div", [
+                                              _vm._v(
+                                                _vm._s(
+                                                  _vm.estados[empresa.estado]
+                                                    .label
+                                                )
+                                              )
+                                            ]),
+                                            _vm._v(" "),
+                                            _vm.mostrarBtnCambioEstado == true
+                                              ? _c(
+                                                  "q-menu",
+                                                  {
+                                                    attrs: {
+                                                      "auto-close": "",
+                                                      rounded: "",
+                                                      size: "xs",
+                                                      padding: "xs"
+                                                    }
+                                                  },
+                                                  [
+                                                    _c(
+                                                      "q-list",
+                                                      {
+                                                        staticStyle: {
+                                                          "min-width": "100px"
+                                                        }
+                                                      },
+                                                      _vm._l(
+                                                        _vm.estados,
+                                                        function(estado) {
+                                                          return _c(
+                                                            "q-item",
+                                                            {
+                                                              key:
+                                                                estado.id + "e",
+                                                              attrs: {
+                                                                clickable: ""
+                                                              },
+                                                              on: {
+                                                                click: function(
+                                                                  $event
+                                                                ) {
+                                                                  return _vm.cambiarEstadoInterno(
+                                                                    empresa.idempresa,
+                                                                    estado.id
+                                                                  )
+                                                                }
+                                                              }
+                                                            },
+                                                            [
+                                                              _c(
+                                                                "q-item-section",
+                                                                [
+                                                                  _vm._v(
+                                                                    _vm._s(
+                                                                      estado.label
+                                                                    )
+                                                                  )
+                                                                ]
+                                                              )
+                                                            ],
+                                                            1
+                                                          )
+                                                        }
+                                                      ),
+                                                      1
                                                     )
-                                                  }
-                                                }
-                                              },
-                                              [
-                                                _c("q-item-section", [
-                                                  _vm._v(_vm._s(estado.label))
-                                                ])
-                                              ],
-                                              1
-                                            )
-                                          }),
-                                          1
-                                        )
-                                      ],
-                                      1
-                                    )
-                                  : _vm._e()
+                                                  ],
+                                                  1
+                                                )
+                                              : _vm._e()
+                                          ]
+                                        },
+                                        proxy: true
+                                      }
+                                    ],
+                                    null,
+                                    true
+                                  )
+                                })
                               ],
                               1
                             ),
