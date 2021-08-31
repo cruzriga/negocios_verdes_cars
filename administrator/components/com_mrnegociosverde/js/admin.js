@@ -2327,9 +2327,24 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _components_Modal__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./../components/Modal */ "./resources/admin/js/components/Modal.vue");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _components_Modal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./../components/Modal */ "./resources/admin/js/components/Modal.vue");
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2609,10 +2624,11 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
   components: {
-    ModalAdjunto: _components_Modal__WEBPACK_IMPORTED_MODULE_0__.default
+    ModalAdjunto: _components_Modal__WEBPACK_IMPORTED_MODULE_1__.default
   },
   data: function data() {
     return {
+      mostrarBtnCambioEstado: false,
       debug: false,
       id: 0,
       msg: 'Hey Nic Raboy',
@@ -2705,6 +2721,37 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
   methods: {
     status: function status(n) {
       return this.estados[n];
+    },
+    cambiarEstadoInterno: function cambiarEstadoInterno(idEmpresa, estadoInterno) {
+      var _this = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var data, res;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                data = {
+                  id: idEmpresa,
+                  estado: estadoInterno
+                };
+                _context.next = 3;
+                return _this.$store.dispatch('admin/CAMBIAR_ESTADO_INTERNO', data);
+
+              case 3:
+                res = _context.sent;
+
+                if (res.ok) {
+                  _this.mostrarBtnCambioEstado = false;
+                }
+
+              case 5:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
     },
     filtrar: function filtrar() {
       var obj = {
@@ -5075,7 +5122,9 @@ var store = {
         }, _callee4);
       }))();
     },
-    REMOVER_IMG_CARRUSEL: function REMOVER_IMG_CARRUSEL(_ref5, datos) {
+    CAMBIAR_ESTADO_INTERNO: function CAMBIAR_ESTADO_INTERNO(_ref5, datos) {
+      var _this = this;
+
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee5() {
         var commit, datopost, resp;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee5$(_context5) {
@@ -5084,26 +5133,76 @@ var store = {
               case 0:
                 commit = _ref5.commit;
                 commit(CARGANDO, true);
-                datopost = 'json=' + encodeURIComponent(JSON.stringify(datos));
+                datopost = 'json=' + JSON.stringify(datos);
                 _context5.next = 5;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=removeimgcarrusel&format=json', datopost);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=updateestadointernoempresa&format=json', datopost);
 
               case 5:
                 resp = _context5.sent;
 
                 if (!resp.ok) {
-                  _context5.next = 8;
+                  _context5.next = 9;
                   break;
                 }
 
+                _this.$q.notify({
+                  color: 'green-4',
+                  textColor: 'white',
+                  icon: 'cloud_done',
+                  message: 'Estado actualizado',
+                  position: 'top'
+                });
+
                 return _context5.abrupt("return", resp);
 
-              case 8:
+              case 9:
+                _this.$q.notify({
+                  color: 'negative',
+                  textColor: 'white',
+                  icon: 'cloud_done',
+                  message: 'Error ',
+                  position: 'top'
+                });
+
+                return _context5.abrupt("return", resp);
+
+              case 11:
               case "end":
                 return _context5.stop();
             }
           }
         }, _callee5);
+      }))();
+    },
+    REMOVER_IMG_CARRUSEL: function REMOVER_IMG_CARRUSEL(_ref6, datos) {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee6() {
+        var commit, datopost, resp;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                commit = _ref6.commit;
+                commit(CARGANDO, true);
+                datopost = 'json=' + encodeURIComponent(JSON.stringify(datos));
+                _context6.next = 5;
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=removeimgcarrusel&format=json', datopost);
+
+              case 5:
+                resp = _context6.sent;
+
+                if (!resp.ok) {
+                  _context6.next = 8;
+                  break;
+                }
+
+                return _context6.abrupt("return", resp);
+
+              case 8:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6);
       }))();
     }
   }
@@ -5750,7 +5849,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* .no-results{\n\n} */\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* .no-results{\n\n} */\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -58214,13 +58313,70 @@ var render = function() {
                                   1
                                 ),
                                 _vm._v(" "),
-                                _c("q-badge", {
-                                  staticClass: "q-ml-md",
-                                  attrs: {
-                                    label: _vm.estados[empresa.estado].label,
-                                    color: _vm.estados[empresa.estado].color
-                                  }
-                                })
+                                _vm.mostrarBtnCambioEstado == false
+                                  ? _c("q-badge", {
+                                      staticClass: "q-ml-md",
+                                      attrs: {
+                                        label:
+                                          _vm.estados[empresa.estado].label,
+                                        color: _vm.estados[empresa.estado].color
+                                      },
+                                      on: {
+                                        click: function($event) {
+                                          _vm.mostrarBtnCambioEstado = true
+                                        }
+                                      }
+                                    })
+                                  : _vm._e(),
+                                _vm._v(" "),
+                                _vm.mostrarBtnCambioEstado == true
+                                  ? _c(
+                                      "q-menu",
+                                      {
+                                        attrs: {
+                                          "auto-close": "",
+                                          rounded: "",
+                                          size: "xs",
+                                          padding: "xs"
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "q-list",
+                                          {
+                                            staticStyle: {
+                                              "min-width": "100px"
+                                            }
+                                          },
+                                          _vm._l(_vm.estados, function(estado) {
+                                            return _c(
+                                              "q-item",
+                                              {
+                                                key: estado.id + "e",
+                                                attrs: { clickable: "" },
+                                                on: {
+                                                  click: function($event) {
+                                                    return _vm.cambiarEstadoInterno(
+                                                      empresa.idempresa,
+                                                      estado.id
+                                                    )
+                                                  }
+                                                }
+                                              },
+                                              [
+                                                _c("q-item-section", [
+                                                  _vm._v(_vm._s(estado.label))
+                                                ])
+                                              ],
+                                              1
+                                            )
+                                          }),
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  : _vm._e()
                               ],
                               1
                             ),

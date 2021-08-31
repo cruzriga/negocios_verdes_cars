@@ -106,7 +106,14 @@
                 <q-icon name="date_range" class="q-mr-md"/>
                 {{empresa.fechaCreacion}}
               </span>
-              <q-badge :label="estados[empresa.estado].label" :color="estados[empresa.estado].color" class="q-ml-md"/>
+              <q-badge v-if="mostrarBtnCambioEstado==false" @click="mostrarBtnCambioEstado=true" :label="estados[empresa.estado].label" :color="estados[empresa.estado].color" class="q-ml-md" />
+              <q-menu v-if="mostrarBtnCambioEstado==true" auto-close rounded size='xs' padding='xs'>
+                <q-list style="min-width: 100px">
+                  <q-item v-for="estado in estados" :key="estado.id+'e'" @click="cambiarEstadoInterno(empresa.idempresa, estado.id)" clickable>
+                    <q-item-section>{{estado.label}}</q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
             </q-item-label>
             <q-item-label caption lines = "1">
               {{empresa.descripcion}}             
@@ -281,6 +288,7 @@ export default {
   components:{ ModalAdjunto },
   data(){
     return {
+      mostrarBtnCambioEstado: false,
       debug: false,
       id: 0,
       msg: 'Hey Nic Raboy',
@@ -388,6 +396,16 @@ export default {
   methods: {
     status(n){
       return this.estados[n]
+    },
+    async cambiarEstadoInterno(idEmpresa, estadoInterno) {
+      let data= {
+        id:idEmpresa,
+        estado:estadoInterno
+      }
+      let res = await this.$store.dispatch('admin/CAMBIAR_ESTADO_INTERNO', data);
+      if (res.ok) {
+        this.mostrarBtnCambioEstado = false;
+      }
     },
     filtrar() {
       let obj = {

@@ -318,6 +318,35 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
     }
 
+    public function updateEstadoInternoEmpresa($item)
+    {
+
+        $db = JFactory::getDBO();
+        
+        $query = $db->getQuery(true);
+
+        // Fields to update.
+        $fields = [
+            $db->quoteName('estado') . ' = ' . $db->quote($item->estado),
+        ];
+
+        // Conditions for which records should be updated.
+        $conditions = array(
+            $db->quoteName('idempresa') . ' = ' . $db->quote($item->id),
+        );
+
+        $query->update($db->quoteName('#__negocios_v_empresas'))->set($fields)->where($conditions);
+
+        $db->setQuery($query);
+
+        $result = $db->execute();
+
+        if ($result) {
+            return $result;
+        }
+        return false;
+    }
+
     public function getEmpresasToDownload($filtros)
     {
         $app = JFactory::getApplication();

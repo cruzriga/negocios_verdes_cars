@@ -90,6 +90,29 @@ const store =
                     return resp;
                 }
             },
+            async CAMBIAR_ESTADO_INTERNO({ commit }, datos) {
+                commit(CARGANDO, true)
+                var datopost = 'json=' + JSON.stringify(datos);
+                let resp = await request('index.php?option=com_mrnegociosverde&task=updateestadointernoempresa&format=json', datopost)
+                if (resp.ok) {
+                    this.$q.notify({
+                        color: 'green-4',
+                        textColor: 'white',
+                        icon: 'cloud_done',
+                        message: 'Estado actualizado',
+                        position: 'top'
+                    })
+                    return resp;
+                }
+                this.$q.notify({
+                    color: 'negative',
+                    textColor: 'white',
+                    icon: 'cloud_done',
+                    message: 'Error ',
+                    position: 'top'
+                });
+                return resp;
+            },
             async REMOVER_IMG_CARRUSEL ({ commit },datos){
                 commit(CARGANDO,true)
                 var datopost = 'json='+encodeURIComponent(JSON.stringify(datos));

@@ -145,6 +145,21 @@ class MrNegociosVerdeController extends JControllerLegacy {
             echo new JResponseJson($e);
         }
     }
+    public function updateEstadoInternoEmpresa()
+    {
+        $app = JFactory::getApplication();
+        $model = $this->getModel('mrnegociosverde');
+        $rawDataPost = $app->input->getArray($_POST);
+        $Itemid = json_decode($rawDataPost['json']);
+        $empresas = $model->updateEstadoInternoEmpresa($Itemid);
+        $app->enqueueMessage("Enqueued notice", "notice");
+        $app->enqueueMessage("Enqueued warning", "warning");
+        try {
+            echo new JResponseJson($empresas, "It worked!");
+        } catch (Exception $e) {
+            echo new JResponseJson($e);
+        }
+    }
     public function removeImgCarrusel(Type $var = null)
     {
         $db = JFactory::getDbo();
