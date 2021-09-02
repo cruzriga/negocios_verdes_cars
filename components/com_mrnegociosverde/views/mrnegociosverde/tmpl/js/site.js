@@ -57544,7 +57544,7 @@ var render = function() {
                 [
                   _c("span", { staticClass: "q-mr-md text-teal text-body2" }, [
                     _vm._v(
-                      "\n            " +
+                      "\n\t\t\t\t\t" +
                         _vm._s(
                           this.$store.state.listado.ListaEmpresas.data.pagina +
                             1
@@ -57553,7 +57553,7 @@ var render = function() {
                         _vm._s(
                           this.$store.state.listado.ListaEmpresas.data.total
                         ) +
-                        "\n          "
+                        "\n\t\t\t\t\t"
                     )
                   ]),
                   _vm._v(" "),

@@ -1,33 +1,33 @@
 <template>
     <!-- <div class="search-wrapper">
     </div> -->
-  <div class="q-gutter-lg" style="min-height: calc(100vh - 172px)">
-    <q-item-label  header>
-      <q-toolbar class="text-primary" style="height: 50px">
-        <q-input @keyup.enter="buscar"  v-model="search" placeholder="Buscar" color="teal" >
-          <template v-slot:prepend>
-            <q-icon v-if="search === ''" name="search" />
-            <q-icon v-else name="clear" class="cursor-pointer" @click="search = ''" />
-          </template>
-        </q-input>
-        <q-space/>
-        <div>
-            <span class="q-mr-md text-teal text-body2">
-              {{this.$store.state.listado.ListaEmpresas.data.pagina+1}} - {{this.$store.state.listado.ListaEmpresas.data.total}}
-            </span> <q-btn @click="backPage(-1)" flat round dense icon="arrow_back_ios"  color="teal"/> <q-btn @click="nextPage(1)" flat round dense icon="arrow_forward_ios" color="teal" />
-        </div>
-      </q-toolbar>
-    </q-item-label>
-    <template v-if = "items.length > 0">
-      <div class="row items-center justify-center">
-        <Card
-          v-for="(value, index) in this.$store.state.listado.ListaEmpresas.data.empresas"
-          v-bind:key="index"
-          v-bind:prop="value"/>
-      <!-- {{this.$store.state.listado.ListaEmpresas.data}} -->
-      </div>
-    </template>
-  </div>
+	<div class="q-gutter-lg" style="min-height: calc(100vh - 172px)">
+		<q-item-label  header>
+			<q-toolbar class="text-primary" style="height: 50px">
+				<q-input @keyup.enter="buscar"  v-model="search" placeholder="Buscar" color="teal" >
+				<template v-slot:prepend>
+					<q-icon v-if="search === ''" name="search" />
+					<q-icon v-else name="clear" class="cursor-pointer" @click="search = ''" />
+				</template>
+				</q-input>
+				<q-space/>
+				<div>
+					<span class="q-mr-md text-teal text-body2">
+					{{this.$store.state.listado.ListaEmpresas.data.pagina+1}} - {{this.$store.state.listado.ListaEmpresas.data.total}}
+					</span> <q-btn @click="backPage(-1)" flat round dense icon="arrow_back_ios"  color="teal"/> <q-btn @click="nextPage(1)" flat round dense icon="arrow_forward_ios" color="teal" />
+				</div>
+			</q-toolbar>
+		</q-item-label>
+		<template v-if = "items.length > 0">
+		<div class="row items-center justify-center">
+			<Card
+			v-for="(value, index) in this.$store.state.listado.ListaEmpresas.data.empresas"
+			v-bind:key="index"
+			v-bind:prop="value"/>
+		<!-- {{this.$store.state.listado.ListaEmpresas.data}} -->
+		</div>
+		</template>
+	</div>
 
 </template>
 
