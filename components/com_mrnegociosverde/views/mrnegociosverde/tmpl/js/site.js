@@ -3393,6 +3393,9 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'ListaEmpresas',
@@ -57490,6 +57493,8 @@ var render = function() {
         "q-item-label",
         { attrs: { header: "" } },
         [
+          _c("q-toolbar"),
+          _vm._v(" "),
           _c(
             "q-toolbar",
             { staticClass: "text-primary", staticStyle: { height: "50px" } },

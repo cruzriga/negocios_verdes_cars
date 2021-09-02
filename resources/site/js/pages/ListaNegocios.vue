@@ -3,6 +3,9 @@
     </div> -->
 	<div class="q-gutter-lg" style="min-height: calc(100vh - 172px)">
 		<q-item-label  header>
+			<q-toolbar>
+				<!-- q-select v-model="model" :options="categories" label="Categorías" / -->
+			</q-toolbar>
 			<q-toolbar class="text-primary" style="height: 50px">
 				<q-input @keyup.enter="buscar"  v-model="search" placeholder="Buscar" color="teal" >
 				<template v-slot:prepend>
