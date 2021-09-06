@@ -44,6 +44,7 @@ module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
     var requestData = config.data;
     var requestHeaders = config.headers;
+    var responseType = config.responseType;
 
     if (utils.isFormData(requestData)) {
       delete requestHeaders['Content-Type']; // Let the browser set it
@@ -64,23 +65,14 @@ module.exports = function xhrAdapter(config) {
     // Set the request timeout in MS
     request.timeout = config.timeout;
 
-    // Listen for ready state
-    request.onreadystatechange = function handleLoad() {
-      if (!request || request.readyState !== 4) {
+    function onloadend() {
+      if (!request) {
         return;
       }
-
-      // The request errored out and we didn't get a response, this will be
-      // handled by onerror instead
-      // With one exception: request that using file: protocol, most browsers
-      // will return status as 0 even though it's a successful request
-      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
-        return;
-      }
-
       // Prepare the response
       var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
-      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var responseData = !responseType || responseType === 'text' ||  responseType === 'json' ?
+        request.responseText : request.response;
       var response = {
         data: responseData,
         status: request.status,
@@ -94,7 +86,30 @@ module.exports = function xhrAdapter(config) {
 
       // Clean up request
       request = null;
-    };
+    }
+
+    if ('onloadend' in request) {
+      // Use onloadend if available
+      request.onloadend = onloadend;
+    } else {
+      // Listen for ready state to emulate onloadend
+      request.onreadystatechange = function handleLoad() {
+        if (!request || request.readyState !== 4) {
+          return;
+        }
+
+        // The request errored out and we didn't get a response, this will be
+        // handled by onerror instead
+        // With one exception: request that using file: protocol, most browsers
+        // will return status as 0 even though it's a successful request
+        if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+          return;
+        }
+        // readystate handler is calling before onerror or ontimeout handlers,
+        // so we should call onloadend on the next 'tick'
+        setTimeout(onloadend);
+      };
+    }
 
     // Handle browser request cancellation (as opposed to a manual cancellation)
     request.onabort = function handleAbort() {
@@ -124,7 +139,10 @@ module.exports = function xhrAdapter(config) {
       if (config.timeoutErrorMessage) {
         timeoutErrorMessage = config.timeoutErrorMessage;
       }
-      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+      reject(createError(
+        timeoutErrorMessage,
+        config,
+        config.transitional && config.transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
         request));
 
       // Clean up request
@@ -164,16 +182,8 @@ module.exports = function xhrAdapter(config) {
     }
 
     // Add responseType to request if needed
-    if (config.responseType) {
-      try {
-        request.responseType = config.responseType;
-      } catch (e) {
-        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
-        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
-        if (config.responseType !== 'json') {
-          throw e;
-        }
-      }
+    if (responseType && responseType !== 'json') {
+      request.responseType = config.responseType;
     }
 
     // Handle progress if needed
@@ -274,7 +284,7 @@ axios.isAxiosError = __webpack_require__(/*! ./helpers/isAxiosError */ "./node_m
 module.exports = axios;
 
 // Allow use of default import syntax in TypeScript
-module.exports.default = axios;
+module.exports["default"] = axios;
 
 
 /***/ }),
@@ -407,7 +417,9 @@ var buildURL = __webpack_require__(/*! ../helpers/buildURL */ "./node_modules/ax
 var InterceptorManager = __webpack_require__(/*! ./InterceptorManager */ "./node_modules/axios/lib/core/InterceptorManager.js");
 var dispatchRequest = __webpack_require__(/*! ./dispatchRequest */ "./node_modules/axios/lib/core/dispatchRequest.js");
 var mergeConfig = __webpack_require__(/*! ./mergeConfig */ "./node_modules/axios/lib/core/mergeConfig.js");
+var validator = __webpack_require__(/*! ../helpers/validator */ "./node_modules/axios/lib/helpers/validator.js");
 
+var validators = validator.validators;
 /**
  * Create a new instance of Axios
  *
@@ -447,20 +459,71 @@ Axios.prototype.request = function request(config) {
     config.method = 'get';
   }
 
-  // Hook up interceptors middleware
-  var chain = [dispatchRequest, undefined];
-  var promise = Promise.resolve(config);
+  var transitional = config.transitional;
 
+  if (transitional !== undefined) {
+    validator.assertOptions(transitional, {
+      silentJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
+      forcedJSONParsing: validators.transitional(validators.boolean, '1.0.0'),
+      clarifyTimeoutError: validators.transitional(validators.boolean, '1.0.0')
+    }, false);
+  }
+
+  // filter out skipped interceptors
+  var requestInterceptorChain = [];
+  var synchronousRequestInterceptors = true;
   this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
-    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+    if (typeof interceptor.runWhen === 'function' && interceptor.runWhen(config) === false) {
+      return;
+    }
+
+    synchronousRequestInterceptors = synchronousRequestInterceptors && interceptor.synchronous;
+
+    requestInterceptorChain.unshift(interceptor.fulfilled, interceptor.rejected);
   });
 
+  var responseInterceptorChain = [];
   this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
-    chain.push(interceptor.fulfilled, interceptor.rejected);
+    responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
   });
 
-  while (chain.length) {
-    promise = promise.then(chain.shift(), chain.shift());
+  var promise;
+
+  if (!synchronousRequestInterceptors) {
+    var chain = [dispatchRequest, undefined];
+
+    Array.prototype.unshift.apply(chain, requestInterceptorChain);
+    chain = chain.concat(responseInterceptorChain);
+
+    promise = Promise.resolve(config);
+    while (chain.length) {
+      promise = promise.then(chain.shift(), chain.shift());
+    }
+
+    return promise;
+  }
+
+
+  var newConfig = config;
+  while (requestInterceptorChain.length) {
+    var onFulfilled = requestInterceptorChain.shift();
+    var onRejected = requestInterceptorChain.shift();
+    try {
+      newConfig = onFulfilled(newConfig);
+    } catch (error) {
+      onRejected(error);
+      break;
+    }
+  }
+
+  try {
+    promise = dispatchRequest(newConfig);
+  } catch (error) {
+    return Promise.reject(error);
+  }
+
+  while (responseInterceptorChain.length) {
+    promise = promise.then(responseInterceptorChain.shift(), responseInterceptorChain.shift());
   }
 
   return promise;
@@ -522,10 +585,12 @@ function InterceptorManager() {
  *
  * @return {Number} An ID used to remove interceptor later
  */
-InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
   this.handlers.push({
     fulfilled: fulfilled,
-    rejected: rejected
+    rejected: rejected,
+    synchronous: options ? options.synchronous : false,
+    runWhen: options ? options.runWhen : null
   });
   return this.handlers.length - 1;
 };
@@ -658,7 +723,8 @@ module.exports = function dispatchRequest(config) {
   config.headers = config.headers || {};
 
   // Transform request data
-  config.data = transformData(
+  config.data = transformData.call(
+    config,
     config.data,
     config.headers,
     config.transformRequest
@@ -684,7 +750,8 @@ module.exports = function dispatchRequest(config) {
     throwIfCancellationRequested(config);
 
     // Transform response data
-    response.data = transformData(
+    response.data = transformData.call(
+      config,
       response.data,
       response.headers,
       config.transformResponse
@@ -697,7 +764,8 @@ module.exports = function dispatchRequest(config) {
 
       // Transform response data
       if (reason && reason.response) {
-        reason.response.data = transformData(
+        reason.response.data = transformData.call(
+          config,
           reason.response.data,
           reason.response.headers,
           config.transformResponse
@@ -909,6 +977,7 @@ module.exports = function settle(resolve, reject, response) {
 
 
 var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
+var defaults = __webpack_require__(/*! ./../defaults */ "./node_modules/axios/lib/defaults.js");
 
 /**
  * Transform the data for a request or a response
@@ -919,9 +988,10 @@ var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/util
  * @returns {*} The resulting transformed data
  */
 module.exports = function transformData(data, headers, fns) {
+  var context = this || defaults;
   /*eslint no-param-reassign:0*/
   utils.forEach(fns, function transform(fn) {
-    data = fn(data, headers);
+    data = fn.call(context, data, headers);
   });
 
   return data;
@@ -942,6 +1012,7 @@ module.exports = function transformData(data, headers, fns) {
 
 var utils = __webpack_require__(/*! ./utils */ "./node_modules/axios/lib/utils.js");
 var normalizeHeaderName = __webpack_require__(/*! ./helpers/normalizeHeaderName */ "./node_modules/axios/lib/helpers/normalizeHeaderName.js");
+var enhanceError = __webpack_require__(/*! ./core/enhanceError */ "./node_modules/axios/lib/core/enhanceError.js");
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded'
@@ -966,11 +1037,19 @@ function getDefaultAdapter() {
 }
 
 var defaults = {
+
+  transitional: {
+    silentJSONParsing: true,
+    forcedJSONParsing: true,
+    clarifyTimeoutError: false
+  },
+
   adapter: getDefaultAdapter(),
 
   transformRequest: [function transformRequest(data, headers) {
     normalizeHeaderName(headers, 'Accept');
     normalizeHeaderName(headers, 'Content-Type');
+
     if (utils.isFormData(data) ||
       utils.isArrayBuffer(data) ||
       utils.isBuffer(data) ||
@@ -987,20 +1066,32 @@ var defaults = {
       setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
       return data.toString();
     }
-    if (utils.isObject(data)) {
-      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+    if (utils.isObject(data) || (headers && headers['Content-Type'] === 'application/json')) {
+      setContentTypeIfUnset(headers, 'application/json');
       return JSON.stringify(data);
     }
     return data;
   }],
 
   transformResponse: [function transformResponse(data) {
-    /*eslint no-param-reassign:0*/
-    if (typeof data === 'string') {
+    var transitional = this.transitional;
+    var silentJSONParsing = transitional && transitional.silentJSONParsing;
+    var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
+    var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
+
+    if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
       try {
-        data = JSON.parse(data);
-      } catch (e) { /* Ignore */ }
+        return JSON.parse(data);
+      } catch (e) {
+        if (strictJSONParsing) {
+          if (e.name === 'SyntaxError') {
+            throw enhanceError(e, this, 'E_JSON_PARSE');
+          }
+          throw e;
+        }
+      }
     }
+
     return data;
   }],
 
@@ -1483,6 +1574,122 @@ module.exports = function spread(callback) {
 
 /***/ }),
 
+/***/ "./node_modules/axios/lib/helpers/validator.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/validator.js ***!
+  \*****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var pkg = __webpack_require__(/*! ./../../package.json */ "./node_modules/axios/package.json");
+
+var validators = {};
+
+// eslint-disable-next-line func-names
+['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(function(type, i) {
+  validators[type] = function validator(thing) {
+    return typeof thing === type || 'a' + (i < 1 ? 'n ' : ' ') + type;
+  };
+});
+
+var deprecatedWarnings = {};
+var currentVerArr = pkg.version.split('.');
+
+/**
+ * Compare package versions
+ * @param {string} version
+ * @param {string?} thanVersion
+ * @returns {boolean}
+ */
+function isOlderVersion(version, thanVersion) {
+  var pkgVersionArr = thanVersion ? thanVersion.split('.') : currentVerArr;
+  var destVer = version.split('.');
+  for (var i = 0; i < 3; i++) {
+    if (pkgVersionArr[i] > destVer[i]) {
+      return true;
+    } else if (pkgVersionArr[i] < destVer[i]) {
+      return false;
+    }
+  }
+  return false;
+}
+
+/**
+ * Transitional option validator
+ * @param {function|boolean?} validator
+ * @param {string?} version
+ * @param {string} message
+ * @returns {function}
+ */
+validators.transitional = function transitional(validator, version, message) {
+  var isDeprecated = version && isOlderVersion(version);
+
+  function formatMessage(opt, desc) {
+    return '[Axios v' + pkg.version + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
+  }
+
+  // eslint-disable-next-line func-names
+  return function(value, opt, opts) {
+    if (validator === false) {
+      throw new Error(formatMessage(opt, ' has been removed in ' + version));
+    }
+
+    if (isDeprecated && !deprecatedWarnings[opt]) {
+      deprecatedWarnings[opt] = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        formatMessage(
+          opt,
+          ' has been deprecated since v' + version + ' and will be removed in the near future'
+        )
+      );
+    }
+
+    return validator ? validator(value, opt, opts) : true;
+  };
+};
+
+/**
+ * Assert object's properties type
+ * @param {object} options
+ * @param {object} schema
+ * @param {boolean?} allowUnknown
+ */
+
+function assertOptions(options, schema, allowUnknown) {
+  if (typeof options !== 'object') {
+    throw new TypeError('options must be an object');
+  }
+  var keys = Object.keys(options);
+  var i = keys.length;
+  while (i-- > 0) {
+    var opt = keys[i];
+    var validator = schema[opt];
+    if (validator) {
+      var value = options[opt];
+      var result = value === undefined || validator(value, opt, options);
+      if (result !== true) {
+        throw new TypeError('option ' + opt + ' must be ' + result);
+      }
+      continue;
+    }
+    if (allowUnknown !== true) {
+      throw Error('Unknown option ' + opt);
+    }
+  }
+}
+
+module.exports = {
+  isOlderVersion: isOlderVersion,
+  assertOptions: assertOptions,
+  validators: validators
+};
+
+
+/***/ }),
+
 /***/ "./node_modules/axios/lib/utils.js":
 /*!*****************************************!*\
   !*** ./node_modules/axios/lib/utils.js ***!
@@ -1493,8 +1700,6 @@ module.exports = function spread(callback) {
 
 
 var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
-
-/*global toString:true*/
 
 // utils is a library of generic helper functions non-specific to axios
 
@@ -1679,7 +1884,7 @@ function isURLSearchParams(val) {
  * @returns {String} The String freed of excess whitespace
  */
 function trim(str) {
-  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+  return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
 }
 
 /**
@@ -2832,7 +3037,7 @@ var anexarfile = [{
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'FormularioNegocios',
   components: {
-    EmpresaAvatar: _EmpresaAvatar__WEBPACK_IMPORTED_MODULE_0__.default
+    EmpresaAvatar: _EmpresaAvatar__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
   props: {
     propformulario: {
@@ -3324,7 +3529,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
-    layout: _layouts_layout__WEBPACK_IMPORTED_MODULE_0__.default
+    layout: _layouts_layout__WEBPACK_IMPORTED_MODULE_0__["default"]
   }
 });
 
@@ -3463,7 +3668,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'ListaEmpresas',
   components: {
-    Card: _components_Card__WEBPACK_IMPORTED_MODULE_1__.default
+    Card: _components_Card__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   data: function data() {
     return {
@@ -3511,7 +3716,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 obj = {
                   pagina: _this.pagina,
                   numlist: _this.numlist,
-                  categoria: _this.categoriaSeleccionada
+                  categoria: _this.categoriaSeleccionada.value
                 };
                 _context.next = 4;
                 return _this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
@@ -3531,7 +3736,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         var obj = {
           pagina: this.$store.state.admin.empresas.data.pagina + n,
           numlist: this.$store.state.admin.empresas.data.numList,
-          categoria: this.categoriaSeleccionada
+          categoria: this.categoriaSeleccionada.value
         };
         this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
       }
@@ -3544,7 +3749,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         var obj = {
           pagina: this.$store.state.admin.empresas.data.pagina + n,
           numlist: this.$store.state.admin.empresas.data.numList,
-          categoria: this.categoriaSeleccionada
+          categoria: this.categoriaSeleccionada.value
         };
         this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
       }
@@ -4035,7 +4240,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'FormSite',
   components: {
-    FormularioNegocios: _components_FormularioNegocios__WEBPACK_IMPORTED_MODULE_0__.default
+    FormularioNegocios: _components_FormularioNegocios__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
   data: function data() {
     return {
@@ -4091,14 +4296,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-vue__WEBPACK_IMPORTED_MODULE_3__.default.use(vue_router__WEBPACK_IMPORTED_MODULE_4__.default);
-var router = new vue_router__WEBPACK_IMPORTED_MODULE_4__.default({
+vue__WEBPACK_IMPORTED_MODULE_3__["default"].use(vue_router__WEBPACK_IMPORTED_MODULE_4__["default"]);
+var router = new vue_router__WEBPACK_IMPORTED_MODULE_4__["default"]({
   routes: [{
     path: '*',
     redirect: '/'
   }, {
     path: '/',
-    component: _pages_ListaNegocios__WEBPACK_IMPORTED_MODULE_0__.default,
+    component: _pages_ListaNegocios__WEBPACK_IMPORTED_MODULE_0__["default"],
     props: true,
     children: [
       /* {
@@ -4109,7 +4314,7 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_4__.default({
     ]
   }, {
     path: '/registrar',
-    component: _pages_Registrar__WEBPACK_IMPORTED_MODULE_1__.default,
+    component: _pages_Registrar__WEBPACK_IMPORTED_MODULE_1__["default"],
     props: true,
     children: [
       /* {s
@@ -4121,7 +4326,7 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_4__.default({
   }, {
     path: '/perfil/:idEmpresa',
     name: 'perfil',
-    component: _pages_PerfilNegocio__WEBPACK_IMPORTED_MODULE_2__.default,
+    component: _pages_PerfilNegocio__WEBPACK_IMPORTED_MODULE_2__["default"],
     props: true
   }]
 });
@@ -4174,7 +4379,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.default);
+vue__WEBPACK_IMPORTED_MODULE_2__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_3__["default"]);
 var CARGAR_CATEGORIA = 'CARGAR_CATEGORIA';
 var CATEGORIAS = 'CATEGORIAS';
 var GUARDAR_FORMULARIO = 'GUARDAR_FORMULARIO';
@@ -4524,7 +4729,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
-vue__WEBPACK_IMPORTED_MODULE_2__.default.use(vuex__WEBPACK_IMPORTED_MODULE_3__.default);
+vue__WEBPACK_IMPORTED_MODULE_2__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_3__["default"]);
 var CARGAR_EMPRESAS = 'CARGAR_EMPRESAS';
 var BUSCAR_EMPRESAS = 'BUSCAR_EMPRESAS';
 var EMPRESAS = 'EMPRESAS';
@@ -4651,14 +4856,14 @@ __webpack_require__.r(__webpack_exports__);
 /* provided dependency */ var process = __webpack_require__(/*! process/browser */ "./node_modules/process/browser.js");
 
 
-vue__WEBPACK_IMPORTED_MODULE_0__.default.use(vuex__WEBPACK_IMPORTED_MODULE_1__.default);
+vue__WEBPACK_IMPORTED_MODULE_0__["default"].use(vuex__WEBPACK_IMPORTED_MODULE_1__["default"]);
 
 
 /* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
-  var Store = new vuex__WEBPACK_IMPORTED_MODULE_1__.default.Store({
+  var Store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
     modules: {
-      formulario: _modules_formulario__WEBPACK_IMPORTED_MODULE_2__.default,
-      listado: _modules_listado__WEBPACK_IMPORTED_MODULE_3__.default
+      formulario: _modules_formulario__WEBPACK_IMPORTED_MODULE_2__["default"],
+      listado: _modules_listado__WEBPACK_IMPORTED_MODULE_3__["default"]
     },
     // enable strict mode (adds overhead!)
     // for dev mode only
@@ -5873,7 +6078,7 @@ function restoreAjax (start, stop) {
   }
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QAjaxBar',
 
   props: {
@@ -6051,7 +6256,7 @@ function restoreAjax (start, stop) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QAjaxBar": () => (/* reexport safe */ _QAjaxBar_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QAjaxBar": () => (/* reexport safe */ _QAjaxBar_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QAjaxBar_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QAjaxBar.js */ "./node_modules/quasar/src/components/ajax-bar/QAjaxBar.js");
 
@@ -6086,10 +6291,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QAvatar',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_size_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_size_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     fontSize: String,
@@ -6121,7 +6326,7 @@ __webpack_require__.r(__webpack_exports__);
 
   render (h) {
     const icon = this.icon !== void 0
-      ? [ h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, { props: { name: this.icon } }) ]
+      ? [ h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], { props: { name: this.icon } }) ]
       : void 0
 
     return h('div', {
@@ -6150,7 +6355,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QAvatar": () => (/* reexport safe */ _QAvatar_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QAvatar": () => (/* reexport safe */ _QAvatar_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QAvatar_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QAvatar.js */ "./node_modules/quasar/src/components/avatar/QAvatar.js");
 
@@ -6180,10 +6385,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QBadge',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     color: String,
@@ -6257,7 +6462,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QBadge": () => (/* reexport safe */ _QBadge_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QBadge": () => (/* reexport safe */ _QBadge_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QBadge_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QBadge.js */ "./node_modules/quasar/src/components/badge/QBadge.js");
 
@@ -6291,10 +6496,10 @@ __webpack_require__.r(__webpack_exports__);
 
 const attrs = { role: 'alert' }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QBanner',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     inlineActions: Boolean,
@@ -6347,7 +6552,7 @@ const attrs = { role: 'alert' }
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QBanner": () => (/* reexport safe */ _QBanner_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QBanner": () => (/* reexport safe */ _QBanner_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QBanner_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QBanner.js */ "./node_modules/quasar/src/components/banner/QBanner.js");
 
@@ -6381,10 +6586,10 @@ __webpack_require__.r(__webpack_exports__);
 
 const attrs = { role: 'toolbar' }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QBar',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     dense: Boolean
@@ -6419,7 +6624,7 @@ const attrs = { role: 'toolbar' }
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QBar": () => (/* reexport safe */ _QBar_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QBar": () => (/* reexport safe */ _QBar_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QBar_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QBar.js */ "./node_modules/quasar/src/components/bar/QBar.js");
 
@@ -6450,10 +6655,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QBreadcrumbs',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_align_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_align_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     separator: {
@@ -6563,10 +6768,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QBreadcrumbsEl',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_router_link_js__WEBPACK_IMPORTED_MODULE_3__.RouterLinkMixin ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_router_link_js__WEBPACK_IMPORTED_MODULE_3__.RouterLinkMixin ],
 
   props: {
     label: String,
@@ -6577,7 +6782,7 @@ __webpack_require__.r(__webpack_exports__);
     const child = []
 
     this.icon !== void 0 && child.push(
-      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
         staticClass: 'q-breadcrumbs__el-icon',
         class: this.label !== void 0 ? 'q-breadcrumbs__el-icon--with-label' : null,
         props: { name: this.icon }
@@ -6606,8 +6811,8 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QBreadcrumbs": () => (/* reexport safe */ _QBreadcrumbs_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QBreadcrumbsEl": () => (/* reexport safe */ _QBreadcrumbsEl_js__WEBPACK_IMPORTED_MODULE_1__.default)
+/* harmony export */   "QBreadcrumbs": () => (/* reexport safe */ _QBreadcrumbs_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QBreadcrumbsEl": () => (/* reexport safe */ _QBreadcrumbsEl_js__WEBPACK_IMPORTED_MODULE_1__["default"])
 /* harmony export */ });
 /* harmony import */ var _QBreadcrumbs_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QBreadcrumbs.js */ "./node_modules/quasar/src/components/breadcrumbs/QBreadcrumbs.js");
 /* harmony import */ var _QBreadcrumbsEl_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QBreadcrumbsEl.js */ "./node_modules/quasar/src/components/breadcrumbs/QBreadcrumbsEl.js");
@@ -6654,10 +6859,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__["default"].extend({
   name: 'QBtnDropdown',
 
-  mixins: [ _mixins_btn_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_btn_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   inheritAttrs: false,
 
@@ -6724,7 +6929,7 @@ __webpack_require__.r(__webpack_exports__);
     }
 
     const Arrow = [
-      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
         props: { name: this.dropdownIcon || this.$q.iconSet.arrow.dropdown },
         class: 'q-btn-dropdown__arrow' +
           (this.showing === true && this.noIconAnimation === false ? ' rotate-180' : '') +
@@ -6733,7 +6938,7 @@ __webpack_require__.r(__webpack_exports__);
     ]
 
     this.disableDropdown !== true && Arrow.push(
-      h(_menu_QMenu_js__WEBPACK_IMPORTED_MODULE_5__.default, {
+      h(_menu_QMenu_js__WEBPACK_IMPORTED_MODULE_5__["default"], {
         ref: 'menu',
         props: {
           cover: this.cover,
@@ -6748,7 +6953,7 @@ __webpack_require__.r(__webpack_exports__);
           contentStyle: this.contentStyle,
           separateClosePopup: true
         },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__.default)(this, 'menu', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__["default"])(this, 'menu', {
           'before-show': e => {
             this.showing = true
             this.$emit('before-show', e)
@@ -6770,7 +6975,7 @@ __webpack_require__.r(__webpack_exports__);
     )
 
     if (this.split === false) {
-      return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_3__.default, {
+      return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
         class: 'q-btn-dropdown q-btn-dropdown--simple',
         props: {
           ...this.$props,
@@ -6782,7 +6987,7 @@ __webpack_require__.r(__webpack_exports__);
           ...this.qAttrs,
           ...attrs
         },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__.default)(this, 'nonSpl', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__["default"])(this, 'nonSpl', {
           click: e => {
             this.$emit('click', e)
           }
@@ -6790,7 +6995,7 @@ __webpack_require__.r(__webpack_exports__);
       }, label.concat(Arrow))
     }
 
-    const Btn = h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_3__.default, {
+    const Btn = h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
       class: 'q-btn-dropdown--current',
       props: {
         ...this.$props,
@@ -6800,7 +7005,7 @@ __webpack_require__.r(__webpack_exports__);
         round: false
       },
       attrs: this.qAttrs,
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__.default)(this, 'spl', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__["default"])(this, 'spl', {
         click: e => {
           (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_7__.stop)(e) // prevent showing the menu on click
           this.hide()
@@ -6809,7 +7014,7 @@ __webpack_require__.r(__webpack_exports__);
       })
     }, label)
 
-    return h(_btn_group_QBtnGroup_js__WEBPACK_IMPORTED_MODULE_4__.default, {
+    return h(_btn_group_QBtnGroup_js__WEBPACK_IMPORTED_MODULE_4__["default"], {
       props: {
         outline: this.outline,
         flat: this.flat,
@@ -6823,7 +7028,7 @@ __webpack_require__.r(__webpack_exports__);
     }, [
       Btn,
 
-      h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_3__.default, {
+      h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
         staticClass: 'q-btn-dropdown__arrow-container q-anchor--skip',
         attrs,
         props: {
@@ -6873,7 +7078,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QBtnDropdown": () => (/* reexport safe */ _QBtnDropdown_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QBtnDropdown": () => (/* reexport safe */ _QBtnDropdown_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QBtnDropdown_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QBtnDropdown.js */ "./node_modules/quasar/src/components/btn-dropdown/QBtnDropdown.js");
 
@@ -6903,10 +7108,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QBtnGroup',
 
-  mixin: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixin: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     unelevated: Boolean,
@@ -6949,7 +7154,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QBtnGroup": () => (/* reexport safe */ _QBtnGroup_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QBtnGroup": () => (/* reexport safe */ _QBtnGroup_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QBtnGroup_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QBtnGroup.js */ "./node_modules/quasar/src/components/btn-group/QBtnGroup.js");
 
@@ -6988,10 +7193,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QBtnToggle',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_ripple_js__WEBPACK_IMPORTED_MODULE_4__.default, _mixins_form_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_ripple_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_form_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   props: {
     value: {
@@ -7121,14 +7326,14 @@ __webpack_require__.r(__webpack_exports__);
 
   render (h) {
     const child = this.btnOptions.map(opt => {
-      return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, { ...opt.options }, opt.slot !== void 0 ? (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_5__.slot)(this, opt.slot) : void 0)
+      return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], { ...opt.options }, opt.slot !== void 0 ? (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_5__.slot)(this, opt.slot) : void 0)
     })
 
     if (this.name !== void 0 && this.disable !== true && this.hasActiveValue === true) {
       this.__injectFormInput(child, 'push')
     }
 
-    return h(_btn_group_QBtnGroup_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+    return h(_btn_group_QBtnGroup_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
       staticClass: 'q-btn-toggle',
       props: {
         outline: this.outline,
@@ -7156,7 +7361,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QBtnToggle": () => (/* reexport safe */ _QBtnToggle_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QBtnToggle": () => (/* reexport safe */ _QBtnToggle_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QBtnToggle_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QBtnToggle.js */ "./node_modules/quasar/src/components/btn-toggle/QBtnToggle.js");
 
@@ -7204,10 +7409,10 @@ let
 
 const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QBtn',
 
-  mixins: [ _mixins_btn_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_btn_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   props: {
     percentage: Number,
@@ -7467,7 +7672,7 @@ const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
     let inner = []
 
     this.icon !== void 0 && inner.push(
-      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
         attrs: iconAttrs,
         props: { name: this.icon, left: this.stack === false && this.hasLabel === true }
       })
@@ -7481,7 +7686,7 @@ const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
 
     if (this.iconRight !== void 0 && this.round === false) {
       inner.push(
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           attrs: iconAttrs,
           props: { name: this.iconRight, right: this.stack === false && this.hasLabel === true }
         })
@@ -7528,7 +7733,7 @@ const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
         h('span', {
           key: 'loading',
           staticClass: 'absolute-full flex flex-center'
-        }, this.$scopedSlots.loading !== void 0 ? this.$scopedSlots.loading() : [ h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_1__.default) ])
+        }, this.$scopedSlots.loading !== void 0 ? this.$scopedSlots.loading() : [ h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_1__["default"]) ])
       ] : void 0)
     )
 
@@ -7555,7 +7760,7 @@ const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QBtn": () => (/* reexport safe */ _QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QBtn": () => (/* reexport safe */ _QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QBtn_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QBtn.js */ "./node_modules/quasar/src/components/btn/QBtn.js");
 
@@ -7589,10 +7794,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QCard',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     square: Boolean,
@@ -7643,10 +7848,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QCardActions',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_align_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_align_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     vertical: Boolean
@@ -7692,10 +7897,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QCardSection',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_tag_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_tag_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     horizontal: Boolean
@@ -7728,9 +7933,9 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QCard": () => (/* reexport safe */ _QCard_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QCardSection": () => (/* reexport safe */ _QCardSection_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "QCardActions": () => (/* reexport safe */ _QCardActions_js__WEBPACK_IMPORTED_MODULE_2__.default)
+/* harmony export */   "QCard": () => (/* reexport safe */ _QCard_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QCardSection": () => (/* reexport safe */ _QCardSection_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "QCardActions": () => (/* reexport safe */ _QCardActions_js__WEBPACK_IMPORTED_MODULE_2__["default"])
 /* harmony export */ });
 /* harmony import */ var _QCard_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QCard.js */ "./node_modules/quasar/src/components/card/QCard.js");
 /* harmony import */ var _QCardSection_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QCardSection.js */ "./node_modules/quasar/src/components/card/QCardSection.js");
@@ -7775,10 +7980,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QCarousel',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_panel_js__WEBPACK_IMPORTED_MODULE_2__.PanelParentMixin, _mixins_fullscreen_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_panel_js__WEBPACK_IMPORTED_MODULE_2__.PanelParentMixin, _mixins_fullscreen_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   props: {
     height: String,
@@ -7916,11 +8121,11 @@ __webpack_require__.r(__webpack_exports__);
       if (this.navigation === true) {
         const fn = this.$scopedSlots['navigation-icon'] !== void 0
           ? this.$scopedSlots['navigation-icon']
-          : opts => h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+          : opts => h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
             key: 'nav' + opts.name,
             class: `q-carousel__navigation-icon q-carousel__navigation-icon--${opts.active === true ? '' : 'in'}active`,
             props: opts.btnProps,
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'nav#' + opts.name, { click: opts.onClick })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'nav#' + opts.name, { click: opts.onClick })
           })
 
         const maxIndex = this.panels.length - 1
@@ -7958,7 +8163,7 @@ __webpack_require__.r(__webpack_exports__);
               src: slide.imgSrc
             },
             key: 'tmb#' + slide.name,
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'tmb#' + slide.name, { click: () => { this.goTo(slide.name) } })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'tmb#' + slide.name, { click: () => { this.goTo(slide.name) } })
           })
         }))
       }
@@ -7970,9 +8175,9 @@ __webpack_require__.r(__webpack_exports__);
               key: 'prev',
               staticClass: `q-carousel__control q-carousel__arrow q-carousel__prev-arrow q-carousel__prev-arrow--${this.direction} absolute flex flex-center`
             }, [
-              h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+              h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
                 props: { icon: this.arrowIcons[0], ...this.controlProps },
-                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'prev', { click: this.previous })
+                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'prev', { click: this.previous })
               })
             ])
           )
@@ -7984,9 +8189,9 @@ __webpack_require__.r(__webpack_exports__);
               key: 'next',
               staticClass: `q-carousel__control q-carousel__arrow q-carousel__next-arrow q-carousel__next-arrow--${this.direction} absolute flex flex-center`
             }, [
-              h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+              h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
                 props: { icon: this.arrowIcons[1], ...this.controlProps },
-                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'next', { click: this.next })
+                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'next', { click: this.next })
               })
             ])
           )
@@ -8042,10 +8247,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QCarouselControl',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     position: {
@@ -8109,7 +8314,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QCarouselSlide',
 
   mixins: [ _mixins_panel_js__WEBPACK_IMPORTED_MODULE_0__.PanelChildMixin ],
@@ -8149,9 +8354,9 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QCarousel": () => (/* reexport safe */ _QCarousel_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QCarouselSlide": () => (/* reexport safe */ _QCarouselSlide_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "QCarouselControl": () => (/* reexport safe */ _QCarouselControl_js__WEBPACK_IMPORTED_MODULE_2__.default)
+/* harmony export */   "QCarousel": () => (/* reexport safe */ _QCarousel_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QCarouselSlide": () => (/* reexport safe */ _QCarouselSlide_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "QCarouselControl": () => (/* reexport safe */ _QCarouselControl_js__WEBPACK_IMPORTED_MODULE_2__["default"])
 /* harmony export */ });
 /* harmony import */ var _QCarousel_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QCarousel.js */ "./node_modules/quasar/src/components/carousel/QCarousel.js");
 /* harmony import */ var _QCarouselSlide_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QCarouselSlide.js */ "./node_modules/quasar/src/components/carousel/QCarouselSlide.js");
@@ -8182,10 +8387,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QChatMessage',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     sent: Boolean,
@@ -8362,7 +8567,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QChatMessage": () => (/* reexport safe */ _QChatMessage_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QChatMessage": () => (/* reexport safe */ _QChatMessage_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QChatMessage_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QChatMessage.js */ "./node_modules/quasar/src/components/chat/QChatMessage.js");
 
@@ -8389,10 +8594,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QCheckbox',
 
-  mixins: [ _mixins_checkbox_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_checkbox_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   methods: {
     __getInner (h) {
@@ -8441,7 +8646,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QCheckbox": () => (/* reexport safe */ _QCheckbox_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QCheckbox": () => (/* reexport safe */ _QCheckbox_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QCheckbox_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QCheckbox.js */ "./node_modules/quasar/src/components/checkbox/QCheckbox.js");
 
@@ -8482,12 +8687,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QChip',
 
   mixins: [
-    _mixins_ripple_js__WEBPACK_IMPORTED_MODULE_2__.default,
-    _mixins_dark_js__WEBPACK_IMPORTED_MODULE_1__.default,
+    _mixins_ripple_js__WEBPACK_IMPORTED_MODULE_2__["default"],
+    _mixins_dark_js__WEBPACK_IMPORTED_MODULE_1__["default"],
     (0,_mixins_size_js__WEBPACK_IMPORTED_MODULE_3__.getSizeMixin)({
       xs: 8,
       sm: 10,
@@ -8602,7 +8807,7 @@ __webpack_require__.r(__webpack_exports__);
       )
 
       this.hasLeftIcon === true && child.push(
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           staticClass: 'q-chip__icon q-chip__icon--left',
           props: { name: this.leftIcon }
         })
@@ -8619,18 +8824,18 @@ __webpack_require__.r(__webpack_exports__);
       )
 
       this.iconRight && child.push(
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           staticClass: 'q-chip__icon q-chip__icon--right',
           props: { name: this.iconRight }
         })
       )
 
       this.removable === true && child.push(
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           staticClass: 'q-chip__icon q-chip__icon--remove cursor-pointer',
           props: { name: this.removeIcon },
           attrs: this.attrs,
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'non', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'non', {
             click: this.__onRemove,
             keyup: this.__onRemove
           })
@@ -8652,11 +8857,11 @@ __webpack_require__.r(__webpack_exports__);
 
     this.isClickable === true && Object.assign(data, {
       attrs: this.attrs,
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'click', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'click', {
         click: this.__onClick,
         keyup: this.__onKeyup
       }),
-      directives: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'dir#' + this.ripple, [
+      directives: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'dir#' + this.ripple, [
         { name: 'ripple', value: this.ripple }
       ])
     })
@@ -8677,7 +8882,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QChip": () => (/* reexport safe */ _QChip_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QChip": () => (/* reexport safe */ _QChip_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QChip_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QChip.js */ "./node_modules/quasar/src/components/chip/QChip.js");
 
@@ -8716,10 +8921,10 @@ const
   circumference = diameter * Math.PI,
   strokeDashArray = Math.round(circumference * 1000) / 1000
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QCircularProgress',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_size_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_size_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     value: {
@@ -8904,7 +9109,7 @@ const
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QCircularProgress": () => (/* reexport safe */ _QCircularProgress_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QCircularProgress": () => (/* reexport safe */ _QCircularProgress_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QCircularProgress_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QCircularProgress.js */ "./node_modules/quasar/src/components/circular-progress/QCircularProgress.js");
 
@@ -8976,13 +9181,13 @@ const palette = [
   'rgb(255,255,255)', 'rgb(205,205,205)', 'rgb(178,178,178)', 'rgb(153,153,153)', 'rgb(127,127,127)', 'rgb(102,102,102)', 'rgb(76,76,76)', 'rgb(51,51,51)', 'rgb(25,25,25)', 'rgb(0,0,0)'
 ]
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_15__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_15__["default"].extend({
   name: 'QColor',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_7__.default, _mixins_dark_js__WEBPACK_IMPORTED_MODULE_5__.default, _mixins_form_js__WEBPACK_IMPORTED_MODULE_6__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_7__["default"], _mixins_dark_js__WEBPACK_IMPORTED_MODULE_5__["default"], _mixins_form_js__WEBPACK_IMPORTED_MODULE_6__["default"] ],
 
   directives: {
-    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_8__.default
+    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_8__["default"]
   },
 
   props: {
@@ -9144,7 +9349,7 @@ const palette = [
   },
 
   created () {
-    this.__spectrumChange = (0,_utils_throttle_js__WEBPACK_IMPORTED_MODULE_1__.default)(this.__spectrumChange, 20)
+    this.__spectrumChange = (0,_utils_throttle_js__WEBPACK_IMPORTED_MODULE_1__["default"])(this.__spectrumChange, 20)
   },
 
   render (h) {
@@ -9181,17 +9386,17 @@ const palette = [
           class: this.headerClass,
           style: this.currentBgColor
         }, [
-          h(_tabs_QTabs_js__WEBPACK_IMPORTED_MODULE_11__.default, {
+          h(_tabs_QTabs_js__WEBPACK_IMPORTED_MODULE_11__["default"], {
             props: {
               value: this.topView,
               dense: true,
               align: 'justify'
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'topVTab', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'topVTab', {
               input: val => { this.topView = val }
             })
           }, [
-            h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__.default, {
+            h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__["default"], {
               props: {
                 label: 'HEX' + (this.hasAlpha === true ? 'A' : ''),
                 name: 'hex',
@@ -9199,7 +9404,7 @@ const palette = [
               }
             }),
 
-            h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__.default, {
+            h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__["default"], {
               props: {
                 label: 'RGB' + (this.hasAlpha === true ? 'A' : ''),
                 name: 'rgb',
@@ -9217,7 +9422,7 @@ const palette = [
               attrs: this.editable !== true ? {
                 readonly: true
               } : null,
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'topIn', {
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'topIn', {
                 input: evt => {
                   this.__updateErrorIcon(this.__onEditorChange(evt) === true)
                 },
@@ -9229,7 +9434,7 @@ const palette = [
               })
             }),
 
-            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_10__.default, {
+            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_10__["default"], {
               ref: 'errorIcon',
               staticClass: 'q-color-picker__error-icon absolute no-pointer-events',
               props: { name: this.$q.iconSet.type.negative }
@@ -9240,23 +9445,23 @@ const palette = [
     },
 
     __getContent (h) {
-      return h(_tab_panels_QTabPanels_js__WEBPACK_IMPORTED_MODULE_13__.default, {
+      return h(_tab_panels_QTabPanels_js__WEBPACK_IMPORTED_MODULE_13__["default"], {
         props: {
           value: this.view,
           animated: true
         }
       }, [
-        h(_tab_panels_QTabPanel_js__WEBPACK_IMPORTED_MODULE_14__.default, {
+        h(_tab_panels_QTabPanel_js__WEBPACK_IMPORTED_MODULE_14__["default"], {
           staticClass: 'q-color-picker__spectrum-tab overflow-hidden',
           props: { name: 'spectrum' }
         }, this.__getSpectrumTab(h)),
 
-        h(_tab_panels_QTabPanel_js__WEBPACK_IMPORTED_MODULE_14__.default, {
+        h(_tab_panels_QTabPanel_js__WEBPACK_IMPORTED_MODULE_14__["default"], {
           staticClass: 'q-pa-md q-color-picker__tune-tab',
           props: { name: 'tune' }
         }, this.__getTuneTab(h)),
 
-        h(_tab_panels_QTabPanel_js__WEBPACK_IMPORTED_MODULE_14__.default, {
+        h(_tab_panels_QTabPanel_js__WEBPACK_IMPORTED_MODULE_14__["default"], {
           staticClass: 'q-color-picker__palette-tab',
           props: { name: 'palette' }
         }, this.__getPaletteTab(h))
@@ -9267,18 +9472,18 @@ const palette = [
       return h('div', {
         staticClass: 'q-color-picker__footer relative-position overflow-hidden'
       }, [
-        h(_tabs_QTabs_js__WEBPACK_IMPORTED_MODULE_11__.default, {
+        h(_tabs_QTabs_js__WEBPACK_IMPORTED_MODULE_11__["default"], {
           staticClass: 'absolute-full',
           props: {
             value: this.view,
             dense: true,
             align: 'justify'
           },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'ftIn', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'ftIn', {
             input: val => { this.view = val }
           })
         }, [
-          h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__.default, {
+          h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__["default"], {
             props: {
               icon: this.$q.iconSet.colorPicker.spectrum,
               name: 'spectrum',
@@ -9286,7 +9491,7 @@ const palette = [
             }
           }),
 
-          h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__.default, {
+          h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__["default"], {
             props: {
               icon: this.$q.iconSet.colorPicker.tune,
               name: 'tune',
@@ -9294,7 +9499,7 @@ const palette = [
             }
           }),
 
-          h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__.default, {
+          h(_tabs_QTab_js__WEBPACK_IMPORTED_MODULE_12__["default"], {
             props: {
               icon: this.$q.iconSet.colorPicker.palette,
               name: 'palette',
@@ -9315,13 +9520,13 @@ const palette = [
           style: this.spectrumStyle,
           class: { readonly: this.editable !== true },
           on: this.editable === true
-            ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'spectrT', {
+            ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'spectrT', {
               click: this.__spectrumClick,
               mousedown: this.__activate
             })
             : null,
           directives: this.editable === true
-            ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'spectrDir', [{
+            ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'spectrDir', [{
               name: 'touch-pan',
               modifiers: {
                 prevent: true,
@@ -9347,7 +9552,7 @@ const palette = [
           staticClass: 'q-color-picker__sliders'
         }, [
           h('div', { staticClass: 'q-color-picker__hue non-selectable' }, [
-            h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__.default, {
+            h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__["default"], {
               props: {
                 value: this.model.h,
                 min: 0,
@@ -9356,7 +9561,7 @@ const palette = [
                 readonly: this.editable !== true,
                 thumbPath
               },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'hueSlide', {
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'hueSlide', {
                 input: this.__onHueChange,
                 change: val => this.__onHueChange(val, true)
               })
@@ -9364,7 +9569,7 @@ const palette = [
           ]),
           this.hasAlpha === true
             ? h('div', { staticClass: 'q-color-picker__alpha non-selectable' }, [
-              h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__.default, {
+              h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__["default"], {
                 props: {
                   value: this.model.a,
                   min: 0,
@@ -9373,7 +9578,7 @@ const palette = [
                   readonly: this.editable !== true,
                   thumbPath
                 },
-                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'alphaSlide', {
+                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'alphaSlide', {
                   input: value => this.__onNumericChange(value, 'a', 100),
                   change: value => this.__onNumericChange(value, 'a', 100, void 0, true)
                 })
@@ -9394,7 +9599,7 @@ const palette = [
       return [
         h('div', { staticClass: 'row items-center no-wrap' }, [
           h('div', ['R']),
-          h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__.default, {
+          h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__["default"], {
             props: {
               value: this.model.r,
               min: 0,
@@ -9403,7 +9608,7 @@ const palette = [
               dark: this.isDark,
               readonly: this.editable !== true
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'rSlide', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'rSlide', {
               input: value => this.__onNumericChange(value, 'r', 255),
               change: value => this.__onNumericChange(value, 'r', 255, void 0, true)
             })
@@ -9411,7 +9616,7 @@ const palette = [
           h('input', {
             domProps: { value: this.model.r },
             attrs,
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'rIn', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'rIn', {
               input: evt => this.__onNumericChange(evt.target.value, 'r', 255, evt),
               change: _utils_event_js__WEBPACK_IMPORTED_MODULE_3__.stop,
               blur: evt => this.__onNumericChange(evt.target.value, 'r', 255, evt, true)
@@ -9421,7 +9626,7 @@ const palette = [
 
         h('div', { staticClass: 'row items-center no-wrap' }, [
           h('div', ['G']),
-          h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__.default, {
+          h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__["default"], {
             props: {
               value: this.model.g,
               min: 0,
@@ -9430,7 +9635,7 @@ const palette = [
               dark: this.isDark,
               readonly: this.editable !== true
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'gSlide', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'gSlide', {
               input: value => this.__onNumericChange(value, 'g', 255),
               change: value => this.__onNumericChange(value, 'g', 255, void 0, true)
             })
@@ -9438,7 +9643,7 @@ const palette = [
           h('input', {
             domProps: { value: this.model.g },
             attrs,
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'gIn', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'gIn', {
               input: evt => this.__onNumericChange(evt.target.value, 'g', 255, evt),
               change: _utils_event_js__WEBPACK_IMPORTED_MODULE_3__.stop,
               blur: evt => this.__onNumericChange(evt.target.value, 'g', 255, evt, true)
@@ -9448,7 +9653,7 @@ const palette = [
 
         h('div', { staticClass: 'row items-center no-wrap' }, [
           h('div', ['B']),
-          h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__.default, {
+          h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__["default"], {
             props: {
               value: this.model.b,
               min: 0,
@@ -9457,7 +9662,7 @@ const palette = [
               readonly: this.editable !== true,
               dark: this.isDark
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'bSlide', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'bSlide', {
               input: value => this.__onNumericChange(value, 'b', 255),
               change: value => this.__onNumericChange(value, 'b', 255, void 0, true)
             })
@@ -9465,7 +9670,7 @@ const palette = [
           h('input', {
             domProps: { value: this.model.b },
             attrs,
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'bIn', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'bIn', {
               input: evt => this.__onNumericChange(evt.target.value, 'b', 255, evt),
               change: _utils_event_js__WEBPACK_IMPORTED_MODULE_3__.stop,
               blur: evt => this.__onNumericChange(evt.target.value, 'b', 255, evt, true)
@@ -9475,14 +9680,14 @@ const palette = [
 
         this.hasAlpha === true ? h('div', { staticClass: 'row items-center no-wrap' }, [
           h('div', ['A']),
-          h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__.default, {
+          h(_slider_QSlider_js__WEBPACK_IMPORTED_MODULE_9__["default"], {
             props: {
               value: this.model.a,
               color: 'grey',
               readonly: this.editable !== true,
               dark: this.isDark
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'aSlide', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'aSlide', {
               input: value => this.__onNumericChange(value, 'a', 100),
               change: value => this.__onNumericChange(value, 'a', 100, void 0, true)
             })
@@ -9490,7 +9695,7 @@ const palette = [
           h('input', {
             domProps: { value: this.model.a },
             attrs,
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'aIn', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'aIn', {
               input: evt => this.__onNumericChange(evt.target.value, 'a', 100, evt),
               change: _utils_event_js__WEBPACK_IMPORTED_MODULE_3__.stop,
               blur: evt => this.__onNumericChange(evt.target.value, 'a', 100, evt, true)
@@ -9510,7 +9715,7 @@ const palette = [
         }, this.computedPalette.map(color => h('div', {
           staticClass: 'q-color-picker__cube col-auto',
           style: { backgroundColor: color },
-          on: this.editable === true ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'palette#' + color, {
+          on: this.editable === true ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'palette#' + color, {
             click: () => {
               this.__onPalettePick(color)
             }
@@ -9822,7 +10027,7 @@ const palette = [
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QColor": () => (/* reexport safe */ _QColor_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QColor": () => (/* reexport safe */ _QColor_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QColor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QColor.js */ "./node_modules/quasar/src/components/color/QColor.js");
 
@@ -9868,10 +10073,10 @@ const viewIsValid = v => views.includes(v)
 const yearMonthValidator = v => /^-?[\d]+\/[0-1]\d$/.test(v)
 const lineStr = ' \u2014 '
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QDate',
 
-  mixins: [ _mixins_datetime_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_datetime_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     multiple: Boolean,
@@ -10683,7 +10888,7 @@ const lineStr = ' \u2014 '
               staticClass: 'q-date__header-subtitle q-date__header-link',
               class: this.view === 'Years' ? 'q-date__header-link--active' : 'cursor-pointer',
               attrs: { tabindex: this.computedTabindex },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'vY', {
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'vY', {
                 click: () => { this.view = 'Years' },
                 keyup: e => { e.keyCode === 13 && (this.view = 'Years') }
               })
@@ -10707,7 +10912,7 @@ const lineStr = ' \u2014 '
                 staticClass: 'q-date__header-title-label q-date__header-link',
                 class: this.view === 'Calendar' ? 'q-date__header-link--active' : 'cursor-pointer',
                 attrs: { tabindex: this.computedTabindex },
-                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'vC', {
+                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'vC', {
                   click: () => { this.view = 'Calendar' },
                   keyup: e => { e.keyCode === 13 && (this.view = 'Calendar') }
                 })
@@ -10715,7 +10920,7 @@ const lineStr = ' \u2014 '
             ])
           ]),
 
-          this.todayBtn === true ? h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+          this.todayBtn === true ? h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
             staticClass: 'q-date__header-today self-start',
             props: {
               icon: this.$q.iconSet.datetime.today,
@@ -10724,7 +10929,7 @@ const lineStr = ' \u2014 '
               round: true,
               tabindex: this.computedTabindex
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'today', { click: this.setToday })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'today', { click: this.setToday })
           }) : null
         ])
       ])
@@ -10735,7 +10940,7 @@ const lineStr = ' \u2014 '
         h('div', {
           staticClass: 'row items-center q-date__arrow'
         }, [
-          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
             props: {
               round: true,
               dense: true,
@@ -10745,7 +10950,7 @@ const lineStr = ' \u2014 '
               tabindex: this.computedTabindex,
               disable: boundaries.prev === false
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'go-#' + view, { click () { goTo(-1) } })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'go-#' + view, { click () { goTo(-1) } })
           })
         ]),
 
@@ -10758,7 +10963,7 @@ const lineStr = ' \u2014 '
             }
           }, [
             h('div', { key }, [
-              h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+              h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
                 props: {
                   flat: true,
                   dense: true,
@@ -10766,7 +10971,7 @@ const lineStr = ' \u2014 '
                   label,
                   tabindex: this.computedTabindex
                 },
-                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'view#' + view, { click: () => { this.view = view } })
+                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'view#' + view, { click: () => { this.view = view } })
               })
             ])
           ])
@@ -10775,7 +10980,7 @@ const lineStr = ' \u2014 '
         h('div', {
           staticClass: 'row items-center q-date__arrow'
         }, [
-          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
             props: {
               round: true,
               dense: true,
@@ -10785,7 +10990,7 @@ const lineStr = ' \u2014 '
               tabindex: this.computedTabindex,
               disable: boundaries.next === false
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'go+#' + view, { click () { goTo(1) } })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'go+#' + view, { click () { goTo(1) } })
           })
         ])
       ]
@@ -10834,7 +11039,7 @@ const lineStr = ' \u2014 '
                 staticClass: 'q-date__calendar-days fit'
               }, this.days.map(day => h('div', { staticClass: day.classes }, [
                 day.in === true
-                  ? h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+                  ? h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
                     staticClass: day.today === true ? 'q-date__today' : null,
                     props: {
                       dense: true,
@@ -10845,7 +11050,7 @@ const lineStr = ' \u2014 '
                       label: day.i,
                       tabindex: this.computedTabindex
                     },
-                    on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'day#' + day.i, {
+                    on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'day#' + day.i, {
                       click: () => { this.__onDayClick(day.i) },
                       mouseover: () => { this.__onDayMouseover(day.i) }
                     })
@@ -10875,7 +11080,7 @@ const lineStr = ' \u2014 '
         return h('div', {
           staticClass: 'q-date__months-item flex flex-center'
         }, [
-          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
             staticClass: currentYear === true && this.today.month === i + 1 ? 'q-date__today' : null,
             props: {
               flat: active !== true,
@@ -10886,7 +11091,7 @@ const lineStr = ' \u2014 '
               tabindex: this.computedTabindex,
               disable: isDisabled(i + 1)
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'month#' + i, { click: () => { this.__setMonth(i + 1) } })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'month#' + i, { click: () => { this.__setMonth(i + 1) } })
           })
         ])
       })
@@ -10931,7 +11136,7 @@ const lineStr = ' \u2014 '
           h('div', {
             staticClass: 'q-date__years-item flex flex-center'
           }, [
-            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
               key: 'yr' + i,
               staticClass: this.today.year === i ? 'q-date__today' : null,
               props: {
@@ -10944,7 +11149,7 @@ const lineStr = ' \u2014 '
                 tabindex: this.computedTabindex,
                 disable: isDisabled(i)
               },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'yr#' + i, { click: () => { this.__setYear(i) } })
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'yr#' + i, { click: () => { this.__setYear(i) } })
             })
           ])
         )
@@ -10956,7 +11161,7 @@ const lineStr = ' \u2014 '
         h('div', {
           staticClass: 'col-auto'
         }, [
-          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
             props: {
               round: true,
               dense: true,
@@ -10965,7 +11170,7 @@ const lineStr = ' \u2014 '
               tabindex: this.computedTabindex,
               disable: isDisabled(start)
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'y-', { click: () => { this.startYear -= yearsInterval } })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'y-', { click: () => { this.startYear -= yearsInterval } })
           })
         ]),
 
@@ -10976,7 +11181,7 @@ const lineStr = ' \u2014 '
         h('div', {
           staticClass: 'col-auto'
         }, [
-          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
             props: {
               round: true,
               dense: true,
@@ -10985,7 +11190,7 @@ const lineStr = ' \u2014 '
               tabindex: this.computedTabindex,
               disable: isDisabled(stop)
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'y+', { click: () => { this.startYear += yearsInterval } })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'y+', { click: () => { this.startYear += yearsInterval } })
           })
         ])
       ])
@@ -11324,7 +11529,7 @@ const lineStr = ' \u2014 '
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QDate": () => (/* reexport safe */ _QDate_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QDate": () => (/* reexport safe */ _QDate_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QDate_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QDate.js */ "./node_modules/quasar/src/components/date/QDate.js");
 
@@ -11374,10 +11579,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__["default"].extend({
   name: 'BottomSheetPlugin',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_7__.default, _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_8__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_7__["default"], _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_8__["default"] ],
 
   inheritAttrs: false,
 
@@ -11420,7 +11625,7 @@ __webpack_require__.r(__webpack_exports__);
         const img = action.avatar || action.img
 
         return action.label === void 0
-          ? h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+          ? h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
             staticClass: 'col-all',
             props: { dark: this.isDark }
           })
@@ -11438,7 +11643,7 @@ __webpack_require__.r(__webpack_exports__);
             h('div', { staticClass: 'q-focus-helper' }),
 
             action.icon
-              ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, { props: { name: action.icon, color: action.color } })
+              ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], { props: { name: action.icon, color: action.color } })
               : (
                 img
                   ? h('img', {
@@ -11458,8 +11663,8 @@ __webpack_require__.r(__webpack_exports__);
         const img = action.avatar || action.img
 
         return action.label === void 0
-          ? h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_2__.default, { props: { spaced: true, dark: this.isDark } })
-          : h(_item_QItem_js__WEBPACK_IMPORTED_MODULE_5__.default, {
+          ? h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_2__["default"], { props: { spaced: true, dark: this.isDark } })
+          : h(_item_QItem_js__WEBPACK_IMPORTED_MODULE_5__["default"], {
             staticClass: 'q-bottom-sheet__item',
             class: action.classes,
             props: {
@@ -11474,9 +11679,9 @@ __webpack_require__.r(__webpack_exports__);
               }
             }
           }, [
-            h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_6__.default, { props: { avatar: true } }, [
+            h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_6__["default"], { props: { avatar: true } }, [
               action.icon
-                ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, { props: { name: action.icon, color: action.color } })
+                ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], { props: { name: action.icon, color: action.color } })
                 : (
                   img
                     ? h('img', {
@@ -11486,7 +11691,7 @@ __webpack_require__.r(__webpack_exports__);
                     : null
                 )
             ]),
-            h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_6__.default, [ action.label ])
+            h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_6__["default"], [ action.label ])
           ])
       })
     }
@@ -11496,13 +11701,13 @@ __webpack_require__.r(__webpack_exports__);
     const child = []
 
     this.title && child.push(
-      h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_4__.default, {
+      h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_4__["default"], {
         staticClass: 'q-dialog__title'
       }, [ this.title ])
     )
 
     this.message && child.push(
-      h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_4__.default, {
+      h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_4__["default"], {
         staticClass: 'q-dialog__message'
       }, [ this.message ])
     )
@@ -11515,16 +11720,16 @@ __webpack_require__.r(__webpack_exports__);
         : h('div', this.__getList(h))
     )
 
-    return h(_dialog_QDialog_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+    return h(_dialog_QDialog_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
       ref: 'dialog',
       props: this.dialogProps,
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_9__.default)(this, 'hide', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_9__["default"])(this, 'hide', {
         hide: () => {
           this.$emit('hide')
         }
       })
     }, [
-      h(_card_QCard_js__WEBPACK_IMPORTED_MODULE_3__.default, {
+      h(_card_QCard_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
         staticClass: `q-bottom-sheet q-bottom-sheet--${this.grid === true ? 'grid' : 'list'}` +
           (this.isDark === true ? ' q-bottom-sheet--dark q-dark' : ''),
         style: this.cardStyle,
@@ -11586,10 +11791,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_14__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_14__["default"].extend({
   name: 'DialogPlugin',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_11__.default, _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_12__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_11__["default"], _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_12__["default"] ],
 
   inheritAttrs: false,
 
@@ -11631,11 +11836,11 @@ __webpack_require__.r(__webpack_exports__);
       if (this.progress !== false) {
         return Object(this.progress) === this.progress
           ? {
-            component: this.progress.spinner || _spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_10__.default,
+            component: this.progress.spinner || _spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_10__["default"],
             props: { color: this.progress.color || this.vmColor }
           }
           : {
-            component: _spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_10__.default,
+            component: _spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_10__["default"],
             props: { color: this.vmColor }
           }
       }
@@ -11711,7 +11916,7 @@ __webpack_require__.r(__webpack_exports__);
 
     getPrompt (h) {
       return [
-        h(_input_QInput_js__WEBPACK_IMPORTED_MODULE_8__.default, {
+        h(_input_QInput_js__WEBPACK_IMPORTED_MODULE_8__["default"], {
           props: {
             value: this.prompt.model,
             type: this.prompt.type,
@@ -11736,7 +11941,7 @@ __webpack_require__.r(__webpack_exports__);
             dark: this.isDark
           },
           attrs: this.prompt.attrs,
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'prompt', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'prompt', {
             input: v => { this.prompt.model = v },
             keyup: evt => {
               // if ENTER key
@@ -11755,7 +11960,7 @@ __webpack_require__.r(__webpack_exports__);
 
     getOptions (h) {
       return [
-        h(_option_group_QOptionGroup_js__WEBPACK_IMPORTED_MODULE_9__.default, {
+        h(_option_group_QOptionGroup_js__WEBPACK_IMPORTED_MODULE_9__["default"], {
           props: {
             value: this.options.model,
             type: this.options.type,
@@ -11764,7 +11969,7 @@ __webpack_require__.r(__webpack_exports__);
             options: this.options.items,
             dark: this.isDark
           },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'opts', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'opts', {
             input: v => { this.options.model = v }
           })
         })
@@ -11774,20 +11979,20 @@ __webpack_require__.r(__webpack_exports__);
     getButtons (h) {
       const child = []
 
-      this.cancel && child.push(h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+      this.cancel && child.push(h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
         props: this.cancelProps,
         attrs: { 'data-autofocus': this.focus === 'cancel' && this.hasForm !== true },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'cancel', { click: this.onCancel })
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'cancel', { click: this.onCancel })
       }))
 
-      this.ok && child.push(h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+      this.ok && child.push(h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
         props: this.okProps,
         attrs: { 'data-autofocus': this.focus === 'ok' && this.hasForm !== true },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'ok', { click: this.onOk })
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'ok', { click: this.onOk })
       }))
 
       if (child.length > 0) {
-        return h(_card_QCardActions_js__WEBPACK_IMPORTED_MODULE_6__.default, {
+        return h(_card_QCardActions_js__WEBPACK_IMPORTED_MODULE_6__["default"], {
           staticClass: this.stackButtons === true ? 'items-end' : null,
           props: {
             vertical: this.stackButtons,
@@ -11798,7 +12003,7 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     onOk () {
-      this.$emit('ok', (0,_utils_clone_js__WEBPACK_IMPORTED_MODULE_2__.default)(this.getData()))
+      this.$emit('ok', (0,_utils_clone_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this.getData()))
       this.hide()
     },
 
@@ -11814,11 +12019,11 @@ __webpack_require__.r(__webpack_exports__);
 
     getSection (h, staticClass, text) {
       return this.html === true
-        ? h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__.default, {
+        ? h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__["default"], {
           staticClass,
           domProps: { innerHTML: text }
         })
-        : h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__.default, { staticClass }, [ text ])
+        : h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__["default"], { staticClass }, [ text ])
     }
   },
 
@@ -11830,7 +12035,7 @@ __webpack_require__.r(__webpack_exports__);
     )
 
     this.progress !== false && child.push(
-      h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__.default, { staticClass: 'q-dialog__progress' }, [
+      h(_card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__["default"], { staticClass: 'q-dialog__progress' }, [
         h(this.spinner.component, {
           props: this.spinner.props
         })
@@ -11844,7 +12049,7 @@ __webpack_require__.r(__webpack_exports__);
     if (this.prompt !== void 0) {
       child.push(
         h(
-          _card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__.default,
+          _card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__["default"],
           { staticClass: 'scroll q-dialog-plugin__form' },
           this.getPrompt(h)
         )
@@ -11852,13 +12057,13 @@ __webpack_require__.r(__webpack_exports__);
     }
     else if (this.options !== void 0) {
       child.push(
-        h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_7__.default, { props: { dark: this.isDark } }),
+        h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_7__["default"], { props: { dark: this.isDark } }),
         h(
-          _card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__.default,
+          _card_QCardSection_js__WEBPACK_IMPORTED_MODULE_5__["default"],
           { staticClass: 'scroll q-dialog-plugin__form' },
           this.getOptions(h)
         ),
-        h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_7__.default, { props: { dark: this.isDark } })
+        h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_7__["default"], { props: { dark: this.isDark } })
       )
     }
 
@@ -11866,7 +12071,7 @@ __webpack_require__.r(__webpack_exports__);
       child.push(this.getButtons(h))
     }
 
-    return h(_dialog_QDialog_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+    return h(_dialog_QDialog_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
       ref: 'dialog',
 
       props: {
@@ -11874,13 +12079,13 @@ __webpack_require__.r(__webpack_exports__);
         value: this.value
       },
 
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'hide', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'hide', {
         hide: () => {
           this.$emit('hide')
         }
       })
     }, [
-      h(_card_QCard_js__WEBPACK_IMPORTED_MODULE_4__.default, {
+      h(_card_QCard_js__WEBPACK_IMPORTED_MODULE_4__["default"], {
         staticClass: this.classes,
         style: this.cardStyle,
         class: this.cardClass,
@@ -11949,15 +12154,15 @@ const transitions = {
   left: ['slide-right', 'slide-left']
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_11__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_11__["default"].extend({
   name: 'QDialog',
 
   mixins: [
-    _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_4__.default,
-    _mixins_history_js__WEBPACK_IMPORTED_MODULE_0__.default,
-    _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__.default,
-    _mixins_portal_js__WEBPACK_IMPORTED_MODULE_2__.default,
-    _mixins_prevent_scroll_js__WEBPACK_IMPORTED_MODULE_3__.default
+    _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_4__["default"],
+    _mixins_history_js__WEBPACK_IMPORTED_MODULE_0__["default"],
+    _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+    _mixins_portal_js__WEBPACK_IMPORTED_MODULE_2__["default"],
+    _mixins_prevent_scroll_js__WEBPACK_IMPORTED_MODULE_3__["default"]
   ],
 
   props: {
@@ -12113,7 +12318,7 @@ const transitions = {
       this.$el.dispatchEvent((0,_utils_event_js__WEBPACK_IMPORTED_MODULE_8__.create)('popup-show', { bubbles: true }))
       this.__updateMaximized(this.maximized)
 
-      _utils_escape_key_js__WEBPACK_IMPORTED_MODULE_6__.default.register(this, () => {
+      _utils_escape_key_js__WEBPACK_IMPORTED_MODULE_6__["default"].register(this, () => {
         if (this.seamless !== true) {
           if (this.persistent === true || this.noEscDismiss === true) {
             this.maximized !== true && this.shake()
@@ -12189,7 +12394,7 @@ const transitions = {
       clearTimeout(this.shakeTimeout)
 
       if (hiding === true || this.showing === true) {
-        _utils_escape_key_js__WEBPACK_IMPORTED_MODULE_6__.default.pop(this)
+        _utils_escape_key_js__WEBPACK_IMPORTED_MODULE_6__["default"].pop(this)
         this.__updateMaximized(false)
 
         if (this.seamless !== true) {
@@ -12263,7 +12468,7 @@ const transitions = {
           h('div', {
             staticClass: 'q-dialog__backdrop fixed-full',
             attrs: _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_4__.ariaHidden,
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_9__.default)(this, 'bkdrop', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_9__["default"])(this, 'bkdrop', {
               click: this.__onBackdropClick
             })
           })
@@ -12305,7 +12510,7 @@ const transitions = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QDialog": () => (/* reexport safe */ _QDialog_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QDialog": () => (/* reexport safe */ _QDialog_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QDialog_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QDialog.js */ "./node_modules/quasar/src/components/dialog/QDialog.js");
 
@@ -12356,7 +12561,7 @@ const mouseEvents = [
   'mouseover', 'mouseout', 'mouseenter', 'mouseleave'
 ]
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__["default"].extend({
   name: 'QDrawer',
 
   inject: {
@@ -12367,10 +12572,10 @@ const mouseEvents = [
     }
   },
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_3__.default, _mixins_history_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_prevent_scroll_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_3__["default"], _mixins_history_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_prevent_scroll_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   directives: {
-    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_4__.default
+    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_4__["default"]
   },
 
   props: {
@@ -13006,7 +13211,7 @@ const mouseEvents = [
           style: this.lastBackdropBg !== void 0
             ? { backgroundColor: this.lastBackdropBg }
             : null,
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__.default)(this, 'bkdrop', { click: this.hide }),
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__["default"])(this, 'bkdrop', { click: this.hide }),
           directives: this.showing === false
             ? void 0
             : this.backdropCloseDirective
@@ -13062,7 +13267,7 @@ const mouseEvents = [
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QDrawer": () => (/* reexport safe */ _QDrawer_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QDrawer": () => (/* reexport safe */ _QDrawer_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QDrawer_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QDrawer.js */ "./node_modules/quasar/src/components/drawer/QDrawer.js");
 
@@ -13109,10 +13314,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__["default"].extend({
   name: 'QEditor',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_4__.default, _mixins_fullscreen_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_dark_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_fullscreen_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_dark_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   props: {
     value: {
@@ -13254,7 +13459,7 @@ __webpack_require__.r(__webpack_exports__);
     buttons () {
       const userDef = this.definitions || {}
       const def = this.definitions || this.fonts
-        ? (0,_utils_extend_js__WEBPACK_IMPORTED_MODULE_7__.default)(
+        ? (0,_utils_extend_js__WEBPACK_IMPORTED_MODULE_7__["default"])(
           true,
           {},
           this.buttonDef,
@@ -14093,14 +14298,14 @@ function getBtn (h, vm, btn, clickHandler, active = false) {
       ? h('div', [h('small', `(CTRL + ${String.fromCharCode(btn.key)})`)])
       : null
     child.push(
-      h(_tooltip_QTooltip_js__WEBPACK_IMPORTED_MODULE_3__.default, { props: { delay: 1000 } }, [
+      h(_tooltip_QTooltip_js__WEBPACK_IMPORTED_MODULE_3__["default"], { props: { delay: 1000 } }, [
         h('div', { domProps: { innerHTML: btn.tip } }),
         Key
       ])
     )
   }
 
-  return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+  return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
     props: {
       ...vm.buttonProps,
       icon: btn.icon !== null ? btn.icon : void 0,
@@ -14167,7 +14372,7 @@ function getDropdown (h, vm, btn) {
       const htmlTip = btn.htmlTip
 
       return h(
-        _item_QItem_js__WEBPACK_IMPORTED_MODULE_5__.default,
+        _item_QItem_js__WEBPACK_IMPORTED_MODULE_5__["default"],
         {
           props: { active, activeClass, clickable: true, disable: disable, dense: true },
           on: {
@@ -14182,14 +14387,14 @@ function getDropdown (h, vm, btn) {
         [
           noIcons === true
             ? null
-            : h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_6__.default, {
+            : h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_6__["default"], {
               class: active ? activeClass : inactiveClass,
               props: { side: true }
             }, [
-              h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__.default, { props: { name: btn.icon !== null ? btn.icon : void 0 } })
+              h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__["default"], { props: { name: btn.icon !== null ? btn.icon : void 0 } })
             ]),
 
-          h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_6__.default, [
+          h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_6__["default"], [
             htmlTip
               ? h('div', {
                 staticClass: 'text-no-wrap',
@@ -14206,13 +14411,13 @@ function getDropdown (h, vm, btn) {
     })
     contentClass = [vm.toolbarBackgroundClass, inactiveClass]
     Items = [
-      h(_item_QList_js__WEBPACK_IMPORTED_MODULE_4__.default, [ Items ])
+      h(_item_QList_js__WEBPACK_IMPORTED_MODULE_4__["default"], [ Items ])
     ]
   }
 
   const highlight = btn.highlight && label !== btn.label
   const Dropdown = h(
-    _btn_dropdown_QBtnDropdown_js__WEBPACK_IMPORTED_MODULE_1__.default,
+    _btn_dropdown_QBtnDropdown_js__WEBPACK_IMPORTED_MODULE_1__["default"],
     {
       props: {
         ...vm.buttonProps,
@@ -14337,7 +14542,7 @@ function getLinkEditor (h, vm, ie11) {
         }
       }),
       __getGroup(h, [
-        h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           key: 'qedt_btm_rem',
           attrs: { tabindex: -1 },
           props: {
@@ -14355,7 +14560,7 @@ function getLinkEditor (h, vm, ie11) {
             }
           }
         }),
-        h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           key: 'qedt_btm_upd',
           props: {
             ...vm.buttonProps,
@@ -14383,7 +14588,7 @@ function getLinkEditor (h, vm, ie11) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QEditor": () => (/* reexport safe */ _QEditor_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QEditor": () => (/* reexport safe */ _QEditor_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QEditor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QEditor.js */ "./node_modules/quasar/src/components/editor/QEditor.js");
 
@@ -14436,10 +14641,10 @@ __webpack_require__.r(__webpack_exports__);
 
 const eventName = 'q:expansion-item:close'
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_12__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_12__["default"].extend({
   name: 'QExpansionItem',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_8__.default, _mixins_router_link_js__WEBPACK_IMPORTED_MODULE_6__.RouterLinkMixin, _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_7__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_8__["default"], _mixins_router_link_js__WEBPACK_IMPORTED_MODULE_6__.RouterLinkMixin, _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_7__["default"] ],
 
   props: {
     icon: String,
@@ -14556,7 +14761,7 @@ const eventName = 'q:expansion-item:close'
       }
 
       const child = [
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_3__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
           staticClass: 'q-expansion-item__toggle-icon',
           class: this.expandedIcon === void 0 && this.showing === true
             ? 'q-expansion-item__toggle-icon--rotated'
@@ -14568,7 +14773,7 @@ const eventName = 'q:expansion-item:close'
       if (this.activeToggleIcon === true) {
         Object.assign(data, {
           attrs: { tabindex: 0 },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_11__.default)(this, 'inpExt', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_11__["default"])(this, 'inpExt', {
             click: this.__toggleIcon,
             keyup: this.__toggleIconKeyboard
           })
@@ -14583,7 +14788,7 @@ const eventName = 'q:expansion-item:close'
         )
       }
 
-      return h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_1__.default, data, child)
+      return h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_1__["default"], data, child)
     },
 
     __getHeader (h) {
@@ -14594,13 +14799,13 @@ const eventName = 'q:expansion-item:close'
       }
       else {
         child = [
-          h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_1__.default, [
-            h(_item_QItemLabel_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+          h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_1__["default"], [
+            h(_item_QItemLabel_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
               props: { lines: this.labelLines }
             }, [ this.label || '' ]),
 
             this.caption
-              ? h(_item_QItemLabel_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+              ? h(_item_QItemLabel_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
                 props: { lines: this.captionLines, caption: true }
               }, [ this.caption ])
               : null
@@ -14608,13 +14813,13 @@ const eventName = 'q:expansion-item:close'
         ]
 
         this.icon && child[this.switchToggleSide === true ? 'push' : 'unshift'](
-          h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+          h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
             props: {
               side: this.switchToggleSide === true,
               avatar: this.switchToggleSide !== true
             }
           }, [
-            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_3__.default, {
+            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
               props: { name: this.icon }
             })
           ])
@@ -14652,16 +14857,16 @@ const eventName = 'q:expansion-item:close'
         )
       }
 
-      return h(_item_QItem_js__WEBPACK_IMPORTED_MODULE_0__.default, data, child)
+      return h(_item_QItem_js__WEBPACK_IMPORTED_MODULE_0__["default"], data, child)
     },
 
     __getContent (h) {
       const node = [
         this.__getHeader(h),
 
-        h(_slide_transition_QSlideTransition_js__WEBPACK_IMPORTED_MODULE_4__.default, {
+        h(_slide_transition_QSlideTransition_js__WEBPACK_IMPORTED_MODULE_4__["default"], {
           props: { duration: this.duration },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_11__.default)(this, 'slide', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_11__["default"])(this, 'slide', {
             show: () => { this.$emit('after-show') },
             hide: () => { this.$emit('after-hide') }
           })
@@ -14676,11 +14881,11 @@ const eventName = 'q:expansion-item:close'
 
       if (this.expandSeparator) {
         node.push(
-          h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_5__.default, {
+          h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_5__["default"], {
             staticClass: 'q-expansion-item__border q-expansion-item__border--top absolute-top',
             props: { dark: this.isDark }
           }),
-          h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_5__.default, {
+          h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_5__["default"], {
             staticClass: 'q-expansion-item__border q-expansion-item__border--bottom absolute-bottom',
             props: { dark: this.isDark }
           })
@@ -14725,7 +14930,7 @@ const eventName = 'q:expansion-item:close'
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QExpansionItem": () => (/* reexport safe */ _QExpansionItem_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QExpansionItem": () => (/* reexport safe */ _QExpansionItem_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QExpansionItem_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QExpansionItem.js */ "./node_modules/quasar/src/components/expansion-item/QExpansionItem.js");
 
@@ -14769,12 +14974,12 @@ __webpack_require__.r(__webpack_exports__);
 const directions = ['up', 'right', 'down', 'left']
 const alignValues = [ 'left', 'center', 'right' ]
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QFab',
 
   inheritAttrs: false,
 
-  mixins: [ _mixins_fab_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_3__.default, _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_4__.default ],
+  mixins: [ _mixins_fab_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_3__["default"], _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_4__["default"] ],
 
   provide () {
     return {
@@ -14854,11 +15059,11 @@ const alignValues = [ 'left', 'center', 'right' ]
 
     this.hideIcon !== true && child.push(
       h('div', { staticClass: 'q-fab__icon-holder', class: this.iconHolderClasses }, [
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
           staticClass: 'q-fab__icon absolute-full',
           props: { name: this.icon || this.$q.iconSet.fab.icon }
         }),
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
           staticClass: 'q-fab__active-icon absolute-full',
           props: { name: this.activeIcon || this.$q.iconSet.fab.activeIcon }
         })
@@ -14874,7 +15079,7 @@ const alignValues = [ 'left', 'center', 'right' ]
       class: this.classes,
       on: { ...this.qListeners }
     }, [
-      h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+      h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
         ref: 'trigger',
         class: this.formClass,
         props: {
@@ -14888,7 +15093,7 @@ const alignValues = [ 'left', 'center', 'right' ]
           fab: true
         },
         attrs: this.attrs,
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'tog', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'tog', {
           click: this.toggle
         })
       }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_5__.mergeSlot)(child, this, 'tooltip')),
@@ -14939,10 +15144,10 @@ const anchorMap = {
 
 const anchorValues = Object.keys(anchorMap)
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_5__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_5__["default"].extend({
   name: 'QFabAction',
 
-  mixins: [ _mixins_fab_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_fab_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   props: {
     icon: {
@@ -14999,7 +15204,7 @@ const anchorValues = Object.keys(anchorMap)
     const child = []
 
     this.icon !== '' && child.push(
-      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
         props: { name: this.icon }
       })
     )
@@ -15008,7 +15213,7 @@ const anchorValues = Object.keys(anchorMap)
       h('div', this.labelProps.data, [ this.label ])
     )
 
-    return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+    return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
       class: this.classes,
       props: {
         ...this.$props,
@@ -15037,8 +15242,8 @@ const anchorValues = Object.keys(anchorMap)
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QFab": () => (/* reexport safe */ _QFab_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QFabAction": () => (/* reexport safe */ _QFabAction_js__WEBPACK_IMPORTED_MODULE_1__.default)
+/* harmony export */   "QFab": () => (/* reexport safe */ _QFab_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QFabAction": () => (/* reexport safe */ _QFabAction_js__WEBPACK_IMPORTED_MODULE_1__["default"])
 /* harmony export */ });
 /* harmony import */ var _QFab_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QFab.js */ "./node_modules/quasar/src/components/fab/QFab.js");
 /* harmony import */ var _QFabAction_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QFabAction.js */ "./node_modules/quasar/src/components/fab/QFabAction.js");
@@ -15089,13 +15294,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 function getTargetUid (val) {
-  return val === void 0 ? `f_${(0,_utils_uid_js__WEBPACK_IMPORTED_MODULE_7__.default)()}` : val
+  return val === void 0 ? `f_${(0,_utils_uid_js__WEBPACK_IMPORTED_MODULE_7__["default"])()}` : val
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__["default"].extend({
   name: 'QField',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_4__.default, _mixins_validate_js__WEBPACK_IMPORTED_MODULE_3__.default, _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_5__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_validate_js__WEBPACK_IMPORTED_MODULE_3__["default"], _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_5__["default"] ],
 
   inheritAttrs: false,
 
@@ -15369,7 +15574,7 @@ function getTargetUid (val) {
 
       this.hasError === true && this.noErrorIcon === false && node.push(
         this.__getInnerAppendNode(h, 'error', [
-          h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, { props: { name: this.$q.iconSet.field.error, color: 'negative' } })
+          h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], { props: { name: this.$q.iconSet.field.error, color: 'negative' } })
         ])
       )
 
@@ -15380,14 +15585,14 @@ function getTargetUid (val) {
             'inner-loading-append',
             this.$scopedSlots.loading !== void 0
               ? this.$scopedSlots.loading()
-              : [ h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_2__.default, { props: { color: this.color } }) ]
+              : [ h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_2__["default"], { props: { color: this.color } }) ]
           )
         )
       }
       else if (this.clearable === true && this.hasValue === true && this.editable === true) {
         node.push(
           this.__getInnerAppendNode(h, 'inner-clearable-append', [
-            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
               staticClass: 'q-field__focusable-action',
               props: { tag: 'button', name: this.clearIcon || this.$q.iconSet.field.clear },
               attrs: { tabindex: 0, type: 'button' },
@@ -15682,7 +15887,7 @@ function getTargetUid (val) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QField": () => (/* reexport safe */ _QField_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QField": () => (/* reexport safe */ _QField_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QField_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QField.js */ "./node_modules/quasar/src/components/field/QField.js");
 
@@ -15723,10 +15928,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QFile',
 
-  mixins: [ _field_QField_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_file_js__WEBPACK_IMPORTED_MODULE_3__.default, _mixins_form_js__WEBPACK_IMPORTED_MODULE_2__.FormFieldMixin, _mixins_file_js__WEBPACK_IMPORTED_MODULE_3__.FileValueMixin ],
+  mixins: [ _field_QField_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_file_js__WEBPACK_IMPORTED_MODULE_3__["default"], _mixins_form_js__WEBPACK_IMPORTED_MODULE_2__.FormFieldMixin, _mixins_file_js__WEBPACK_IMPORTED_MODULE_3__.FileValueMixin ],
 
   props: {
     /* SSR does not know about File & FileList */
@@ -15870,7 +16075,7 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       if (this.editable === true) {
-        data.on = (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'native', {
+        data.on = (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'native', {
           dragover: this.__onDragOver,
           keyup: this.__onKeyup
         })
@@ -15909,7 +16114,7 @@ __webpack_require__.r(__webpack_exports__);
       if (this.useChips === true) {
         return this.innerValue.length === 0
           ? this.__getFiller(h)
-          : this.innerValue.map((file, i) => h(_chip_QChip_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+          : this.innerValue.map((file, i) => h(_chip_QChip_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
             key: 'file-' + i,
             props: {
               removable: this.editable,
@@ -15917,7 +16122,7 @@ __webpack_require__.r(__webpack_exports__);
               textColor: this.color,
               tabindex: this.tabindex
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'rem#' + i, {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'rem#' + i, {
               remove: () => { this.removeAtIndex(i) }
             })
           }, [
@@ -15951,7 +16156,7 @@ __webpack_require__.r(__webpack_exports__);
         staticClass: 'q-field__input fit absolute-full cursor-pointer',
         attrs: this.inputAttrs,
         domProps: this.formDomProps,
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'input', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'input', {
           change: this.__addFiles
         })
       }
@@ -15985,7 +16190,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QFile": () => (/* reexport safe */ _QFile_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QFile": () => (/* reexport safe */ _QFile_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QFile_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QFile.js */ "./node_modules/quasar/src/components/file/QFile.js");
 
@@ -16025,10 +16230,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QFooter',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   inject: {
     layout: {
@@ -16164,9 +16369,9 @@ __webpack_require__.r(__webpack_exports__);
 
   render (h) {
     const child = (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_3__.mergeSlot)([
-      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
         props: { debounce: 0 },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__.default)(this, 'resize', { resize: this.__onResize })
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__["default"])(this, 'resize', { resize: this.__onResize })
       })
     ], this, 'default')
 
@@ -16252,7 +16457,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QFooter": () => (/* reexport safe */ _QFooter_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QFooter": () => (/* reexport safe */ _QFooter_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QFooter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QFooter.js */ "./node_modules/quasar/src/components/footer/QFooter.js");
 
@@ -16286,10 +16491,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QForm',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     autofocus: Boolean,
@@ -16465,7 +16670,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QForm": () => (/* reexport safe */ _QForm_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QForm": () => (/* reexport safe */ _QForm_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QForm_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QForm.js */ "./node_modules/quasar/src/components/form/QForm.js");
 
@@ -16502,10 +16707,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_5__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_5__["default"].extend({
   name: 'QHeader',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   inject: {
     layout: {
@@ -16637,9 +16842,9 @@ __webpack_require__.r(__webpack_exports__);
     )
 
     child.push(
-      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
         props: { debounce: 0 },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__.default)(this, 'resize', { resize: this.__onResize })
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__["default"])(this, 'resize', { resize: this.__onResize })
       })
     )
 
@@ -16707,7 +16912,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QHeader": () => (/* reexport safe */ _QHeader_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QHeader": () => (/* reexport safe */ _QHeader_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QHeader_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QHeader.js */ "./node_modules/quasar/src/components/header/QHeader.js");
 
@@ -16741,10 +16946,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QIcon',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_size_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_size_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     tag: {
@@ -16947,7 +17152,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QIcon": () => (/* reexport safe */ _QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QIcon": () => (/* reexport safe */ _QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QIcon_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QIcon.js */ "./node_modules/quasar/src/components/icon/QIcon.js");
 
@@ -16982,10 +17187,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QImg',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_ratio_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_ratio_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     src: String,
@@ -17243,7 +17448,7 @@ __webpack_require__.r(__webpack_exports__);
           : (
             this.noDefaultSpinner === false
               ? [
-                h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+                h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
                   props: {
                     color: this.spinnerColor,
                     size: this.spinnerSize
@@ -17305,7 +17510,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QImg": () => (/* reexport safe */ _QImg_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QImg": () => (/* reexport safe */ _QImg_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QImg_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QImg.js */ "./node_modules/quasar/src/components/img/QImg.js");
 
@@ -17343,10 +17548,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QInfiniteScroll',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     offset: {
@@ -17496,7 +17701,7 @@ __webpack_require__.r(__webpack_exports__);
 
       this.poll = val <= 0
         ? this.immediatePoll
-        : (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_1__.default)(this.immediatePoll, isNaN(val) === true ? 100 : val)
+        : (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_1__["default"])(this.immediatePoll, isNaN(val) === true ? 100 : val)
 
       if (this.__scrollTarget && this.working === true) {
         if (oldPoll !== void 0) {
@@ -17562,7 +17767,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QInfiniteScroll": () => (/* reexport safe */ _QInfiniteScroll_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QInfiniteScroll": () => (/* reexport safe */ _QInfiniteScroll_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QInfiniteScroll_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QInfiniteScroll.js */ "./node_modules/quasar/src/components/infinite-scroll/QInfiniteScroll.js");
 
@@ -17596,10 +17801,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QInnerLoading',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__.default, _mixins_dark_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_transition_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__["default"], _mixins_dark_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_transition_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     showing: Boolean,
@@ -17623,7 +17828,7 @@ __webpack_require__.r(__webpack_exports__);
           this.$scopedSlots.default !== void 0
             ? this.$scopedSlots.default()
             : [
-              h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+              h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
                 props: {
                   size: this.size,
                   color: this.color
@@ -17655,7 +17860,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QInnerLoading": () => (/* reexport safe */ _QInnerLoading_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QInnerLoading": () => (/* reexport safe */ _QInnerLoading_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QInnerLoading_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QInnerLoading.js */ "./node_modules/quasar/src/components/inner-loading/QInnerLoading.js");
 
@@ -17698,16 +17903,16 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__["default"].extend({
   name: 'QInput',
 
   mixins: [
-    _field_QField_js__WEBPACK_IMPORTED_MODULE_0__.default,
-    _mixins_mask_js__WEBPACK_IMPORTED_MODULE_3__.default,
-    _mixins_composition_js__WEBPACK_IMPORTED_MODULE_4__.default,
+    _field_QField_js__WEBPACK_IMPORTED_MODULE_0__["default"],
+    _mixins_mask_js__WEBPACK_IMPORTED_MODULE_3__["default"],
+    _mixins_composition_js__WEBPACK_IMPORTED_MODULE_4__["default"],
     _mixins_form_js__WEBPACK_IMPORTED_MODULE_1__.FormFieldMixin,
     _mixins_file_js__WEBPACK_IMPORTED_MODULE_2__.FileValueMixin,
-    _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_5__.default
+    _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_5__["default"]
   ],
 
   props: {
@@ -18056,7 +18261,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QInput": () => (/* reexport safe */ _QInput_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QInput": () => (/* reexport safe */ _QInput_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QInput_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QInput.js */ "./node_modules/quasar/src/components/input/QInput.js");
 
@@ -18094,13 +18299,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_5__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_5__["default"].extend({
   name: 'QIntersection',
 
-  mixins: [ _mixins_tag_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_tag_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   directives: {
-    Intersection: _directives_Intersection_js__WEBPACK_IMPORTED_MODULE_1__.default
+    Intersection: _directives_Intersection_js__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
 
   props: {
@@ -18195,7 +18400,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QIntersection": () => (/* reexport safe */ _QIntersection_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QIntersection": () => (/* reexport safe */ _QIntersection_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QIntersection_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QIntersection.js */ "./node_modules/quasar/src/components/intersection/QIntersection.js");
 
@@ -18235,10 +18440,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QItem',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_router_link_js__WEBPACK_IMPORTED_MODULE_2__.RouterLinkMixin, _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_router_link_js__WEBPACK_IMPORTED_MODULE_2__.RouterLinkMixin, _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   props: {
     active: Boolean,
@@ -18398,10 +18603,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QItemLabel',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     overline: Boolean,
@@ -18465,10 +18670,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QItemSection',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     avatar: Boolean,
@@ -18528,10 +18733,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QList',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     bordered: Boolean,
@@ -18571,10 +18776,10 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QList": () => (/* reexport safe */ _QList_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QItem": () => (/* reexport safe */ _QItem_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "QItemSection": () => (/* reexport safe */ _QItemSection_js__WEBPACK_IMPORTED_MODULE_2__.default),
-/* harmony export */   "QItemLabel": () => (/* reexport safe */ _QItemLabel_js__WEBPACK_IMPORTED_MODULE_3__.default)
+/* harmony export */   "QList": () => (/* reexport safe */ _QList_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QItem": () => (/* reexport safe */ _QItem_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "QItemSection": () => (/* reexport safe */ _QItemSection_js__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   "QItemLabel": () => (/* reexport safe */ _QItemLabel_js__WEBPACK_IMPORTED_MODULE_3__["default"])
 /* harmony export */ });
 /* harmony import */ var _QList_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QList.js */ "./node_modules/quasar/src/components/item/QList.js");
 /* harmony import */ var _QItem_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QItem.js */ "./node_modules/quasar/src/components/item/QItem.js");
@@ -18624,16 +18829,16 @@ __webpack_require__.r(__webpack_exports__);
 // PGDOWN, LEFT, DOWN, PGUP, RIGHT, UP
 const keyCodes = [34, 37, 40, 33, 39, 38]
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QKnob',
 
   mixins: [
-    { props: _circular_progress_QCircularProgress_js__WEBPACK_IMPORTED_MODULE_4__.default.options.props },
-    _mixins_form_js__WEBPACK_IMPORTED_MODULE_5__.default
+    { props: _circular_progress_QCircularProgress_js__WEBPACK_IMPORTED_MODULE_4__["default"].options.props },
+    _mixins_form_js__WEBPACK_IMPORTED_MODULE_5__["default"]
   ],
 
   directives: {
-    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_6__.default
+    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_6__["default"]
   },
 
   props: {
@@ -18871,7 +19076,7 @@ const keyCodes = [34, 37, 40, 33, 39, 38]
 
     if (this.editable === true) {
       data.on = this.onEvents
-      data.directives = (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'dir', [{
+      data.directives = (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'dir', [{
         name: 'touch-pan',
         value: this.__pan,
         modifiers: {
@@ -18888,7 +19093,7 @@ const keyCodes = [34, 37, 40, 33, 39, 38]
       }
     }
 
-    return h(_circular_progress_QCircularProgress_js__WEBPACK_IMPORTED_MODULE_4__.default, data, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_2__.slot)(this, 'default'))
+    return h(_circular_progress_QCircularProgress_js__WEBPACK_IMPORTED_MODULE_4__["default"], data, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_2__.slot)(this, 'default'))
   }
 }));
 
@@ -18904,7 +19109,7 @@ const keyCodes = [34, 37, 40, 33, 39, 38]
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QKnob": () => (/* reexport safe */ _QKnob_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QKnob": () => (/* reexport safe */ _QKnob_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QKnob_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QKnob.js */ "./node_modules/quasar/src/components/knob/QKnob.js");
 
@@ -18946,10 +19151,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QLayout',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   provide () {
     return {
@@ -19057,12 +19262,12 @@ __webpack_require__.r(__webpack_exports__);
       style: this.style,
       on: { ...this.qListeners }
     }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_5__.mergeSlot)([
-      h(_scroll_observer_QScrollObserver_js__WEBPACK_IMPORTED_MODULE_1__.default, {
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'scroll', { scroll: this.__onPageScroll })
+      h(_scroll_observer_QScrollObserver_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'scroll', { scroll: this.__onPageScroll })
       }),
 
-      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_2__.default, {
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'resizeOut', { resize: this.__onPageResize })
+      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'resizeOut', { resize: this.__onPageResize })
       })
     ], this, 'default'))
 
@@ -19070,8 +19275,8 @@ __webpack_require__.r(__webpack_exports__);
       ? h('div', {
         staticClass: 'q-layout-container overflow-hidden'
       }, [
-        h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_2__.default, {
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'resizeIn', { resize: this.__onContainerResize })
+        h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'resizeIn', { resize: this.__onContainerResize })
         }),
         h('div', {
           staticClass: 'absolute-full',
@@ -19161,7 +19366,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QLayout": () => (/* reexport safe */ _QLayout_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QLayout": () => (/* reexport safe */ _QLayout_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QLayout_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QLayout.js */ "./node_modules/quasar/src/components/layout/QLayout.js");
 
@@ -19203,12 +19408,12 @@ function width (val, reverse, $q) {
   }
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QLinearProgress',
 
   mixins: [
-    _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default,
-    _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default,
+    _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"],
+    _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"],
     (0,_mixins_size_js__WEBPACK_IMPORTED_MODULE_1__.getSizeMixin)({
       xs: 2,
       sm: 4,
@@ -19330,7 +19535,7 @@ function width (val, reverse, $q) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QLinearProgress": () => (/* reexport safe */ _QLinearProgress_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QLinearProgress": () => (/* reexport safe */ _QLinearProgress_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QLinearProgress_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QLinearProgress.js */ "./node_modules/quasar/src/components/linear-progress/QLinearProgress.js");
 
@@ -19362,10 +19567,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QMarkupTable',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     dense: Boolean,
@@ -19415,7 +19620,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QMarkupTable": () => (/* reexport safe */ _QMarkupTable_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QMarkupTable": () => (/* reexport safe */ _QMarkupTable_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QMarkupTable_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QMarkupTable.js */ "./node_modules/quasar/src/components/markup-table/QMarkupTable.js");
 
@@ -19629,20 +19834,20 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_13__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_13__["default"].extend({
   name: 'QMenu',
 
   mixins: [
-    _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_5__.default,
-    _mixins_dark_js__WEBPACK_IMPORTED_MODULE_2__.default,
-    _mixins_anchor_js__WEBPACK_IMPORTED_MODULE_0__.default,
-    _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__.default,
-    _mixins_portal_js__WEBPACK_IMPORTED_MODULE_3__.default,
-    _mixins_transition_js__WEBPACK_IMPORTED_MODULE_4__.default
+    _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_5__["default"],
+    _mixins_dark_js__WEBPACK_IMPORTED_MODULE_2__["default"],
+    _mixins_anchor_js__WEBPACK_IMPORTED_MODULE_0__["default"],
+    _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+    _mixins_portal_js__WEBPACK_IMPORTED_MODULE_3__["default"],
+    _mixins_transition_js__WEBPACK_IMPORTED_MODULE_4__["default"]
   ],
 
   directives: {
-    ClickOutside: _ClickOutside_js__WEBPACK_IMPORTED_MODULE_6__.default
+    ClickOutside: _ClickOutside_js__WEBPACK_IMPORTED_MODULE_6__["default"]
   },
 
   props: {
@@ -19758,7 +19963,7 @@ __webpack_require__.r(__webpack_exports__);
         ? document.activeElement
         : void 0
 
-      _utils_escape_key_js__WEBPACK_IMPORTED_MODULE_9__.default.register(this, () => {
+      _utils_escape_key_js__WEBPACK_IMPORTED_MODULE_9__["default"].register(this, () => {
         if (this.persistent !== true) {
           this.$emit('escape-key')
           this.hide()
@@ -19847,7 +20052,7 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       if (hiding === true || this.showing === true) {
-        _utils_escape_key_js__WEBPACK_IMPORTED_MODULE_9__.default.pop(this)
+        _utils_escape_key_js__WEBPACK_IMPORTED_MODULE_9__["default"].pop(this)
         this.__unconfigureScrollTarget()
       }
     },
@@ -19968,7 +20173,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QMenu": () => (/* reexport safe */ _QMenu_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QMenu": () => (/* reexport safe */ _QMenu_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QMenu_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QMenu.js */ "./node_modules/quasar/src/components/menu/QMenu.js");
 
@@ -20002,10 +20207,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QNoSsr',
 
-  mixins: [ _mixins_can_render_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_can_render_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   props: {
     placeholder: String
@@ -20052,7 +20257,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QNoSsr": () => (/* reexport safe */ _QNoSsr_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QNoSsr": () => (/* reexport safe */ _QNoSsr_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QNoSsr_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QNoSsr.js */ "./node_modules/quasar/src/components/no-ssr/QNoSsr.js");
 
@@ -20092,17 +20297,17 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const components = {
-  radio: _radio_QRadio_js__WEBPACK_IMPORTED_MODULE_0__.default,
-  checkbox: _checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_1__.default,
-  toggle: _toggle_QToggle_js__WEBPACK_IMPORTED_MODULE_2__.default
+  radio: _radio_QRadio_js__WEBPACK_IMPORTED_MODULE_0__["default"],
+  checkbox: _checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+  toggle: _toggle_QToggle_js__WEBPACK_IMPORTED_MODULE_2__["default"]
 }
 
 const typeValues = Object.keys(components)
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QOptionGroup',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_3__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_4__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_3__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_4__["default"] ],
 
   props: {
     value: {
@@ -20205,7 +20410,7 @@ const typeValues = Object.keys(components)
           dense: this.dense,
           keepColor: opt.keepColor === void 0 ? this.keepColor : opt.keepColor
         },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__.default)(this, 'inp', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__["default"])(this, 'inp', {
           input: this.__update
         })
       })
@@ -20225,7 +20430,7 @@ const typeValues = Object.keys(components)
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QOptionGroup": () => (/* reexport safe */ _QOptionGroup_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QOptionGroup": () => (/* reexport safe */ _QOptionGroup_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QOptionGroup_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QOptionGroup.js */ "./node_modules/quasar/src/components/option-group/QOptionGroup.js");
 
@@ -20254,10 +20459,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QPageScroller',
 
-  mixins: [ _page_sticky_QPageSticky_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _page_sticky_QPageSticky_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     scrollOffset: {
@@ -20364,7 +20569,7 @@ __webpack_require__.r(__webpack_exports__);
           staticClass: 'q-page-scroller',
           on: this.onEvents
         }, [
-          _page_sticky_QPageSticky_js__WEBPACK_IMPORTED_MODULE_0__.default.options.render.call(this, h)
+          _page_sticky_QPageSticky_js__WEBPACK_IMPORTED_MODULE_0__["default"].options.render.call(this, h)
         ])
       ]
       : null
@@ -20388,7 +20593,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QPageScroller": () => (/* reexport safe */ _QPageScroller_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QPageScroller": () => (/* reexport safe */ _QPageScroller_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QPageScroller_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QPageScroller.js */ "./node_modules/quasar/src/components/page-scroller/QPageScroller.js");
 
@@ -20418,10 +20623,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QPageSticky',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   inject: {
     layout: {
@@ -20560,7 +20765,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QPageSticky": () => (/* reexport safe */ _QPageSticky_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QPageSticky": () => (/* reexport safe */ _QPageSticky_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QPageSticky_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QPageSticky.js */ "./node_modules/quasar/src/components/page-sticky/QPageSticky.js");
 
@@ -20590,10 +20795,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QPage',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   inject: {
     pageContainer: {
@@ -20674,10 +20879,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QPageContainer',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   inject: {
     layout: {
@@ -20733,8 +20938,8 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QPage": () => (/* reexport safe */ _QPage_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QPageContainer": () => (/* reexport safe */ _QPageContainer_js__WEBPACK_IMPORTED_MODULE_1__.default)
+/* harmony export */   "QPage": () => (/* reexport safe */ _QPage_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QPageContainer": () => (/* reexport safe */ _QPageContainer_js__WEBPACK_IMPORTED_MODULE_1__["default"])
 /* harmony export */ });
 /* harmony import */ var _QPage_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QPage.js */ "./node_modules/quasar/src/components/page/QPage.js");
 /* harmony import */ var _QPageContainer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QPageContainer.js */ "./node_modules/quasar/src/components/page/QPageContainer.js");
@@ -20779,10 +20984,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__["default"].extend({
   name: 'QPagination',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   props: {
     value: {
@@ -21001,7 +21206,7 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
 
-      return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, data)
+      return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], data)
     }
   },
 
@@ -21042,7 +21247,7 @@ __webpack_require__.r(__webpack_exports__);
     }
 
     if (this.input === true) {
-      contentMiddle.push(h(_input_QInput_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+      contentMiddle.push(h(_input_QInput_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
         staticClass: 'inline',
         style: {
           width: `${this.inputPlaceholder.length / 1.5}em`
@@ -21062,7 +21267,7 @@ __webpack_require__.r(__webpack_exports__);
           min: this.min,
           max: this.max
         },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__.default)(this, 'inp', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__["default"])(this, 'inp', {
           input: value => { this.newPage = value },
           keyup: e => { (0,_utils_key_composition_js__WEBPACK_IMPORTED_MODULE_6__.isKeyCode)(e, 13) === true && this.__update() },
           blur: this.__update
@@ -21191,7 +21396,7 @@ __webpack_require__.r(__webpack_exports__);
       h('div', {
         staticClass: 'row justify-center',
         on: this.input === true
-          ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__.default)(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stop })
+          ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__["default"])(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stop })
           : null
       }, [
         contentMiddle
@@ -21214,7 +21419,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QPagination": () => (/* reexport safe */ _QPagination_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QPagination": () => (/* reexport safe */ _QPagination_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QPagination_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QPagination.js */ "./node_modules/quasar/src/components/pagination/QPagination.js");
 
@@ -21254,10 +21459,10 @@ __webpack_require__.r(__webpack_exports__);
 
 const { passive } = _utils_event_js__WEBPACK_IMPORTED_MODULE_5__.listenOpts
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QParallax',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     src: String,
@@ -21383,9 +21588,9 @@ const { passive } = _utils_event_js__WEBPACK_IMPORTED_MODULE_5__.listenOpts
   },
 
   mounted () {
-    this.__setPos = (0,_utils_frame_debounce_js__WEBPACK_IMPORTED_MODULE_2__.default)(this.__setPos)
-    this.__update = (0,_utils_frame_debounce_js__WEBPACK_IMPORTED_MODULE_2__.default)(this.__update)
-    this.__resizeHandler = (0,_utils_frame_debounce_js__WEBPACK_IMPORTED_MODULE_2__.default)(this.__onResize)
+    this.__setPos = (0,_utils_frame_debounce_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this.__setPos)
+    this.__update = (0,_utils_frame_debounce_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this.__update)
+    this.__resizeHandler = (0,_utils_frame_debounce_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this.__onResize)
 
     this.media = this.$scopedSlots.media !== void 0
       ? this.$refs.mediaParent.children[0]
@@ -21426,7 +21631,7 @@ const { passive } = _utils_event_js__WEBPACK_IMPORTED_MODULE_5__.listenOpts
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QParallax": () => (/* reexport safe */ _QParallax_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QParallax": () => (/* reexport safe */ _QParallax_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QParallax_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QParallax.js */ "./node_modules/quasar/src/components/parallax/QParallax.js");
 
@@ -21469,10 +21674,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__["default"].extend({
   name: 'QPopupEdit',
 
-  mixins: [ _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   props: {
     value: {
@@ -21598,21 +21803,21 @@ __webpack_require__.r(__webpack_exports__);
 
       this.buttons === true && child.push(
         h('div', { staticClass: 'q-popup-edit__buttons row justify-center no-wrap' }, [
-          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
             props: {
               flat: true,
               color: this.color,
               label: this.labelCancel || this.$q.lang.label.cancel
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__.default)(this, 'cancel', { click: this.cancel })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__["default"])(this, 'cancel', { click: this.cancel })
           }),
-          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+          h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
             props: {
               flat: true,
               color: this.color,
               label: this.labelSet || this.$q.lang.label.set
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__.default)(this, 'ok', { click: this.set })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__["default"])(this, 'ok', { click: this.set })
           })
         ])
       )
@@ -21624,13 +21829,13 @@ __webpack_require__.r(__webpack_exports__);
   render (h) {
     if (this.disable === true) { return }
 
-    return h(_menu_QMenu_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+    return h(_menu_QMenu_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
       ref: 'menu',
       props: this.menuProps,
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__.default)(this, 'menu', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__["default"])(this, 'menu', {
         'before-show': () => {
           this.validated = false
-          this.initialValue = (0,_utils_clone_js__WEBPACK_IMPORTED_MODULE_3__.default)(this.value)
+          this.initialValue = (0,_utils_clone_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this.value)
           this.watcher = this.$watch('value', this.__reposition)
           this.$emit('before-show')
         },
@@ -21676,7 +21881,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QPopupEdit": () => (/* reexport safe */ _QPopupEdit_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QPopupEdit": () => (/* reexport safe */ _QPopupEdit_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QPopupEdit_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QPopupEdit.js */ "./node_modules/quasar/src/components/popup-edit/QPopupEdit.js");
 
@@ -21714,10 +21919,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QPopupProxy',
 
-  mixins: [ _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_4__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_5__.default, _mixins_anchor_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_5__["default"], _mixins_anchor_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   props: {
     breakpoint: {
@@ -21821,10 +22026,10 @@ __webpack_require__.r(__webpack_exports__);
     let component
 
     if (this.type === 'dialog') {
-      component = _dialog_QDialog_js__WEBPACK_IMPORTED_MODULE_0__.default
+      component = _dialog_QDialog_js__WEBPACK_IMPORTED_MODULE_0__["default"]
     }
     else {
-      component = _menu_QMenu_js__WEBPACK_IMPORTED_MODULE_1__.default
+      component = _menu_QMenu_js__WEBPACK_IMPORTED_MODULE_1__["default"]
       data.props.target = this.target
       data.props.contextMenu = this.contextMenu
       data.props.noParentEvent = true
@@ -21847,7 +22052,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QPopupProxy": () => (/* reexport safe */ _QPopupProxy_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QPopupProxy": () => (/* reexport safe */ _QPopupProxy_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QPopupProxy_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QPopupProxy.js */ "./node_modules/quasar/src/components/popup-proxy/QPopupProxy.js");
 
@@ -21894,13 +22099,13 @@ const
   PULLER_HEIGHT = 40,
   OFFSET_TOP = 20
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__["default"].extend({
   name: 'QPullToRefresh',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   directives: {
-    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_2__.default
+    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_2__["default"]
   },
 
   props: {
@@ -22082,14 +22287,14 @@ const
           class: this.classes
         }, [
           this.state !== 'refreshing'
-            ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+            ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
               props: {
                 name: this.icon || this.$q.iconSet.pullToRefresh.icon,
                 color: this.color,
                 size: '32px'
               }
             })
-            : h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+            : h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
               props: {
                 size: '24px',
                 color: this.color
@@ -22113,7 +22318,7 @@ const
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QPullToRefresh": () => (/* reexport safe */ _QPullToRefresh_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QPullToRefresh": () => (/* reexport safe */ _QPullToRefresh_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QPullToRefresh_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QPullToRefresh.js */ "./node_modules/quasar/src/components/pull-to-refresh/QPullToRefresh.js");
 
@@ -22153,10 +22358,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QRadio',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_option_size_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_form_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_refocus_target_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_option_size_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_form_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_refocus_target_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   props: {
     value: {
@@ -22303,7 +22508,7 @@ __webpack_require__.r(__webpack_exports__);
     return h('div', {
       class: this.classes,
       attrs: this.attrs,
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'inpExt', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'inpExt', {
         click: this.set,
         keydown: e => {
           if (e.keyCode === 13 || e.keyCode === 32) {
@@ -22332,7 +22537,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QRadio": () => (/* reexport safe */ _QRadio_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QRadio": () => (/* reexport safe */ _QRadio_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QRadio_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QRadio.js */ "./node_modules/quasar/src/components/radio/QRadio.js");
 
@@ -22370,7 +22575,7 @@ const dragType = {
   MAX: 2
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QRange',
 
   mixins: [ _slider_slider_utils_js__WEBPACK_IMPORTED_MODULE_0__.SliderMixin ],
@@ -22892,7 +23097,7 @@ const dragType = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QRange": () => (/* reexport safe */ _QRange_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QRange": () => (/* reexport safe */ _QRange_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QRange_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QRange.js */ "./node_modules/quasar/src/components/range/QRange.js");
 
@@ -22935,10 +23140,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__["default"].extend({
   name: 'QRating',
 
-  mixins: [ _mixins_size_js__WEBPACK_IMPORTED_MODULE_3__.default, _mixins_form_js__WEBPACK_IMPORTED_MODULE_4__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_5__.default ],
+  mixins: [ _mixins_size_js__WEBPACK_IMPORTED_MODULE_3__["default"], _mixins_form_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_5__["default"] ],
 
   props: {
     value: {
@@ -23091,7 +23296,7 @@ __webpack_require__.r(__webpack_exports__);
           )
 
       child.push(
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
           key: i,
           ref: `rt${i}`,
           staticClass: 'q-rating__icon',
@@ -23103,7 +23308,7 @@ __webpack_require__.r(__webpack_exports__);
           },
           props: { name: name || this.$q.iconSet.rating.icon },
           attrs: { tabindex },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'i#' + i, {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'i#' + i, {
             click: () => { this.__set(i) },
             mouseover: () => { this.__setHoverValue(i) },
             mouseout: () => { this.mouseModel = 0 },
@@ -23141,7 +23346,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QRating": () => (/* reexport safe */ _QRating_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QRating": () => (/* reexport safe */ _QRating_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QRating_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QRating.js */ "./node_modules/quasar/src/components/rating/QRating.js");
 
@@ -23174,10 +23379,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QResizeObserver',
 
-  mixins: [ _mixins_can_render_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_can_render_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     debounce: {
@@ -23259,7 +23464,7 @@ __webpack_require__.r(__webpack_exports__);
         data: this.url,
         'aria-hidden': 'true'
       },
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'load', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'load', {
         load: this.__onObjLoad
       })
     })
@@ -23319,7 +23524,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QResizeObserver": () => (/* reexport safe */ _QResizeObserver_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QResizeObserver": () => (/* reexport safe */ _QResizeObserver_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QResizeObserver_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QResizeObserver.js */ "./node_modules/quasar/src/components/resize-observer/QResizeObserver.js");
 
@@ -23351,10 +23556,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QResponsive',
 
-  mixins: [ _mixins_ratio_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_ratio_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   render (h) {
     return h('div', {
@@ -23386,7 +23591,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QResponsive": () => (/* reexport safe */ _QResponsive_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QResponsive": () => (/* reexport safe */ _QResponsive_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QResponsive_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QResponsive.js */ "./node_modules/quasar/src/components/responsive/QResponsive.js");
 
@@ -23432,13 +23637,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__["default"].extend({
   name: 'QScrollArea',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_8__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_8__["default"] ],
 
   directives: {
-    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_7__.default
+    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_7__["default"]
   },
 
   props: {
@@ -23688,7 +23893,7 @@ __webpack_require__.r(__webpack_exports__);
   render (h) {
     return h('div', {
       class: this.classes,
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'desk', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'desk', {
         mouseenter: () => { this.hover = true },
         mouseleave: () => { this.hover = false }
       })
@@ -23703,19 +23908,19 @@ __webpack_require__.r(__webpack_exports__);
           style: this.mainStyle,
           class: `full-${this.horizontal === true ? 'height' : 'width'}`
         }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_2__.mergeSlot)([
-          h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_5__.default, {
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'resizeIn', { resize: this.__updateScrollSize })
+          h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_5__["default"], {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'resizeIn', { resize: this.__updateScrollSize })
           })
         ], this, 'default')),
 
-        h(_scroll_observer_QScrollObserver_js__WEBPACK_IMPORTED_MODULE_6__.default, {
+        h(_scroll_observer_QScrollObserver_js__WEBPACK_IMPORTED_MODULE_6__["default"], {
           props: { horizontal: this.horizontal },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'scroll', { scroll: this.__updateScroll })
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'scroll', { scroll: this.__updateScroll })
         })
       ]),
 
-      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_5__.default, {
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'resizeOut', { resize: this.__updateContainer })
+      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_5__["default"], {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'resizeOut', { resize: this.__updateContainer })
       }),
 
       h('div', {
@@ -23723,7 +23928,7 @@ __webpack_require__.r(__webpack_exports__);
         style: this.barStyle,
         class: this.barClass,
         attrs: _mixins_attrs__WEBPACK_IMPORTED_MODULE_9__.ariaHidden,
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'bar', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'bar', {
           mousedown: this.__mouseDown
         })
       }),
@@ -23743,7 +23948,7 @@ __webpack_require__.r(__webpack_exports__);
     // we have lots of listeners, so
     // ensure we're not emitting same info
     // multiple times
-    this.__emitScroll = (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_4__.default)(() => {
+    this.__emitScroll = (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_4__["default"])(() => {
       if (this.$listeners.scroll !== void 0) {
         const info = { ref: this }
         const prefix = this.dirProps.prefix
@@ -23771,7 +23976,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QScrollArea": () => (/* reexport safe */ _QScrollArea_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QScrollArea": () => (/* reexport safe */ _QScrollArea_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QScrollArea_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QScrollArea.js */ "./node_modules/quasar/src/components/scroll-area/QScrollArea.js");
 
@@ -23802,7 +24007,7 @@ __webpack_require__.r(__webpack_exports__);
 
 const { passive } = _utils_event_js__WEBPACK_IMPORTED_MODULE_1__.listenOpts
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QScrollObserver',
 
   props: {
@@ -23914,7 +24119,7 @@ const { passive } = _utils_event_js__WEBPACK_IMPORTED_MODULE_1__.listenOpts
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QScrollObserver": () => (/* reexport safe */ _QScrollObserver_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QScrollObserver": () => (/* reexport safe */ _QScrollObserver_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QScrollObserver_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QScrollObserver.js */ "./node_modules/quasar/src/components/scroll-observer/QScrollObserver.js");
 
@@ -23982,15 +24187,15 @@ __webpack_require__.r(__webpack_exports__);
 const validateNewValueMode = v => ['add', 'add-unique', 'toggle'].includes(v)
 const reEscapeList = '.*+?^${}()|[]\\'
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_18__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_18__["default"].extend({
   name: 'QSelect',
 
   mixins: [
-    _field_QField_js__WEBPACK_IMPORTED_MODULE_0__.default,
-    _mixins_virtual_scroll_js__WEBPACK_IMPORTED_MODULE_15__.default,
-    _mixins_composition_js__WEBPACK_IMPORTED_MODULE_16__.default,
+    _field_QField_js__WEBPACK_IMPORTED_MODULE_0__["default"],
+    _mixins_virtual_scroll_js__WEBPACK_IMPORTED_MODULE_15__["default"],
+    _mixins_composition_js__WEBPACK_IMPORTED_MODULE_16__["default"],
     _mixins_form_js__WEBPACK_IMPORTED_MODULE_14__.FormFieldMixin,
-    _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_17__.default
+    _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_17__["default"]
   ],
 
   props: {
@@ -24854,7 +25059,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
       }
 
       if (this.useChips === true) {
-        return this.selectedScope.map((scope, i) => h(_chip_QChip_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+        return this.selectedScope.map((scope, i) => h(_chip_QChip_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
           key: 'option-' + i,
           props: {
             removable: this.editable === true && this.isOptionDisabled(scope.opt) !== true,
@@ -24862,7 +25067,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
             textColor: this.color,
             tabindex: this.computedTabindex
           },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'rem#' + i, {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'rem#' + i, {
             remove () { scope.removeAtIndex(i) }
           })
         }, [
@@ -24905,7 +25110,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
               tabindex: this.tabindex,
               ...this.comboboxAttrs
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'f-tget', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'f-tget', {
               keydown: this.__onTargetKeydown,
               keyup: this.__onTargetKeyup,
               keypress: this.__onTargetKeypress
@@ -24918,7 +25123,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
             h('input', {
               staticClass: 'q-select__autocomplete-input no-outline',
               attrs: { autocomplete: this.autocomplete },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'autoinp', {
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'autoinp', {
                 keyup: this.__onTargetAutocomplete
               })
             })
@@ -24960,14 +25165,14 @@ const reEscapeList = '.*+?^${}()|[]\\'
 
       const fn = this.$scopedSlots.option !== void 0
         ? this.$scopedSlots.option
-        : scope => h(_item_QItem_js__WEBPACK_IMPORTED_MODULE_3__.default, {
+        : scope => h(_item_QItem_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
           key: scope.index,
           props: scope.itemProps,
           attrs: scope.itemAttrs,
           on: scope.itemEvents
         }, [
-          h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_4__.default, [
-            h(_item_QItemLabel_js__WEBPACK_IMPORTED_MODULE_5__.default, {
+          h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_4__["default"], [
+            h(_item_QItemLabel_js__WEBPACK_IMPORTED_MODULE_5__["default"], {
               domProps: {
                 [scope.sanitize === true ? 'textContent' : 'innerHTML']: this.getOptionLabel(scope.opt)
               }
@@ -24995,7 +25200,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
     __getInnerAppend (h) {
       return this.loading !== true && this.innerLoadingIndicator !== true && this.hideDropdownIcon !== true
         ? [
-          h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+          h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
             staticClass: 'q-select__dropdown-icon' + (this.menu === true ? ' rotate-180' : ''),
             props: { name: this.dropdownArrowIcon }
           })
@@ -25213,7 +25418,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
         )
         : this.__getOptions(h)
 
-      return h(_menu_QMenu_js__WEBPACK_IMPORTED_MODULE_6__.default, {
+      return h(_menu_QMenu_js__WEBPACK_IMPORTED_MODULE_6__["default"], {
         ref: 'menu',
         props: {
           value: this.menu,
@@ -25234,7 +25439,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
           separateClosePopup: true
         },
         attrs: this.listboxAttrs,
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'menu', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'menu', {
           '&scroll': this.__onVirtualScrollEvt,
           'before-hide': this.__closeMenu,
           show: this.__onMenuShow
@@ -25262,7 +25467,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
 
     __getDialog (h) {
       const content = [
-        h(_field_QField_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_field_QField_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           staticClass: `col-auto ${this.fieldClass}`,
           props: {
             ...this.$props,
@@ -25295,7 +25500,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
           class: this.menuContentClass,
           style: this.popupContentStyle,
           attrs: this.listboxAttrs,
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'virtMenu', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'virtMenu', {
             click: _utils_event_js__WEBPACK_IMPORTED_MODULE_9__.prevent,
             '&scroll': this.__onVirtualScrollEvt
           })
@@ -25310,7 +25515,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
         ))
       )
 
-      return h(_dialog_QDialog_js__WEBPACK_IMPORTED_MODULE_7__.default, {
+      return h(_dialog_QDialog_js__WEBPACK_IMPORTED_MODULE_7__["default"], {
         ref: 'dialog',
         props: {
           value: this.dialog,
@@ -25319,7 +25524,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
           transitionShow: this.transitionShowComputed,
           transitionHide: this.transitionHide
         },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'dialog', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__["default"])(this, 'dialog', {
           'before-hide': this.__onDialogBeforeHide,
           hide: this.__onDialogHide,
           show: this.__onDialogShow
@@ -25490,7 +25695,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QSelect": () => (/* reexport safe */ _QSelect_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QSelect": () => (/* reexport safe */ _QSelect_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QSelect_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QSelect.js */ "./node_modules/quasar/src/components/select/QSelect.js");
 
@@ -25534,10 +25739,10 @@ const margins = {
   xl: 24
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QSeparator',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     spaced: [ Boolean, String ],
@@ -25623,7 +25828,7 @@ const margins = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QSeparator": () => (/* reexport safe */ _QSeparator_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QSeparator": () => (/* reexport safe */ _QSeparator_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QSeparator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QSeparator.js */ "./node_modules/quasar/src/components/separator/QSeparator.js");
 
@@ -25671,10 +25876,10 @@ const skeletonAnimations = [
   'wave', 'pulse', 'pulse-x', 'pulse-y', 'fade', 'blink', 'none'
 ]
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QSkeleton',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_tag_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   props: {
     type: {
@@ -25734,7 +25939,7 @@ const skeletonAnimations = [
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QSkeleton": () => (/* reexport safe */ _QSkeleton_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QSkeleton": () => (/* reexport safe */ _QSkeleton_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QSkeleton_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QSkeleton.js */ "./node_modules/quasar/src/components/skeleton/QSkeleton.js");
 
@@ -25778,10 +25983,10 @@ const slotsDef = [
   ['bottom', 'end', 'center', 'height']
 ]
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_5__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_5__["default"].extend({
   name: 'QSlideItem',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   props: {
     leftColor: String,
@@ -25791,7 +25996,7 @@ const slotsDef = [
   },
 
   directives: {
-    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_0__.default
+    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
 
   computed: {
@@ -25984,7 +26189,7 @@ const slotsDef = [
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QSlideItem": () => (/* reexport safe */ _QSlideItem_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QSlideItem": () => (/* reexport safe */ _QSlideItem_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QSlideItem_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QSlideItem.js */ "./node_modules/quasar/src/components/slide-item/QSlideItem.js");
 
@@ -26013,7 +26218,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QSlideTransition',
 
   props: {
@@ -26066,7 +26271,7 @@ __webpack_require__.r(__webpack_exports__);
         css: false,
         appear: this.appear
       },
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_1__.default)(this, 'tr', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_1__["default"])(this, 'tr', {
         enter: (el, done) => {
           let pos = 0
           this.el = el
@@ -26135,7 +26340,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QSlideTransition": () => (/* reexport safe */ _QSlideTransition_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QSlideTransition": () => (/* reexport safe */ _QSlideTransition_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QSlideTransition_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QSlideTransition.js */ "./node_modules/quasar/src/components/slide-transition/QSlideTransition.js");
 
@@ -26167,7 +26372,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QSlider',
 
   mixins: [ _slider_utils_js__WEBPACK_IMPORTED_MODULE_0__.SliderMixin ],
@@ -26412,7 +26617,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QSlider": () => (/* reexport safe */ _QSlider_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QSlider": () => (/* reexport safe */ _QSlider_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QSlider_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QSlider.js */ "./node_modules/quasar/src/components/slider/QSlider.js");
 
@@ -26477,10 +26682,10 @@ function getModel (ratio, min, max, step, decimals) {
 }
 
 const SliderMixin = {
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_3__.default, _mixins_form_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_3__["default"], _mixins_form_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   directives: {
-    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_4__.default
+    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_4__["default"]
   },
 
   props: {
@@ -26762,10 +26967,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpace',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   render (h) {
     return h('div', {
@@ -26787,7 +26992,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QSpace": () => (/* reexport safe */ _QSpace_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QSpace": () => (/* reexport safe */ _QSpace_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QSpace_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QSpace.js */ "./node_modules/quasar/src/components/space/QSpace.js");
 
@@ -26814,10 +27019,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinner',
 
-  mixins: [ _spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     thickness: {
@@ -26874,10 +27079,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerAudio',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -26998,10 +27203,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerBall',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -27140,10 +27345,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerBars',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -27331,10 +27536,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerBox',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -27418,10 +27623,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerClock',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -27518,10 +27723,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerComment',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -27636,10 +27841,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerCube',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -27814,10 +28019,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerDots',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -27954,10 +28159,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerFacebook',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -28093,10 +28298,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerGears',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -28182,10 +28387,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerGrid',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -28388,10 +28593,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerHearts',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -28470,10 +28675,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerHourglass',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -28629,10 +28834,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerInfinity',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -28693,10 +28898,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerIos',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -28935,10 +29140,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerOrbit',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -29010,10 +29215,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerOval',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -29086,10 +29291,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerPie',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -29201,10 +29406,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerPuff',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -29316,10 +29521,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerRadio',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -29424,10 +29629,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerRings',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -29570,10 +29775,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__["default"].extend({
   name: 'QSpinnerTail',
 
-  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__.default],
+  mixins: [_spinner_mixin_js__WEBPACK_IMPORTED_MODULE_0__["default"]],
 
   render (h) {
     return h('svg', {
@@ -29681,29 +29886,29 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QSpinner": () => (/* reexport safe */ _QSpinner_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QSpinnerAudio": () => (/* reexport safe */ _QSpinnerAudio_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "QSpinnerBall": () => (/* reexport safe */ _QSpinnerBall_js__WEBPACK_IMPORTED_MODULE_2__.default),
-/* harmony export */   "QSpinnerBars": () => (/* reexport safe */ _QSpinnerBars_js__WEBPACK_IMPORTED_MODULE_3__.default),
-/* harmony export */   "QSpinnerBox": () => (/* reexport safe */ _QSpinnerBox_js__WEBPACK_IMPORTED_MODULE_4__.default),
-/* harmony export */   "QSpinnerClock": () => (/* reexport safe */ _QSpinnerClock_js__WEBPACK_IMPORTED_MODULE_5__.default),
-/* harmony export */   "QSpinnerComment": () => (/* reexport safe */ _QSpinnerComment_js__WEBPACK_IMPORTED_MODULE_6__.default),
-/* harmony export */   "QSpinnerCube": () => (/* reexport safe */ _QSpinnerCube_js__WEBPACK_IMPORTED_MODULE_7__.default),
-/* harmony export */   "QSpinnerDots": () => (/* reexport safe */ _QSpinnerDots_js__WEBPACK_IMPORTED_MODULE_8__.default),
-/* harmony export */   "QSpinnerFacebook": () => (/* reexport safe */ _QSpinnerFacebook_js__WEBPACK_IMPORTED_MODULE_9__.default),
-/* harmony export */   "QSpinnerGears": () => (/* reexport safe */ _QSpinnerGears_js__WEBPACK_IMPORTED_MODULE_10__.default),
-/* harmony export */   "QSpinnerGrid": () => (/* reexport safe */ _QSpinnerGrid_js__WEBPACK_IMPORTED_MODULE_11__.default),
-/* harmony export */   "QSpinnerHearts": () => (/* reexport safe */ _QSpinnerHearts_js__WEBPACK_IMPORTED_MODULE_12__.default),
-/* harmony export */   "QSpinnerHourglass": () => (/* reexport safe */ _QSpinnerHourglass_js__WEBPACK_IMPORTED_MODULE_13__.default),
-/* harmony export */   "QSpinnerInfinity": () => (/* reexport safe */ _QSpinnerInfinity_js__WEBPACK_IMPORTED_MODULE_14__.default),
-/* harmony export */   "QSpinnerIos": () => (/* reexport safe */ _QSpinnerIos_js__WEBPACK_IMPORTED_MODULE_15__.default),
-/* harmony export */   "QSpinnerOrbit": () => (/* reexport safe */ _QSpinnerOrbit_js__WEBPACK_IMPORTED_MODULE_16__.default),
-/* harmony export */   "QSpinnerOval": () => (/* reexport safe */ _QSpinnerOval_js__WEBPACK_IMPORTED_MODULE_17__.default),
-/* harmony export */   "QSpinnerPie": () => (/* reexport safe */ _QSpinnerPie_js__WEBPACK_IMPORTED_MODULE_18__.default),
-/* harmony export */   "QSpinnerPuff": () => (/* reexport safe */ _QSpinnerPuff_js__WEBPACK_IMPORTED_MODULE_19__.default),
-/* harmony export */   "QSpinnerRadio": () => (/* reexport safe */ _QSpinnerRadio_js__WEBPACK_IMPORTED_MODULE_20__.default),
-/* harmony export */   "QSpinnerRings": () => (/* reexport safe */ _QSpinnerRings_js__WEBPACK_IMPORTED_MODULE_21__.default),
-/* harmony export */   "QSpinnerTail": () => (/* reexport safe */ _QSpinnerTail_js__WEBPACK_IMPORTED_MODULE_22__.default)
+/* harmony export */   "QSpinner": () => (/* reexport safe */ _QSpinner_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QSpinnerAudio": () => (/* reexport safe */ _QSpinnerAudio_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "QSpinnerBall": () => (/* reexport safe */ _QSpinnerBall_js__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   "QSpinnerBars": () => (/* reexport safe */ _QSpinnerBars_js__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   "QSpinnerBox": () => (/* reexport safe */ _QSpinnerBox_js__WEBPACK_IMPORTED_MODULE_4__["default"]),
+/* harmony export */   "QSpinnerClock": () => (/* reexport safe */ _QSpinnerClock_js__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   "QSpinnerComment": () => (/* reexport safe */ _QSpinnerComment_js__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   "QSpinnerCube": () => (/* reexport safe */ _QSpinnerCube_js__WEBPACK_IMPORTED_MODULE_7__["default"]),
+/* harmony export */   "QSpinnerDots": () => (/* reexport safe */ _QSpinnerDots_js__WEBPACK_IMPORTED_MODULE_8__["default"]),
+/* harmony export */   "QSpinnerFacebook": () => (/* reexport safe */ _QSpinnerFacebook_js__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   "QSpinnerGears": () => (/* reexport safe */ _QSpinnerGears_js__WEBPACK_IMPORTED_MODULE_10__["default"]),
+/* harmony export */   "QSpinnerGrid": () => (/* reexport safe */ _QSpinnerGrid_js__WEBPACK_IMPORTED_MODULE_11__["default"]),
+/* harmony export */   "QSpinnerHearts": () => (/* reexport safe */ _QSpinnerHearts_js__WEBPACK_IMPORTED_MODULE_12__["default"]),
+/* harmony export */   "QSpinnerHourglass": () => (/* reexport safe */ _QSpinnerHourglass_js__WEBPACK_IMPORTED_MODULE_13__["default"]),
+/* harmony export */   "QSpinnerInfinity": () => (/* reexport safe */ _QSpinnerInfinity_js__WEBPACK_IMPORTED_MODULE_14__["default"]),
+/* harmony export */   "QSpinnerIos": () => (/* reexport safe */ _QSpinnerIos_js__WEBPACK_IMPORTED_MODULE_15__["default"]),
+/* harmony export */   "QSpinnerOrbit": () => (/* reexport safe */ _QSpinnerOrbit_js__WEBPACK_IMPORTED_MODULE_16__["default"]),
+/* harmony export */   "QSpinnerOval": () => (/* reexport safe */ _QSpinnerOval_js__WEBPACK_IMPORTED_MODULE_17__["default"]),
+/* harmony export */   "QSpinnerPie": () => (/* reexport safe */ _QSpinnerPie_js__WEBPACK_IMPORTED_MODULE_18__["default"]),
+/* harmony export */   "QSpinnerPuff": () => (/* reexport safe */ _QSpinnerPuff_js__WEBPACK_IMPORTED_MODULE_19__["default"]),
+/* harmony export */   "QSpinnerRadio": () => (/* reexport safe */ _QSpinnerRadio_js__WEBPACK_IMPORTED_MODULE_20__["default"]),
+/* harmony export */   "QSpinnerRings": () => (/* reexport safe */ _QSpinnerRings_js__WEBPACK_IMPORTED_MODULE_21__["default"]),
+/* harmony export */   "QSpinnerTail": () => (/* reexport safe */ _QSpinnerTail_js__WEBPACK_IMPORTED_MODULE_22__["default"])
 /* harmony export */ });
 /* harmony import */ var _QSpinner_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QSpinner.js */ "./node_modules/quasar/src/components/spinner/QSpinner.js");
 /* harmony import */ var _QSpinnerAudio_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QSpinnerAudio.js */ "./node_modules/quasar/src/components/spinner/QSpinnerAudio.js");
@@ -29775,7 +29980,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     color: String,
@@ -29832,13 +30037,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QSplitter',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   directives: {
-    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_0__.default
+    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
 
   props: {
@@ -30000,7 +30205,7 @@ __webpack_require__.r(__webpack_exports__);
         staticClass: 'q-splitter__panel q-splitter__before' + (this.reverse === true ? ' col' : ''),
         style: this.styles.before,
         class: this.beforeClass,
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__.default)(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stop })
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__["default"])(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stop })
       }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_3__.slot)(this, 'before')),
 
       h('div', {
@@ -30020,7 +30225,7 @@ __webpack_require__.r(__webpack_exports__);
         staticClass: 'q-splitter__panel q-splitter__after' + (this.reverse === true ? '' : ' col'),
         style: this.styles.after,
         class: this.afterClass,
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__.default)(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stop })
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__["default"])(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stop })
       }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_3__.slot)(this, 'after'))
     ]
 
@@ -30044,7 +30249,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QSplitter": () => (/* reexport safe */ _QSplitter_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QSplitter": () => (/* reexport safe */ _QSplitter_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QSplitter_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QSplitter.js */ "./node_modules/quasar/src/components/splitter/QSplitter.js");
 
@@ -30079,7 +30284,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const StepWrapper = vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+const StepWrapper = vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QStepWrapper',
 
   render (h) {
@@ -30093,7 +30298,7 @@ const StepWrapper = vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
   }
 })
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QStep',
 
   inject: {
@@ -30175,7 +30380,7 @@ const StepWrapper = vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
       },
       vertical === true
         ? [
-          h(_StepHeader_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+          h(_StepHeader_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
             props: {
               stepper: this.stepper,
               step: this
@@ -30183,7 +30388,7 @@ const StepWrapper = vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
           }),
 
           this.stepper.animated === true
-            ? h(_slide_transition_QSlideTransition_js__WEBPACK_IMPORTED_MODULE_0__.default, [ content ])
+            ? h(_slide_transition_QSlideTransition_js__WEBPACK_IMPORTED_MODULE_0__["default"], [ content ])
             : content
         ]
         : [ content ]
@@ -30223,7 +30428,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QStepper',
 
   provide () {
@@ -30232,7 +30437,7 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_panel_js__WEBPACK_IMPORTED_MODULE_1__.PanelParentMixin ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_panel_js__WEBPACK_IMPORTED_MODULE_1__.PanelParentMixin ],
 
   props: {
     flat: Boolean,
@@ -30280,7 +30485,7 @@ __webpack_require__.r(__webpack_exports__);
           staticClass: 'q-stepper__content',
           // stop propagation of content emitted @input
           // which would tamper with Panel's model
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__.default)(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stop })
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_5__["default"])(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stop })
         }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_3__.slot)(this, 'default'))
 
         return top === void 0
@@ -30292,7 +30497,7 @@ __webpack_require__.r(__webpack_exports__);
         h('div', { class: this.headerClasses }, this.panels.map(panel => {
           const step = panel.componentOptions.propsData
 
-          return h(_StepHeader_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+          return h(_StepHeader_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
             key: step.name,
             props: {
               stepper: this,
@@ -30342,10 +30547,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QStepperNavigation',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   render (h) {
     return h('div', {
@@ -30383,13 +30588,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'StepHeader',
 
-  mixins: [ _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   directives: {
-    Ripple: _directives_Ripple_js__WEBPACK_IMPORTED_MODULE_1__.default
+    Ripple: _directives_Ripple_js__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
 
   props: {
@@ -30504,7 +30709,7 @@ __webpack_require__.r(__webpack_exports__);
     }
 
     this.headerNav === true && Object.assign(data, {
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'headnavon', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'headnavon', {
         click: this.activate,
         keyup: this.keyup
       }),
@@ -30520,7 +30725,7 @@ __webpack_require__.r(__webpack_exports__);
         h('span', { staticClass: 'row flex-center' }, [
           this.hasPrefix === true
             ? this.step.prefix
-            : h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, { props: { name: this.icon } })
+            : h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], { props: { name: this.icon } })
         ])
       ])
     ]
@@ -30559,9 +30764,9 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QStep": () => (/* reexport safe */ _QStep_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QStepper": () => (/* reexport safe */ _QStepper_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "QStepperNavigation": () => (/* reexport safe */ _QStepperNavigation_js__WEBPACK_IMPORTED_MODULE_2__.default)
+/* harmony export */   "QStep": () => (/* reexport safe */ _QStep_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QStepper": () => (/* reexport safe */ _QStepper_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "QStepperNavigation": () => (/* reexport safe */ _QStepperNavigation_js__WEBPACK_IMPORTED_MODULE_2__["default"])
 /* harmony export */ });
 /* harmony import */ var _QStep_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QStep.js */ "./node_modules/quasar/src/components/stepper/QStep.js");
 /* harmony import */ var _QStepper_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QStepper.js */ "./node_modules/quasar/src/components/stepper/QStepper.js");
@@ -30594,7 +30799,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QTabPanel',
 
   mixins: [ _mixins_panel_js__WEBPACK_IMPORTED_MODULE_0__.PanelChildMixin ],
@@ -30629,10 +30834,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QTabPanels',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_panel_js__WEBPACK_IMPORTED_MODULE_1__.PanelParentMixin ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_panel_js__WEBPACK_IMPORTED_MODULE_1__.PanelParentMixin ],
 
   computed: {
     classes () {
@@ -30664,8 +30869,8 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QTabPanels": () => (/* reexport safe */ _QTabPanels_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QTabPanel": () => (/* reexport safe */ _QTabPanel_js__WEBPACK_IMPORTED_MODULE_1__.default)
+/* harmony export */   "QTabPanels": () => (/* reexport safe */ _QTabPanels_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QTabPanel": () => (/* reexport safe */ _QTabPanel_js__WEBPACK_IMPORTED_MODULE_1__["default"])
 /* harmony export */ });
 /* harmony import */ var _QTabPanels_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QTabPanels.js */ "./node_modules/quasar/src/components/tab-panels/QTabPanels.js");
 /* harmony import */ var _QTabPanel_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QTabPanel.js */ "./node_modules/quasar/src/components/tab-panels/QTabPanel.js");
@@ -30736,25 +30941,25 @@ __webpack_require__.r(__webpack_exports__);
 const commonVirtPropsObj = {}
 _mixins_virtual_scroll_js__WEBPACK_IMPORTED_MODULE_8__.commonVirtPropsList.forEach(p => { commonVirtPropsObj[p] = {} })
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_19__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_19__["default"].extend({
   name: 'QTable',
 
   mixins: [
-    _mixins_dark_js__WEBPACK_IMPORTED_MODULE_9__.default,
-    _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_10__.default,
+    _mixins_dark_js__WEBPACK_IMPORTED_MODULE_9__["default"],
+    _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_10__["default"],
 
-    _mixins_fullscreen_js__WEBPACK_IMPORTED_MODULE_17__.default,
-    _table_top_js__WEBPACK_IMPORTED_MODULE_0__.default,
-    _table_header_js__WEBPACK_IMPORTED_MODULE_1__.default,
-    _table_body_js__WEBPACK_IMPORTED_MODULE_2__.default,
-    _table_bottom_js__WEBPACK_IMPORTED_MODULE_3__.default,
-    _table_grid_js__WEBPACK_IMPORTED_MODULE_4__.default,
-    _table_sort_js__WEBPACK_IMPORTED_MODULE_11__.default,
-    _table_filter_js__WEBPACK_IMPORTED_MODULE_12__.default,
-    _table_pagination_js__WEBPACK_IMPORTED_MODULE_13__.default,
-    _table_row_selection_js__WEBPACK_IMPORTED_MODULE_14__.default,
-    _table_row_expand_js__WEBPACK_IMPORTED_MODULE_15__.default,
-    _table_column_selection_js__WEBPACK_IMPORTED_MODULE_16__.default
+    _mixins_fullscreen_js__WEBPACK_IMPORTED_MODULE_17__["default"],
+    _table_top_js__WEBPACK_IMPORTED_MODULE_0__["default"],
+    _table_header_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+    _table_body_js__WEBPACK_IMPORTED_MODULE_2__["default"],
+    _table_bottom_js__WEBPACK_IMPORTED_MODULE_3__["default"],
+    _table_grid_js__WEBPACK_IMPORTED_MODULE_4__["default"],
+    _table_sort_js__WEBPACK_IMPORTED_MODULE_11__["default"],
+    _table_filter_js__WEBPACK_IMPORTED_MODULE_12__["default"],
+    _table_pagination_js__WEBPACK_IMPORTED_MODULE_13__["default"],
+    _table_row_selection_js__WEBPACK_IMPORTED_MODULE_14__["default"],
+    _table_row_expand_js__WEBPACK_IMPORTED_MODULE_15__["default"],
+    _table_column_selection_js__WEBPACK_IMPORTED_MODULE_16__["default"]
   ],
 
   props: {
@@ -31029,7 +31234,7 @@ _mixins_virtual_scroll_js__WEBPACK_IMPORTED_MODULE_8__.commonVirtPropsList.forEa
           virtSlots.after = () => h('tbody', bottomRow({ cols: this.computedCols }))
         }
 
-        return h(_virtual_scroll_QVirtualScroll_js__WEBPACK_IMPORTED_MODULE_5__.default, {
+        return h(_virtual_scroll_QVirtualScroll_js__WEBPACK_IMPORTED_MODULE_5__["default"], {
           ref: 'virtScroll',
           props: {
             ...this.virtProps,
@@ -31037,7 +31242,7 @@ _mixins_virtual_scroll_js__WEBPACK_IMPORTED_MODULE_8__.commonVirtPropsList.forEa
             type: '__qtable',
             tableColspan: this.computedColspan
           },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_18__.default)(this, 'vs', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_18__["default"])(this, 'vs', {
             'virtual-scroll': this.__onVScroll
           }),
           class: this.tableClass,
@@ -31046,7 +31251,7 @@ _mixins_virtual_scroll_js__WEBPACK_IMPORTED_MODULE_8__.commonVirtPropsList.forEa
         })
       }
 
-      return (0,_get_table_middle_js__WEBPACK_IMPORTED_MODULE_7__.default)(h, {
+      return (0,_get_table_middle_js__WEBPACK_IMPORTED_MODULE_7__["default"])(h, {
         staticClass: 'scroll',
         class: this.tableClass,
         style: this.tableStyle
@@ -31087,7 +31292,7 @@ _mixins_virtual_scroll_js__WEBPACK_IMPORTED_MODULE_8__.commonVirtPropsList.forEa
 
     __getProgress (h) {
       return [
-        h(_linear_progress_QLinearProgress_js__WEBPACK_IMPORTED_MODULE_6__.default, {
+        h(_linear_progress_QLinearProgress_js__WEBPACK_IMPORTED_MODULE_6__["default"], {
           staticClass: 'q-table__linear-progress',
           props: {
             color: this.color,
@@ -31124,10 +31329,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QTd',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     props: Object,
@@ -31196,10 +31401,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QTh',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     props: Object,
@@ -31234,7 +31439,7 @@ __webpack_require__.r(__webpack_exports__);
 
       child = (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_2__.uniqueSlot)(this, 'default', [])
       child[action](
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           props: { name: this.$q.iconSet.table.arrowUp },
           staticClass: col.__iconClass
         })
@@ -31285,10 +31490,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QTr',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     props: Object,
@@ -31345,10 +31550,10 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QTable": () => (/* reexport safe */ _QTable_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QTh": () => (/* reexport safe */ _QTh_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "QTr": () => (/* reexport safe */ _QTr_js__WEBPACK_IMPORTED_MODULE_2__.default),
-/* harmony export */   "QTd": () => (/* reexport safe */ _QTd_js__WEBPACK_IMPORTED_MODULE_3__.default)
+/* harmony export */   "QTable": () => (/* reexport safe */ _QTable_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QTh": () => (/* reexport safe */ _QTh_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "QTr": () => (/* reexport safe */ _QTr_js__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   "QTd": () => (/* reexport safe */ _QTd_js__WEBPACK_IMPORTED_MODULE_3__["default"])
 /* harmony export */ });
 /* harmony import */ var _QTable_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QTable.js */ "./node_modules/quasar/src/components/table/QTable.js");
 /* harmony import */ var _QTh_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QTh.js */ "./node_modules/quasar/src/components/table/QTh.js");
@@ -31416,7 +31621,7 @@ __webpack_require__.r(__webpack_exports__);
         const content = slot !== void 0
           ? slot(this.__getBodySelectionScope({ key, row, pageIndex }))
           : [
-            h(_checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+            h(_checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
               props: {
                 value: selected,
                 color: this.color,
@@ -31622,7 +31827,7 @@ const staticClass = 'q-table__bottom row items-center'
         const children = noData !== void 0
           ? [ noData({ message, icon: this.$q.iconSet.table.warning, filter: this.filter }) ]
           : [
-            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
               staticClass: 'q-table__bottom-nodata-icon',
               props: { name: this.$q.iconSet.table.warning }
             }),
@@ -31679,7 +31884,7 @@ const staticClass = 'q-table__bottom row items-center'
             h('span', { staticClass: 'q-table__bottom-item' }, [
               this.rowsPerPageLabel || this.$q.lang.table.recordsPerPage
             ]),
-            h(_select_QSelect_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+            h(_select_QSelect_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
               staticClass: 'q-table__select inline q-table__bottom-item',
               props: {
                 color: this.color,
@@ -31694,7 +31899,7 @@ const staticClass = 'q-table__bottom row items-center'
                 optionsDense: true,
                 optionsCover: true
               },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'pgSize', {
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'pgSize', {
                 input: pag => {
                   this.setPagination({
                     page: 1,
@@ -31732,48 +31937,48 @@ const staticClass = 'q-table__bottom row items-center'
           }
 
           this.pagesNumber > 2 && control.push(
-            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
               key: 'pgFirst',
               props: {
                 ...btnProps,
                 icon: this.navIcon[0],
                 disable: this.isFirstPage
               },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'pgFirst', { click: this.firstPage })
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'pgFirst', { click: this.firstPage })
             })
           )
 
           control.push(
-            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
               key: 'pgPrev',
               props: {
                 ...btnProps,
                 icon: this.navIcon[1],
                 disable: this.isFirstPage
               },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'pgPrev', { click: this.prevPage })
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'pgPrev', { click: this.prevPage })
             }),
 
-            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
               key: 'pgNext',
               props: {
                 ...btnProps,
                 icon: this.navIcon[2],
                 disable: this.isLastPage
               },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'pgNext', { click: this.nextPage })
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'pgNext', { click: this.nextPage })
             })
           )
 
           this.pagesNumber > 2 && control.push(
-            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+            h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
               key: 'pgLast',
               props: {
                 ...btnProps,
                 icon: this.navIcon[3],
                 disable: this.isLastPage
               },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__.default)(this, 'pgLast', { click: this.lastPage })
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_3__["default"])(this, 'pgLast', { click: this.lastPage })
             })
           )
         }
@@ -31982,7 +32187,7 @@ __webpack_require__.r(__webpack_exports__);
             const content = slot !== void 0
               ? slot(scope)
               : [
-                h(_checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+                h(_checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
                   props: {
                     value: scope.selected,
                     color: this.color,
@@ -31999,7 +32204,7 @@ __webpack_require__.r(__webpack_exports__);
 
             child.unshift(
               h('div', { staticClass: 'q-table__grid-item-row' }, content),
-              h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_1__.default, { props: { dark: this.isDark } })
+              h(_separator_QSeparator_js__WEBPACK_IMPORTED_MODULE_1__["default"], { props: { dark: this.isDark } })
             )
           }
 
@@ -32117,7 +32322,7 @@ __webpack_require__.r(__webpack_exports__);
 
         return slot !== void 0
           ? slot(props)
-          : h(_QTh_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+          : h(_QTh_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
             key: col.name,
             props: { props }
           }, col.label)
@@ -32131,14 +32336,14 @@ __webpack_require__.r(__webpack_exports__);
         const content = slot !== void 0
           ? slot(this.__getHeaderScope({}))
           : [
-            h(_checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+            h(_checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
               props: {
                 color: this.color,
                 value: this.headerSelectedValue,
                 dark: this.isDark,
                 dense: this.dense
               },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'inp', {
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'inp', {
                 input: this.__onMultipleSelectionSet
               })
             })
@@ -32779,10 +32984,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__["default"].extend({
   name: 'QRouteTab',
 
-  mixins: [ _QTab_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_router_link_js__WEBPACK_IMPORTED_MODULE_1__.RouterLinkMixin ],
+  mixins: [ _QTab_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_router_link_js__WEBPACK_IMPORTED_MODULE_1__.RouterLinkMixin ],
 
   props: {
     to: { required: true }
@@ -32951,10 +33156,10 @@ __webpack_require__.r(__webpack_exports__);
 
 let uid = 0
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__["default"].extend({
   name: 'QTab',
 
-  mixins: [ _mixins_ripple_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _mixins_ripple_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   inject: {
     tabs: {
@@ -33060,7 +33265,7 @@ let uid = 0
         })
 
       this.icon !== void 0 && content.push(
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           staticClass: 'q-tab__icon',
           props: { name: this.icon }
         })
@@ -33074,7 +33279,7 @@ let uid = 0
 
       this.alert !== false && content.push(
         this.alertIcon !== void 0
-          ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+          ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
             staticClass: 'q-tab__alert-icon',
             props: {
               color: this.alert !== true
@@ -33206,10 +33411,10 @@ const
   ],
   bufferFiltersLen = bufferFilters.length
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__["default"].extend({
   name: 'QTabs',
 
-  mixins: [ _mixins_timeout_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_timeout_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   provide () {
     return {
@@ -33591,24 +33796,24 @@ const
 
   render (h) {
     const child = [
-      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_1__.default, {
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'resize', { resize: this.__updateContainer })
+      h(_resize_observer_QResizeObserver_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'resize', { resize: this.__updateContainer })
       }),
 
       h('div', {
         ref: 'content',
         staticClass: 'q-tabs__content row no-wrap items-center self-stretch hide-scrollbar',
         class: this.innerClass,
-        on: this.arrowsEnabled === true ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'scroll', { scroll: this.__updateArrowsFn }) : void 0
+        on: this.arrowsEnabled === true ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'scroll', { scroll: this.__updateArrowsFn }) : void 0
       }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_5__.slot)(this, 'default'))
     ]
 
     this.arrowsEnabled === true && child.push(
-      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
         staticClass: 'q-tabs__arrow q-tabs__arrow--left absolute q-tab__icon',
         class: this.leftArrow === true ? '' : 'q-tabs__arrow--faded',
         props: { name: this.leftIcon || (this.vertical === true ? this.$q.iconSet.tabs.up : this.$q.iconSet.tabs.left) },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'onL', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'onL', {
           mousedown: this.__scrollToStart,
           touchstart: this.__scrollToStart,
           mouseup: this.__stopAnimScroll,
@@ -33617,11 +33822,11 @@ const
         })
       }),
 
-      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+      h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
         staticClass: 'q-tabs__arrow q-tabs__arrow--right absolute q-tab__icon',
         class: this.rightArrow === true ? '' : 'q-tabs__arrow--faded',
         props: { name: this.rightIcon || (this.vertical === true ? this.$q.iconSet.tabs.down : this.$q.iconSet.tabs.right) },
-        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'onR', {
+        on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'onR', {
           mousedown: this.__scrollToEnd,
           touchstart: this.__scrollToEnd,
           mouseup: this.__stopAnimScroll,
@@ -33652,9 +33857,9 @@ const
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QTabs": () => (/* reexport safe */ _QTabs_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QTab": () => (/* reexport safe */ _QTab_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "QRouteTab": () => (/* reexport safe */ _QRouteTab_js__WEBPACK_IMPORTED_MODULE_2__.default)
+/* harmony export */   "QTabs": () => (/* reexport safe */ _QTabs_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QTab": () => (/* reexport safe */ _QTab_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "QRouteTab": () => (/* reexport safe */ _QRouteTab_js__WEBPACK_IMPORTED_MODULE_2__["default"])
 /* harmony export */ });
 /* harmony import */ var _QTabs_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QTabs.js */ "./node_modules/quasar/src/components/tabs/QTabs.js");
 /* harmony import */ var _QTab_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QTab.js */ "./node_modules/quasar/src/components/tabs/QTab.js");
@@ -33700,13 +33905,13 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__["default"].extend({
   name: 'QTime',
 
-  mixins: [ _mixins_datetime_js__WEBPACK_IMPORTED_MODULE_7__.default ],
+  mixins: [ _mixins_datetime_js__WEBPACK_IMPORTED_MODULE_7__["default"] ],
 
   directives: {
-    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_1__.default
+    TouchPan: _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
 
   props: {
@@ -34309,7 +34514,7 @@ __webpack_require__.r(__webpack_exports__);
           staticClass: 'q-time__link',
           class: this.view === 'Hour' ? 'q-time__link--active' : 'cursor-pointer',
           attrs: { tabindex: this.computedTabindex },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'vH', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'vH', {
             click: () => { this.view = 'Hour' },
             keyup: this.__onKeyupHour
           })
@@ -34324,7 +34529,7 @@ __webpack_require__.r(__webpack_exports__);
               staticClass: 'q-time__link',
               class: this.view === 'Minute' ? 'q-time__link--active' : 'cursor-pointer',
               attrs: { tabindex: this.computedTabindex },
-              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'vM', {
+              on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'vM', {
                 click: () => { this.view = 'Minute' },
                 keyup: this.__onKeyupMinute
               })
@@ -34345,7 +34550,7 @@ __webpack_require__.r(__webpack_exports__);
                 staticClass: 'q-time__link',
                 class: this.view === 'Second' ? 'q-time__link--active' : 'cursor-pointer',
                 attrs: { tabindex: this.computedTabindex },
-                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'vS', {
+                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'vS', {
                   click: () => { this.view = 'Second' },
                   keyup: this.__onKeyupSecond
                 })
@@ -34372,7 +34577,7 @@ __webpack_require__.r(__webpack_exports__);
             staticClass: 'q-time__link',
             class: this.isAM === true ? 'q-time__link--active' : 'cursor-pointer',
             attrs: { tabindex: this.computedTabindex },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'AM', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'AM', {
               click: this.__setAm,
               keyup: e => { e.keyCode === 13 && this.__setAm() }
             })
@@ -34382,7 +34587,7 @@ __webpack_require__.r(__webpack_exports__);
             staticClass: 'q-time__link',
             class: this.isAM !== true ? 'q-time__link--active' : 'cursor-pointer',
             attrs: { tabindex: this.computedTabindex },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'PM', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'PM', {
               click: this.__setPm,
               keyup: e => { e.keyCode === 13 && this.__setPm() }
             })
@@ -34412,11 +34617,11 @@ __webpack_require__.r(__webpack_exports__);
             }, [
               h('div', {
                 staticClass: 'q-time__clock cursor-pointer non-selectable',
-                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'click', {
+                on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'click', {
                   click: this.__click,
                   mousedown: this.__activate
                 }),
-                directives: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'touch', [{
+                directives: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'touch', [{
                   name: 'touch-pan',
                   value: this.__drag,
                   modifiers: {
@@ -34445,7 +34650,7 @@ __webpack_require__.r(__webpack_exports__);
           ])
         ]),
 
-        this.nowBtn === true ? h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        this.nowBtn === true ? h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           staticClass: 'q-time__now-button absolute',
           props: {
             icon: this.$q.iconSet.datetime.now,
@@ -34456,7 +34661,7 @@ __webpack_require__.r(__webpack_exports__);
             textColor: this.textColor,
             tabindex: this.computedTabindex
           },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'now', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'now', {
             click: this.setNow
           })
         }) : null
@@ -34597,7 +34802,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QTime": () => (/* reexport safe */ _QTime_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QTime": () => (/* reexport safe */ _QTime_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QTime_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QTime.js */ "./node_modules/quasar/src/components/time/QTime.js");
 
@@ -34629,10 +34834,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QTimeline',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   provide () {
     return {
@@ -34699,7 +34904,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__["default"].extend({
   name: 'QTimelineEntry',
 
   inject: {
@@ -34710,7 +34915,7 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     heading: Boolean,
@@ -34777,7 +34982,7 @@ __webpack_require__.r(__webpack_exports__);
 
     if (this.icon !== void 0) {
       dot = [
-        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           staticClass: 'row items-center justify-center',
           props: { name: this.icon }
         })
@@ -34827,8 +35032,8 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QTimeline": () => (/* reexport safe */ _QTimeline_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QTimelineEntry": () => (/* reexport safe */ _QTimelineEntry_js__WEBPACK_IMPORTED_MODULE_1__.default)
+/* harmony export */   "QTimeline": () => (/* reexport safe */ _QTimeline_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QTimelineEntry": () => (/* reexport safe */ _QTimelineEntry_js__WEBPACK_IMPORTED_MODULE_1__["default"])
 /* harmony export */ });
 /* harmony import */ var _QTimeline_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QTimeline.js */ "./node_modules/quasar/src/components/timeline/QTimeline.js");
 /* harmony import */ var _QTimelineEntry_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QTimelineEntry.js */ "./node_modules/quasar/src/components/timeline/QTimelineEntry.js");
@@ -34859,10 +35064,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QToggle',
 
-  mixins: [ _mixins_checkbox_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_checkbox_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     icon: String,
@@ -34898,7 +35103,7 @@ __webpack_require__.r(__webpack_exports__);
           staticClass: 'q-toggle__thumb absolute flex flex-center no-wrap'
         }, this.computedIcon !== void 0
           ? [
-            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+            h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
               props: {
                 name: this.computedIcon,
                 color: this.computedIconColor
@@ -34928,7 +35133,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QToggle": () => (/* reexport safe */ _QToggle_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QToggle": () => (/* reexport safe */ _QToggle_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QToggle_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QToggle.js */ "./node_modules/quasar/src/components/toggle/QToggle.js");
 
@@ -34958,10 +35163,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QToolbar',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     inset: Boolean
@@ -34999,10 +35204,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QToolbarTitle',
 
-  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     shrink: Boolean
@@ -35035,8 +35240,8 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QToolbar": () => (/* reexport safe */ _QToolbar_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QToolbarTitle": () => (/* reexport safe */ _QToolbarTitle_js__WEBPACK_IMPORTED_MODULE_1__.default)
+/* harmony export */   "QToolbar": () => (/* reexport safe */ _QToolbar_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QToolbarTitle": () => (/* reexport safe */ _QToolbarTitle_js__WEBPACK_IMPORTED_MODULE_1__["default"])
 /* harmony export */ });
 /* harmony import */ var _QToolbar_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QToolbar.js */ "./node_modules/quasar/src/components/toolbar/QToolbar.js");
 /* harmony import */ var _QToolbarTitle_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QToolbarTitle.js */ "./node_modules/quasar/src/components/toolbar/QToolbarTitle.js");
@@ -35082,10 +35287,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__["default"].extend({
   name: 'QTooltip',
 
-  mixins: [ _mixins_anchor_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_portal_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_transition_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_anchor_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__["default"], _mixins_portal_js__WEBPACK_IMPORTED_MODULE_2__["default"], _mixins_transition_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   props: {
     maxHeight: {
@@ -35320,7 +35525,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QTooltip": () => (/* reexport safe */ _QTooltip_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QTooltip": () => (/* reexport safe */ _QTooltip_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QTooltip_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QTooltip.js */ "./node_modules/quasar/src/components/tooltip/QTooltip.js");
 
@@ -35362,10 +35567,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__["default"].extend({
   name: 'QTree',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_4__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_4__["default"] ],
 
   props: {
     nodes: {
@@ -35794,7 +35999,7 @@ __webpack_require__.r(__webpack_exports__);
 
     __getNodeMedia (h, node) {
       if (node.icon !== void 0) {
-        return h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        return h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           staticClass: `q-tree__icon q-mr-sm`,
           props: { name: node.icon, color: node.iconColor }
         })
@@ -35865,13 +36070,13 @@ __webpack_require__.r(__webpack_exports__);
           h('div', { staticClass: 'q-focus-helper', attrs: { tabindex: -1 }, ref: `blurTarget_${meta.key}` }),
 
           meta.lazy === 'loading'
-            ? h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_3__.default, {
+            ? h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
               staticClass: 'q-tree__spinner q-mr-xs',
               props: { color: this.computedControlColor }
             })
             : (
               isParent === true
-                ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+                ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
                   staticClass: 'q-tree__arrow q-mr-xs',
                   class: { 'q-tree__arrow--rotate': meta.expanded },
                   props: { name: this.computedIcon },
@@ -35885,7 +36090,7 @@ __webpack_require__.r(__webpack_exports__);
             ),
 
           meta.hasTicking === true && meta.noTick !== true
-            ? h(_checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+            ? h(_checkbox_QCheckbox_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
               staticClass: 'q-mr-xs',
               props: {
                 value: meta.indeterminate === true ? null : meta.ticked,
@@ -35918,9 +36123,9 @@ __webpack_require__.r(__webpack_exports__);
         ]),
 
         isParent === true
-          ? h(_slide_transition_QSlideTransition_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+          ? h(_slide_transition_QSlideTransition_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
             props: { duration: this.duration },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__.default)(this, 'slide', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_7__["default"])(this, 'slide', {
               show: () => { this.$emit('after-show') },
               hide: () => { this.$emit('after-hide') }
             })
@@ -36038,7 +36243,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QTree": () => (/* reexport safe */ _QTree_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QTree": () => (/* reexport safe */ _QTree_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QTree_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QTree.js */ "./node_modules/quasar/src/components/tree/QTree.js");
 
@@ -36067,9 +36272,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QUploader',
-  mixins: [ _QUploaderBase_js__WEBPACK_IMPORTED_MODULE_0__.default, _uploader_xhr_mixin_js__WEBPACK_IMPORTED_MODULE_1__.default ]
+  mixins: [ _QUploaderBase_js__WEBPACK_IMPORTED_MODULE_0__["default"], _uploader_xhr_mixin_js__WEBPACK_IMPORTED_MODULE_1__["default"] ]
 }));
 
 
@@ -36089,7 +36294,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_0__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_0__["default"].extend({
   name: 'QUploaderAddTrigger',
 
   inject: {
@@ -36143,10 +36348,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__["default"].extend({
   name: 'QUploaderBase',
 
-  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_5__.default, _mixins_file_js__WEBPACK_IMPORTED_MODULE_4__.default ],
+  mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_5__["default"], _mixins_file_js__WEBPACK_IMPORTED_MODULE_4__["default"] ],
 
   props: {
     label: String,
@@ -36411,7 +36616,7 @@ __webpack_require__.r(__webpack_exports__);
 
     __getBtn (h, show, icon, fn) {
       if (show === true) {
-        return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+        return h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
           props: {
             type: 'a',
             icon: this.$q.iconSet.uploader[icon],
@@ -36436,7 +36641,7 @@ __webpack_require__.r(__webpack_exports__);
             capture: this.capture,
             ...(this.multiple === true ? { multiple: true } : {})
           },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__.default)(this, 'input', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__["default"])(this, 'input', {
             mousedown: _utils_event_js__WEBPACK_IMPORTED_MODULE_6__.stop, // need to stop refocus from QBtn
             change: this.__addFiles
           })
@@ -36457,7 +36662,7 @@ __webpack_require__.r(__webpack_exports__);
           this.__getBtn(h, this.uploadedFiles.length > 0, 'removeUploaded', this.removeUploadedFiles),
 
           this.isUploading === true
-            ? h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_2__.default, { staticClass: 'q-uploader__spinner' })
+            ? h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_2__["default"], { staticClass: 'q-uploader__spinner' })
             : null,
 
           h('div', { staticClass: 'col column justify-center' }, [
@@ -36498,7 +36703,7 @@ __webpack_require__.r(__webpack_exports__);
           staticClass: 'q-uploader__file-header row flex-center no-wrap'
         }, [
           file.__status === 'failed'
-            ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+            ? h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
               staticClass: 'q-uploader__file-status',
               props: {
                 name: this.$q.iconSet.type.negative,
@@ -36517,7 +36722,7 @@ __webpack_require__.r(__webpack_exports__);
           ]),
 
           file.__status === 'uploading'
-            ? h(_circular_progress_QCircularProgress_js__WEBPACK_IMPORTED_MODULE_3__.default, {
+            ? h(_circular_progress_QCircularProgress_js__WEBPACK_IMPORTED_MODULE_3__["default"], {
               props: {
                 value: file.__progress,
                 min: 0,
@@ -36525,7 +36730,7 @@ __webpack_require__.r(__webpack_exports__);
                 indeterminate: file.__progress === 0
               }
             })
-            : h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__.default, {
+            : h(_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_0__["default"], {
               props: {
                 round: true,
                 dense: true,
@@ -36563,7 +36768,7 @@ __webpack_require__.r(__webpack_exports__);
     this.isBusy === true && children.push(
       h('div', {
         staticClass: 'q-uploader__overlay absolute-full flex flex-center'
-      }, [ h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_2__.default) ])
+      }, [ h(_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_2__["default"]) ])
     )
 
     return h('div', {
@@ -36576,7 +36781,7 @@ __webpack_require__.r(__webpack_exports__);
         'disabled q-uploader--disable': this.disable
       },
       on: this.canAddFiles === true
-        ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__.default)(this, 'drag', { dragover: this.__onDragOver })
+        ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_8__["default"])(this, 'drag', { dragover: this.__onDragOver })
         : null
     }, children)
   }
@@ -36594,9 +36799,9 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QUploader": () => (/* reexport safe */ _QUploader_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "QUploaderBase": () => (/* reexport safe */ _QUploaderBase_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "QUploaderAddTrigger": () => (/* reexport safe */ _QUploaderAddTrigger_js__WEBPACK_IMPORTED_MODULE_2__.default)
+/* harmony export */   "QUploader": () => (/* reexport safe */ _QUploader_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "QUploaderBase": () => (/* reexport safe */ _QUploaderBase_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "QUploaderAddTrigger": () => (/* reexport safe */ _QUploaderAddTrigger_js__WEBPACK_IMPORTED_MODULE_2__["default"])
 /* harmony export */ });
 /* harmony import */ var _QUploader_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QUploader.js */ "./node_modules/quasar/src/components/uploader/QUploader.js");
 /* harmony import */ var _QUploaderBase_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./QUploaderBase.js */ "./node_modules/quasar/src/components/uploader/QUploaderBase.js");
@@ -36898,10 +37103,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__["default"].extend({
   name: 'QVideo',
 
-  mixins: [ _mixins_ratio_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _mixins_ratio_js__WEBPACK_IMPORTED_MODULE_0__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     src: {
@@ -36950,7 +37155,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QVideo": () => (/* reexport safe */ _QVideo_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QVideo": () => (/* reexport safe */ _QVideo_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QVideo_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QVideo.js */ "./node_modules/quasar/src/components/video/QVideo.js");
 
@@ -36996,14 +37201,14 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const comps = {
-  list: _item_QList_js__WEBPACK_IMPORTED_MODULE_0__.default,
-  table: _markup_table_QMarkupTable_js__WEBPACK_IMPORTED_MODULE_1__.default
+  list: _item_QList_js__WEBPACK_IMPORTED_MODULE_0__["default"],
+  table: _markup_table_QMarkupTable_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__["default"].extend({
   name: 'QVirtualScroll',
 
-  mixins: [ _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_4__.default, _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_5__.default, _mixins_virtual_scroll_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_4__["default"], _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_5__["default"], _mixins_virtual_scroll_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   props: {
     type: {
@@ -37123,7 +37328,7 @@ const comps = {
     child = (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_8__.mergeSlot)(child, this, 'after')
 
     return this.type === '__qtable'
-      ? (0,_table_get_table_middle_js__WEBPACK_IMPORTED_MODULE_2__.default)(h, { staticClass: this.classes }, child)
+      ? (0,_table_get_table_middle_js__WEBPACK_IMPORTED_MODULE_2__["default"])(h, { staticClass: this.classes }, child)
       : h(comps[this.type], {
         class: this.classes,
         attrs: this.attrs,
@@ -37145,7 +37350,7 @@ const comps = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "QVirtualScroll": () => (/* reexport safe */ _QVirtualScroll_js__WEBPACK_IMPORTED_MODULE_0__.default)
+/* harmony export */   "QVirtualScroll": () => (/* reexport safe */ _QVirtualScroll_js__WEBPACK_IMPORTED_MODULE_0__["default"])
 /* harmony export */ });
 /* harmony import */ var _QVirtualScroll_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./QVirtualScroll.js */ "./node_modules/quasar/src/components/virtual-scroll/QVirtualScroll.js");
 
@@ -37164,18 +37369,18 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ClosePopup": () => (/* reexport safe */ _directives_ClosePopup_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "GoBack": () => (/* reexport safe */ _directives_GoBack_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "Intersection": () => (/* reexport safe */ _directives_Intersection_js__WEBPACK_IMPORTED_MODULE_2__.default),
-/* harmony export */   "Morph": () => (/* reexport safe */ _directives_Morph_js__WEBPACK_IMPORTED_MODULE_3__.default),
-/* harmony export */   "Mutation": () => (/* reexport safe */ _directives_Mutation_js__WEBPACK_IMPORTED_MODULE_4__.default),
-/* harmony export */   "Ripple": () => (/* reexport safe */ _directives_Ripple_js__WEBPACK_IMPORTED_MODULE_5__.default),
-/* harmony export */   "ScrollFire": () => (/* reexport safe */ _directives_ScrollFire_js__WEBPACK_IMPORTED_MODULE_6__.default),
-/* harmony export */   "Scroll": () => (/* reexport safe */ _directives_Scroll_js__WEBPACK_IMPORTED_MODULE_7__.default),
-/* harmony export */   "TouchHold": () => (/* reexport safe */ _directives_TouchHold_js__WEBPACK_IMPORTED_MODULE_8__.default),
-/* harmony export */   "TouchPan": () => (/* reexport safe */ _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_9__.default),
-/* harmony export */   "TouchRepeat": () => (/* reexport safe */ _directives_TouchRepeat_js__WEBPACK_IMPORTED_MODULE_10__.default),
-/* harmony export */   "TouchSwipe": () => (/* reexport safe */ _directives_TouchSwipe_js__WEBPACK_IMPORTED_MODULE_11__.default)
+/* harmony export */   "ClosePopup": () => (/* reexport safe */ _directives_ClosePopup_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "GoBack": () => (/* reexport safe */ _directives_GoBack_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "Intersection": () => (/* reexport safe */ _directives_Intersection_js__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   "Morph": () => (/* reexport safe */ _directives_Morph_js__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   "Mutation": () => (/* reexport safe */ _directives_Mutation_js__WEBPACK_IMPORTED_MODULE_4__["default"]),
+/* harmony export */   "Ripple": () => (/* reexport safe */ _directives_Ripple_js__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   "ScrollFire": () => (/* reexport safe */ _directives_ScrollFire_js__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   "Scroll": () => (/* reexport safe */ _directives_Scroll_js__WEBPACK_IMPORTED_MODULE_7__["default"]),
+/* harmony export */   "TouchHold": () => (/* reexport safe */ _directives_TouchHold_js__WEBPACK_IMPORTED_MODULE_8__["default"]),
+/* harmony export */   "TouchPan": () => (/* reexport safe */ _directives_TouchPan_js__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   "TouchRepeat": () => (/* reexport safe */ _directives_TouchRepeat_js__WEBPACK_IMPORTED_MODULE_10__["default"]),
+/* harmony export */   "TouchSwipe": () => (/* reexport safe */ _directives_TouchSwipe_js__WEBPACK_IMPORTED_MODULE_11__["default"])
 /* harmony export */ });
 /* harmony import */ var _directives_ClosePopup_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./directives/ClosePopup.js */ "./node_modules/quasar/src/directives/ClosePopup.js");
 /* harmony import */ var _directives_GoBack_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./directives/GoBack.js */ "./node_modules/quasar/src/directives/GoBack.js");
@@ -37549,7 +37754,7 @@ function trigger (group) {
   changeClass(from, 'remove')
   changeClass(to, 'remove')
 
-  const cancelFn = (0,_utils_morph_js__WEBPACK_IMPORTED_MODULE_0__.default)({
+  const cancelFn = (0,_utils_morph_js__WEBPACK_IMPORTED_MODULE_0__["default"])({
     from: from.el,
     to: to.el,
     onToggle () {
@@ -37959,7 +38164,7 @@ function destroy (el) {
         }
       },
 
-      keystart: (0,_utils_throttle_js__WEBPACK_IMPORTED_MODULE_4__.default)(evt => {
+      keystart: (0,_utils_throttle_js__WEBPACK_IMPORTED_MODULE_4__["default"])(evt => {
         if (
           ctx.enabled === true &&
           evt.qSkipRipple !== true &&
@@ -38139,7 +38344,7 @@ function destroy (el) {
 
     const ctx = {
       scrollTarget: (0,_utils_scroll_js__WEBPACK_IMPORTED_MODULE_2__.getScrollTarget)(el),
-      scroll: (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_0__.default)(() => {
+      scroll: (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_0__["default"])(() => {
         let containerBottom, elBottom
 
         if (ctx.scrollTarget === window) {
@@ -39521,7 +39726,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   install ($q, queues, iconSet) {
-    const initialSet = iconSet || _icon_set_material_icons_js__WEBPACK_IMPORTED_MODULE_1__.default
+    const initialSet = iconSet || _icon_set_material_icons_js__WEBPACK_IMPORTED_MODULE_1__["default"]
 
     this.set = (setObject, ssrContext) => {
       const def = { ...setObject }
@@ -39552,8 +39757,8 @@ __webpack_require__.r(__webpack_exports__);
       })
     }
     else {
-      vue__WEBPACK_IMPORTED_MODULE_2__.default.util.defineReactive($q, 'iconMapFn', void 0)
-      vue__WEBPACK_IMPORTED_MODULE_2__.default.util.defineReactive($q, 'iconSet', {})
+      vue__WEBPACK_IMPORTED_MODULE_2__["default"].util.defineReactive($q, 'iconMapFn', void 0)
+      vue__WEBPACK_IMPORTED_MODULE_2__["default"].util.defineReactive($q, 'iconSet', {})
 
       this.set(initialSet)
     }
@@ -39759,9 +39964,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  ..._vue_plugin_js__WEBPACK_IMPORTED_MODULE_0__.default,
+  ..._vue_plugin_js__WEBPACK_IMPORTED_MODULE_0__["default"],
   install (Vue, opts) {
-    _vue_plugin_js__WEBPACK_IMPORTED_MODULE_0__.default.install(Vue, {
+    _vue_plugin_js__WEBPACK_IMPORTED_MODULE_0__["default"].install(Vue, {
       components: _components_js__WEBPACK_IMPORTED_MODULE_1__,
       directives: _directives_js__WEBPACK_IMPORTED_MODULE_2__,
       plugins: _plugins_js__WEBPACK_IMPORTED_MODULE_3__,
@@ -39804,7 +40009,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 const autoInstalled = [
-  _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_1__.default, _plugins_Screen_js__WEBPACK_IMPORTED_MODULE_2__.default, _plugins_Dark_js__WEBPACK_IMPORTED_MODULE_3__.default
+  _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_1__["default"], _plugins_Screen_js__WEBPACK_IMPORTED_MODULE_2__["default"], _plugins_Dark_js__WEBPACK_IMPORTED_MODULE_3__["default"]
 ]
 
 const queues = {
@@ -39824,13 +40029,13 @@ const $q = {
   const cfg = $q.config = Object.freeze(opts.config || {})
 
   // required plugins
-  _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_1__.default.install($q, queues)
-  _body_js__WEBPACK_IMPORTED_MODULE_6__.default.install(queues, cfg)
-  _plugins_Dark_js__WEBPACK_IMPORTED_MODULE_3__.default.install($q, queues, cfg)
-  _plugins_Screen_js__WEBPACK_IMPORTED_MODULE_2__.default.install($q, queues, cfg)
-  _history_js__WEBPACK_IMPORTED_MODULE_4__.default.install(cfg)
-  _lang_js__WEBPACK_IMPORTED_MODULE_5__.default.install($q, queues, opts.lang)
-  _icon_set_js__WEBPACK_IMPORTED_MODULE_7__.default.install($q, queues, opts.iconSet)
+  _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_1__["default"].install($q, queues)
+  _body_js__WEBPACK_IMPORTED_MODULE_6__["default"].install(queues, cfg)
+  _plugins_Dark_js__WEBPACK_IMPORTED_MODULE_3__["default"].install($q, queues, cfg)
+  _plugins_Screen_js__WEBPACK_IMPORTED_MODULE_2__["default"].install($q, queues, cfg)
+  _history_js__WEBPACK_IMPORTED_MODULE_4__["default"].install(cfg)
+  _lang_js__WEBPACK_IMPORTED_MODULE_5__["default"].install($q, queues, opts.lang)
+  _icon_set_js__WEBPACK_IMPORTED_MODULE_7__["default"].install($q, queues, opts.iconSet)
 
   if (_plugins_Platform_js__WEBPACK_IMPORTED_MODULE_1__.isSSR === true) {
     Vue.mixin({
@@ -39909,9 +40114,9 @@ function getLocale () {
   getLocale,
 
   install ($q, queues, lang) {
-    const initialLang = lang || _lang_en_us_js__WEBPACK_IMPORTED_MODULE_0__.default
+    const initialLang = lang || _lang_en_us_js__WEBPACK_IMPORTED_MODULE_0__["default"]
 
-    this.set = (langObject = _lang_en_us_js__WEBPACK_IMPORTED_MODULE_0__.default, ssrContext) => {
+    this.set = (langObject = _lang_en_us_js__WEBPACK_IMPORTED_MODULE_0__["default"], ssrContext) => {
       const lang = {
         ...langObject,
         rtl: langObject.rtl === true,
@@ -39965,7 +40170,7 @@ function getLocale () {
       this.props = initialLang
     }
     else {
-      vue__WEBPACK_IMPORTED_MODULE_2__.default.util.defineReactive($q, 'lang', {})
+      vue__WEBPACK_IMPORTED_MODULE_2__["default"].util.defineReactive($q, 'lang', {})
       this.set(initialLang)
     }
   }
@@ -40303,9 +40508,9 @@ const padding = {
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   mixins: [
-    _listeners_js__WEBPACK_IMPORTED_MODULE_2__.default,
-    _ripple_js__WEBPACK_IMPORTED_MODULE_1__.default,
-    _align_js__WEBPACK_IMPORTED_MODULE_0__.default,
+    _listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"],
+    _ripple_js__WEBPACK_IMPORTED_MODULE_1__["default"],
+    _align_js__WEBPACK_IMPORTED_MODULE_0__["default"],
     (0,_size_js__WEBPACK_IMPORTED_MODULE_3__.getSizeMixin)({
       xs: 8,
       sm: 10,
@@ -40543,7 +40748,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  mixins: [ _dark_js__WEBPACK_IMPORTED_MODULE_0__.default, _option_size_js__WEBPACK_IMPORTED_MODULE_3__.default, _form_js__WEBPACK_IMPORTED_MODULE_2__.default, _refocus_target_js__WEBPACK_IMPORTED_MODULE_4__.default ],
+  mixins: [ _dark_js__WEBPACK_IMPORTED_MODULE_0__["default"], _option_size_js__WEBPACK_IMPORTED_MODULE_3__["default"], _form_js__WEBPACK_IMPORTED_MODULE_2__["default"], _refocus_target_js__WEBPACK_IMPORTED_MODULE_4__["default"] ],
 
   props: {
     value: {
@@ -40745,7 +40950,7 @@ __webpack_require__.r(__webpack_exports__);
     return h('div', {
       class: this.classes,
       attrs: this.attrs,
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'inpExt', {
+      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__["default"])(this, 'inpExt', {
         click: this.toggle,
         keydown: this.__onKeydown,
         keyup: this.__onKeyup
@@ -40858,7 +41063,7 @@ __webpack_require__.r(__webpack_exports__);
 const calendars = [ 'gregorian', 'persian' ]
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  mixins: [ _dark_js__WEBPACK_IMPORTED_MODULE_1__.default, _form_js__WEBPACK_IMPORTED_MODULE_2__.default, _listeners_js__WEBPACK_IMPORTED_MODULE_3__.default ],
+  mixins: [ _dark_js__WEBPACK_IMPORTED_MODULE_1__["default"], _form_js__WEBPACK_IMPORTED_MODULE_2__["default"], _listeners_js__WEBPACK_IMPORTED_MODULE_3__["default"] ],
 
   props: {
     value: {
@@ -40988,7 +41193,7 @@ __webpack_require__.r(__webpack_exports__);
 const labelPositions = ['top', 'right', 'bottom', 'left']
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  mixins: [ _listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
+  mixins: [ _listeners_js__WEBPACK_IMPORTED_MODULE_0__["default"] ],
 
   props: {
     type: {
@@ -41266,7 +41471,7 @@ function stopAndPreventDrag (e) {
       if (this.dnd === true) {
         return h('div', {
           staticClass: `q-${type}__dnd absolute-full`,
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_1__.default)(this, 'dnd', {
+          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_1__["default"])(this, 'dnd', {
             dragenter: stopAndPreventDrag,
             dragover: stopAndPreventDrag,
             dragleave: this.__onDragLeave,
@@ -41441,7 +41646,7 @@ __webpack_require__.r(__webpack_exports__);
       this.__historyFullscreen = {
         handler: this.exitFullscreen
       }
-      _history_js__WEBPACK_IMPORTED_MODULE_0__.default.add(this.__historyFullscreen)
+      _history_js__WEBPACK_IMPORTED_MODULE_0__["default"].add(this.__historyFullscreen)
     },
 
     exitFullscreen () {
@@ -41450,7 +41655,7 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       if (this.__historyFullscreen !== void 0) {
-        _history_js__WEBPACK_IMPORTED_MODULE_0__.default.remove(this.__historyFullscreen)
+        _history_js__WEBPACK_IMPORTED_MODULE_0__["default"].remove(this.__historyFullscreen)
         this.__historyFullscreen = void 0
       }
       this.container.replaceChild(this.$el, this.fullscreenFillerNode)
@@ -41500,12 +41705,12 @@ __webpack_require__.r(__webpack_exports__);
         condition: () => { return this.hideOnRouteChange === true },
         handler: this.hide
       }
-      _history_js__WEBPACK_IMPORTED_MODULE_0__.default.add(this.__historyEntry)
+      _history_js__WEBPACK_IMPORTED_MODULE_0__["default"].add(this.__historyEntry)
     },
 
     __removeHistory () {
       if (this.__historyEntry !== void 0) {
-        _history_js__WEBPACK_IMPORTED_MODULE_0__.default.remove(this.__historyEntry)
+        _history_js__WEBPACK_IMPORTED_MODULE_0__["default"].remove(this.__historyEntry)
         this.__historyEntry = void 0
       }
     }
@@ -42113,7 +42318,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  mixins: [ _timeout_js__WEBPACK_IMPORTED_MODULE_1__.default, _listeners_js__WEBPACK_IMPORTED_MODULE_2__.default ],
+  mixins: [ _timeout_js__WEBPACK_IMPORTED_MODULE_1__["default"], _listeners_js__WEBPACK_IMPORTED_MODULE_2__["default"] ],
 
   props: {
     value: {
@@ -42297,19 +42502,19 @@ function getPanelWrapper (h) {
     attrs: { role: 'tabpanel' },
     // stop propagation of content emitted @input
     // which would tamper with Panel's model
-    on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__.default)(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_2__.stop })
+    on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__["default"])(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_2__.stop })
   }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_3__.slot)(this, 'default'))
 }
 
-const PanelWrapper = vue__WEBPACK_IMPORTED_MODULE_5__.default.extend({
+const PanelWrapper = vue__WEBPACK_IMPORTED_MODULE_5__["default"].extend({
   render: getPanelWrapper
 })
 
 const PanelParentMixin = {
-  mixins: [ _listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   directives: {
-    TouchSwipe: _directives_TouchSwipe_js__WEBPACK_IMPORTED_MODULE_0__.default
+    TouchSwipe: _directives_TouchSwipe_js__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
 
   props: {
@@ -42504,7 +42709,7 @@ const PanelParentMixin = {
           h('keep-alive', { props: this.keepAliveProps }, [
             h(
               this.needsUniqueWrapper === true
-                ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__.cacheWithFn)(this, this.contentKey, () => vue__WEBPACK_IMPORTED_MODULE_5__.default.extend({
+                ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__.cacheWithFn)(this, this.contentKey, () => vue__WEBPACK_IMPORTED_MODULE_5__["default"].extend({
                   name: this.contentKey,
                   render: getPanelWrapper
                 }))
@@ -42521,7 +42726,7 @@ const PanelParentMixin = {
             attrs: { role: 'tabpanel' },
             // stop propagation of content emitted @input
             // which would tamper with Panel's model
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__.default)(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_2__.stop })
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__["default"])(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_2__.stop })
           }, [ panel ])
         ]
 
@@ -42550,7 +42755,7 @@ const PanelParentMixin = {
 }
 
 const PanelChildMixin = {
-  mixins: [ _listeners_js__WEBPACK_IMPORTED_MODULE_1__.default ],
+  mixins: [ _listeners_js__WEBPACK_IMPORTED_MODULE_1__["default"] ],
 
   props: {
     name: {
@@ -42726,7 +42931,7 @@ const Portal = {
             $el: this.$el,
             $refs: this.$refs
           }
-          : new vue__WEBPACK_IMPORTED_MODULE_3__.default({
+          : new vue__WEBPACK_IMPORTED_MODULE_3__["default"]({
             name: 'QPortal',
             parent: this,
 
@@ -43076,7 +43281,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   directives: {
-    Ripple: _directives_Ripple_js__WEBPACK_IMPORTED_MODULE_0__.default
+    Ripple: _directives_Ripple_js__WEBPACK_IMPORTED_MODULE_0__["default"]
   },
 
   props: {
@@ -44258,7 +44463,7 @@ const commonVirtPropsList = Object.keys(commonVirtScrollProps)
 
   beforeMount () {
     buggyRTL === void 0 && detectBuggyRTL()
-    this.__onVirtualScrollEvt = (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_0__.default)(this.__onVirtualScrollEvt, this.$q.platform.is.ios === true ? 120 : 35)
+    this.__onVirtualScrollEvt = (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_0__["default"])(this.__onVirtualScrollEvt, this.$q.platform.is.ios === true ? 120 : 35)
     this.__setVirtualScrollSize()
   },
 
@@ -44280,21 +44485,21 @@ const commonVirtPropsList = Object.keys(commonVirtScrollProps)
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "AddressbarColor": () => (/* reexport safe */ _plugins_AddressbarColor_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "AppFullscreen": () => (/* reexport safe */ _plugins_AppFullscreen_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "AppVisibility": () => (/* reexport safe */ _plugins_AppVisibility_js__WEBPACK_IMPORTED_MODULE_2__.default),
-/* harmony export */   "BottomSheet": () => (/* reexport safe */ _plugins_BottomSheet_js__WEBPACK_IMPORTED_MODULE_3__.default),
-/* harmony export */   "Cookies": () => (/* reexport safe */ _plugins_Cookies_js__WEBPACK_IMPORTED_MODULE_4__.default),
-/* harmony export */   "Dark": () => (/* reexport safe */ _plugins_Dark_js__WEBPACK_IMPORTED_MODULE_5__.default),
-/* harmony export */   "Dialog": () => (/* reexport safe */ _plugins_Dialog_js__WEBPACK_IMPORTED_MODULE_6__.default),
-/* harmony export */   "LoadingBar": () => (/* reexport safe */ _plugins_LoadingBar_js__WEBPACK_IMPORTED_MODULE_7__.default),
-/* harmony export */   "Loading": () => (/* reexport safe */ _plugins_Loading_js__WEBPACK_IMPORTED_MODULE_8__.default),
-/* harmony export */   "Meta": () => (/* reexport safe */ _plugins_Meta_js__WEBPACK_IMPORTED_MODULE_9__.default),
-/* harmony export */   "Notify": () => (/* reexport safe */ _plugins_Notify_js__WEBPACK_IMPORTED_MODULE_10__.default),
-/* harmony export */   "Platform": () => (/* reexport safe */ _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_11__.default),
-/* harmony export */   "Screen": () => (/* reexport safe */ _plugins_Screen_js__WEBPACK_IMPORTED_MODULE_12__.default),
-/* harmony export */   "LocalStorage": () => (/* reexport safe */ _plugins_LocalStorage_js__WEBPACK_IMPORTED_MODULE_13__.default),
-/* harmony export */   "SessionStorage": () => (/* reexport safe */ _plugins_SessionStorage_js__WEBPACK_IMPORTED_MODULE_14__.default)
+/* harmony export */   "AddressbarColor": () => (/* reexport safe */ _plugins_AddressbarColor_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "AppFullscreen": () => (/* reexport safe */ _plugins_AppFullscreen_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "AppVisibility": () => (/* reexport safe */ _plugins_AppVisibility_js__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   "BottomSheet": () => (/* reexport safe */ _plugins_BottomSheet_js__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   "Cookies": () => (/* reexport safe */ _plugins_Cookies_js__WEBPACK_IMPORTED_MODULE_4__["default"]),
+/* harmony export */   "Dark": () => (/* reexport safe */ _plugins_Dark_js__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   "Dialog": () => (/* reexport safe */ _plugins_Dialog_js__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   "LoadingBar": () => (/* reexport safe */ _plugins_LoadingBar_js__WEBPACK_IMPORTED_MODULE_7__["default"]),
+/* harmony export */   "Loading": () => (/* reexport safe */ _plugins_Loading_js__WEBPACK_IMPORTED_MODULE_8__["default"]),
+/* harmony export */   "Meta": () => (/* reexport safe */ _plugins_Meta_js__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   "Notify": () => (/* reexport safe */ _plugins_Notify_js__WEBPACK_IMPORTED_MODULE_10__["default"]),
+/* harmony export */   "Platform": () => (/* reexport safe */ _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_11__["default"]),
+/* harmony export */   "Screen": () => (/* reexport safe */ _plugins_Screen_js__WEBPACK_IMPORTED_MODULE_12__["default"]),
+/* harmony export */   "LocalStorage": () => (/* reexport safe */ _plugins_LocalStorage_js__WEBPACK_IMPORTED_MODULE_13__["default"]),
+/* harmony export */   "SessionStorage": () => (/* reexport safe */ _plugins_SessionStorage_js__WEBPACK_IMPORTED_MODULE_14__["default"])
 /* harmony export */ });
 /* harmony import */ var _plugins_AddressbarColor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./plugins/AddressbarColor.js */ "./node_modules/quasar/src/plugins/AddressbarColor.js");
 /* harmony import */ var _plugins_AppFullscreen_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./plugins/AppFullscreen.js */ "./node_modules/quasar/src/plugins/AppFullscreen.js");
@@ -44353,10 +44558,10 @@ __webpack_require__.r(__webpack_exports__);
 let metaValue
 
 function getProp () {
-  if (_Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.winphone) {
+  if (_Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.winphone) {
     return 'msapplication-navbutton-color'
   }
-  if (_Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.safari) {
+  if (_Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.safari) {
     return 'apple-mobile-web-app-status-bar-style'
   }
   // Chrome, Firefox OS, Opera, Vivaldi
@@ -44395,15 +44600,15 @@ function setColor (hexColor) {
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   install ({ $q, cfg }) {
-    this.set = _Platform_js__WEBPACK_IMPORTED_MODULE_0__.isSSR === false && _Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.mobile === true && (
-      _Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.nativeMobile === true ||
-      _Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.winphone === true || _Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.safari === true ||
-      _Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.webkit === true || _Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.vivaldi === true
+    this.set = _Platform_js__WEBPACK_IMPORTED_MODULE_0__.isSSR === false && _Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.mobile === true && (
+      _Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.nativeMobile === true ||
+      _Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.winphone === true || _Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.safari === true ||
+      _Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.webkit === true || _Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.vivaldi === true
     )
       ? hexColor => {
         const val = hexColor || (0,_utils_colors_js__WEBPACK_IMPORTED_MODULE_2__.getBrand)('primary')
 
-        if (_Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.nativeMobile === true && window.StatusBar) {
+        if (_Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.nativeMobile === true && window.StatusBar) {
           window.StatusBar.backgroundColorByHexString(val)
         }
         else {
@@ -44523,8 +44728,8 @@ function promisify (target, fn) {
       }
     })
 
-    vue__WEBPACK_IMPORTED_MODULE_1__.default.util.defineReactive(this, 'isActive', this.isActive)
-    vue__WEBPACK_IMPORTED_MODULE_1__.default.util.defineReactive(this, 'activeEl', this.activeEl)
+    vue__WEBPACK_IMPORTED_MODULE_1__["default"].util.defineReactive(this, 'isActive', this.isActive)
+    vue__WEBPACK_IMPORTED_MODULE_1__["default"].util.defineReactive(this, 'activeEl', this.activeEl)
   }
 });
 
@@ -44579,7 +44784,7 @@ __webpack_require__.r(__webpack_exports__);
     update()
 
     if (evt && typeof document[prop] !== 'undefined') {
-      vue__WEBPACK_IMPORTED_MODULE_1__.default.util.defineReactive($q, 'appVisible', this.appVisible)
+      vue__WEBPACK_IMPORTED_MODULE_1__["default"].util.defineReactive($q, 'appVisible', this.appVisible)
       document.addEventListener(evt, update, false)
     }
   }
@@ -44606,7 +44811,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   install ({ $q }) {
-    this.create = $q.bottomSheet = (0,_utils_global_dialog_js__WEBPACK_IMPORTED_MODULE_1__.default)(_components_dialog_bottom_sheet_BottomSheet_js__WEBPACK_IMPORTED_MODULE_0__.default)
+    this.create = $q.bottomSheet = (0,_utils_global_dialog_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_components_dialog_bottom_sheet_BottomSheet_js__WEBPACK_IMPORTED_MODULE_0__["default"])
   }
 });
 
@@ -44908,8 +45113,8 @@ const Dark = {
       this.set(initialVal)
     }
 
-    vue__WEBPACK_IMPORTED_MODULE_2__.default.util.defineReactive(this, 'isActive', this.isActive)
-    vue__WEBPACK_IMPORTED_MODULE_2__.default.util.defineReactive($q, 'dark', this)
+    vue__WEBPACK_IMPORTED_MODULE_2__["default"].util.defineReactive(this, 'isActive', this.isActive)
+    vue__WEBPACK_IMPORTED_MODULE_2__["default"].util.defineReactive($q, 'dark', this)
   },
 
   set (val) {
@@ -44965,7 +45170,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   install ({ $q }) {
-    this.create = $q.dialog = (0,_utils_global_dialog_js__WEBPACK_IMPORTED_MODULE_1__.default)(_components_dialog_plugin_DialogPlugin_js__WEBPACK_IMPORTED_MODULE_0__.default)
+    this.create = $q.dialog = (0,_utils_global_dialog_js__WEBPACK_IMPORTED_MODULE_1__["default"])(_components_dialog_plugin_DialogPlugin_js__WEBPACK_IMPORTED_MODULE_0__["default"])
   }
 });
 
@@ -45008,7 +45213,7 @@ const
     spinnerColor: 'white',
     messageColor: 'white',
     backgroundColor: 'black',
-    spinner: _components_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_0__.default,
+    spinner: _components_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_0__["default"],
     customClass: ''
   },
   defaults = { ...originalDefaults }
@@ -45042,7 +45247,7 @@ const Loading = {
       const node = document.createElement('div')
       document.body.appendChild(node)
 
-      vm = new vue__WEBPACK_IMPORTED_MODULE_4__.default({
+      vm = new vue__WEBPACK_IMPORTED_MODULE_4__["default"]({
         name: 'QLoading',
 
         el: node,
@@ -45057,7 +45262,7 @@ const Loading = {
               name: 'q-transition--fade',
               appear: true
             },
-            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'tr', {
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__["default"])(this, 'tr', {
               'after-leave': () => {
                 // might be called to finalize
                 // previous leave, even if it was cancelled
@@ -45117,7 +45322,7 @@ const Loading = {
 }
 
 if (_Platform_js__WEBPACK_IMPORTED_MODULE_1__.isSSR === false) {
-  vue__WEBPACK_IMPORTED_MODULE_4__.default.util.defineReactive(Loading, 'isActive', Loading.isActive)
+  vue__WEBPACK_IMPORTED_MODULE_4__["default"].util.defineReactive(Loading, 'isActive', Loading.isActive)
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Loading);
@@ -45163,9 +45368,9 @@ __webpack_require__.r(__webpack_exports__);
       ? { ...cfg.loadingBar }
       : {}
 
-    const bar = $q.loadingBar = new vue__WEBPACK_IMPORTED_MODULE_3__.default({
+    const bar = $q.loadingBar = new vue__WEBPACK_IMPORTED_MODULE_3__["default"]({
       name: 'LoadingBar',
-      render: h => h(_components_ajax_bar_QAjaxBar_js__WEBPACK_IMPORTED_MODULE_2__.default, {
+      render: h => h(_components_ajax_bar_QAjaxBar_js__WEBPACK_IMPORTED_MODULE_2__["default"], {
         ref: 'bar',
         props
       })
@@ -45187,8 +45392,8 @@ __webpack_require__.r(__webpack_exports__);
       }
     })
 
-    vue__WEBPACK_IMPORTED_MODULE_3__.default.util.defineReactive(this, 'isActive', this.isActive)
-    vue__WEBPACK_IMPORTED_MODULE_3__.default.util.defineReactive(bar, 'isActive', this.isActive)
+    vue__WEBPACK_IMPORTED_MODULE_3__["default"].util.defineReactive(this, 'isActive', this.isActive)
+    vue__WEBPACK_IMPORTED_MODULE_3__["default"].util.defineReactive(bar, 'isActive', this.isActive)
     bar.setDefaults = this.setDefaults
 
     document.body.appendChild(bar.$parent.$el)
@@ -45387,7 +45592,7 @@ function parseMeta (component, meta) {
 
   // if it has meta
   if (hasMeta(component) === true) {
-    (0,_utils_extend_js__WEBPACK_IMPORTED_MODULE_1__.default)(true, meta, component.__qMeta)
+    (0,_utils_extend_js__WEBPACK_IMPORTED_MODULE_1__["default"])(true, meta, component.__qMeta)
 
     if (component.$options.meta.stopPropagation === true) {
       return
@@ -45516,11 +45721,11 @@ function triggerMeta () {
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   install ({ queues }) {
     if (_Platform_js__WEBPACK_IMPORTED_MODULE_0__.isSSR === true) {
-      vue__WEBPACK_IMPORTED_MODULE_2__.default.prototype.$getMetaHTML = app => {
+      vue__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.$getMetaHTML = app => {
         return (html, ctx) => getServerMeta(app, html, ctx)
       }
 
-      vue__WEBPACK_IMPORTED_MODULE_2__.default.mixin({ beforeCreate })
+      vue__WEBPACK_IMPORTED_MODULE_2__["default"].mixin({ beforeCreate })
 
       queues.server.push((_, ctx) => {
         ctx.ssr.Q_HTML_ATTRS += ' %%Q_HTML_ATTRS%%'
@@ -45534,7 +45739,7 @@ function triggerMeta () {
     else {
       ssrTakeover = _Platform_js__WEBPACK_IMPORTED_MODULE_0__.fromSSR
 
-      vue__WEBPACK_IMPORTED_MODULE_2__.default.mixin({
+      vue__WEBPACK_IMPORTED_MODULE_2__["default"].mixin({
         beforeCreate,
         created () {
           if (hasMeta(this) === true) {
@@ -45695,7 +45900,7 @@ const Notifications = {
         notif.spinner = false
       }
       else if (notif.spinner === true) {
-        notif.spinner = _components_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_3__.default
+        notif.spinner = _components_spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_3__["default"]
       }
 
       notif.meta = {
@@ -46008,7 +46213,7 @@ const Notifications = {
           }
           else if (notif.icon) {
             mainChild.push(
-              h(_components_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+              h(_components_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__["default"], {
                 staticClass: 'q-notification__icon',
                 attrs: { role: 'img' },
                 props: { name: notif.icon }
@@ -46017,7 +46222,7 @@ const Notifications = {
           }
           else if (notif.avatar) {
             mainChild.push(
-              h(_components_avatar_QAvatar_js__WEBPACK_IMPORTED_MODULE_0__.default, { staticClass: 'q-notification__avatar' }, [
+              h(_components_avatar_QAvatar_js__WEBPACK_IMPORTED_MODULE_0__["default"], { staticClass: 'q-notification__avatar' }, [
                 h('img', { attrs: { src: notif.avatar, 'aria-hidden': 'true' } })
               ])
             )
@@ -46044,7 +46249,7 @@ const Notifications = {
         notif.actions !== void 0 && child.push(
           h('div', {
             staticClass: meta.actionsClass
-          }, notif.actions.map(action => h(_components_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_2__.default, { ...action })))
+          }, notif.actions.map(action => h(_components_btn_QBtn_js__WEBPACK_IMPORTED_MODULE_2__["default"], { ...action })))
         )
 
         meta.badge > 1 && child.push(
@@ -46124,7 +46329,7 @@ const Notifications = {
     const node = document.createElement('div')
     document.body.appendChild(node)
 
-    this.__vm = new vue__WEBPACK_IMPORTED_MODULE_7__.default(Notifications)
+    this.__vm = new vue__WEBPACK_IMPORTED_MODULE_7__["default"](Notifications)
     this.__vm.$mount(node)
   }
 });
@@ -46478,7 +46683,7 @@ const Platform = {
 
       // we need to make platform reactive
       // for the takeover phase
-      vue__WEBPACK_IMPORTED_MODULE_0__.default.util.defineReactive($q, 'platform', this)
+      vue__WEBPACK_IMPORTED_MODULE_0__["default"].util.defineReactive($q, 'platform', this)
     }
     else {
       // we don't have any business with SSR, so
@@ -46661,7 +46866,7 @@ const { passive } = _utils_event_js__WEBPACK_IMPORTED_MODULE_1__.listenOpts
       this.setDebounce = delay => {
         updateEvt !== void 0 && target.removeEventListener('resize', updateEvt, passive)
         updateEvt = delay > 0
-          ? (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_2__.default)(update, delay)
+          ? (0,_utils_debounce_js__WEBPACK_IMPORTED_MODULE_2__["default"])(update, delay)
           : update
         target.addEventListener('resize', updateEvt, passive)
       }
@@ -46688,7 +46893,7 @@ const { passive } = _utils_event_js__WEBPACK_IMPORTED_MODULE_1__.listenOpts
       start()
     }
 
-    vue__WEBPACK_IMPORTED_MODULE_3__.default.util.defineReactive($q, 'screen', this)
+    vue__WEBPACK_IMPORTED_MODULE_3__["default"].util.defineReactive($q, 'screen', this)
   }
 });
 
@@ -46786,24 +46991,24 @@ const mixin = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "clone": () => (/* reexport safe */ _utils_clone_js__WEBPACK_IMPORTED_MODULE_0__.default),
-/* harmony export */   "colors": () => (/* reexport safe */ _utils_colors_js__WEBPACK_IMPORTED_MODULE_1__.default),
-/* harmony export */   "copyToClipboard": () => (/* reexport safe */ _utils_copy_to_clipboard_js__WEBPACK_IMPORTED_MODULE_2__.default),
-/* harmony export */   "date": () => (/* reexport safe */ _utils_date_js__WEBPACK_IMPORTED_MODULE_3__.default),
-/* harmony export */   "debounce": () => (/* reexport safe */ _utils_debounce_js__WEBPACK_IMPORTED_MODULE_4__.default),
-/* harmony export */   "dom": () => (/* reexport safe */ _utils_dom_js__WEBPACK_IMPORTED_MODULE_5__.default),
-/* harmony export */   "event": () => (/* reexport safe */ _utils_event_js__WEBPACK_IMPORTED_MODULE_6__.default),
-/* harmony export */   "exportFile": () => (/* reexport safe */ _utils_export_file_js__WEBPACK_IMPORTED_MODULE_7__.default),
-/* harmony export */   "extend": () => (/* reexport safe */ _utils_extend_js__WEBPACK_IMPORTED_MODULE_8__.default),
-/* harmony export */   "format": () => (/* reexport safe */ _utils_format_js__WEBPACK_IMPORTED_MODULE_9__.default),
-/* harmony export */   "frameDebounce": () => (/* reexport safe */ _utils_frame_debounce_js__WEBPACK_IMPORTED_MODULE_10__.default),
+/* harmony export */   "clone": () => (/* reexport safe */ _utils_clone_js__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "colors": () => (/* reexport safe */ _utils_colors_js__WEBPACK_IMPORTED_MODULE_1__["default"]),
+/* harmony export */   "copyToClipboard": () => (/* reexport safe */ _utils_copy_to_clipboard_js__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   "date": () => (/* reexport safe */ _utils_date_js__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   "debounce": () => (/* reexport safe */ _utils_debounce_js__WEBPACK_IMPORTED_MODULE_4__["default"]),
+/* harmony export */   "dom": () => (/* reexport safe */ _utils_dom_js__WEBPACK_IMPORTED_MODULE_5__["default"]),
+/* harmony export */   "event": () => (/* reexport safe */ _utils_event_js__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   "exportFile": () => (/* reexport safe */ _utils_export_file_js__WEBPACK_IMPORTED_MODULE_7__["default"]),
+/* harmony export */   "extend": () => (/* reexport safe */ _utils_extend_js__WEBPACK_IMPORTED_MODULE_8__["default"]),
+/* harmony export */   "format": () => (/* reexport safe */ _utils_format_js__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   "frameDebounce": () => (/* reexport safe */ _utils_frame_debounce_js__WEBPACK_IMPORTED_MODULE_10__["default"]),
 /* harmony export */   "noop": () => (/* reexport safe */ _utils_event_js__WEBPACK_IMPORTED_MODULE_6__.noop),
-/* harmony export */   "openURL": () => (/* reexport safe */ _utils_open_url_js__WEBPACK_IMPORTED_MODULE_11__.default),
-/* harmony export */   "morph": () => (/* reexport safe */ _utils_morph_js__WEBPACK_IMPORTED_MODULE_12__.default),
-/* harmony export */   "patterns": () => (/* reexport safe */ _utils_patterns_js__WEBPACK_IMPORTED_MODULE_13__.default),
-/* harmony export */   "scroll": () => (/* reexport safe */ _utils_scroll_js__WEBPACK_IMPORTED_MODULE_14__.default),
-/* harmony export */   "throttle": () => (/* reexport safe */ _utils_throttle_js__WEBPACK_IMPORTED_MODULE_15__.default),
-/* harmony export */   "uid": () => (/* reexport safe */ _utils_uid_js__WEBPACK_IMPORTED_MODULE_16__.default)
+/* harmony export */   "openURL": () => (/* reexport safe */ _utils_open_url_js__WEBPACK_IMPORTED_MODULE_11__["default"]),
+/* harmony export */   "morph": () => (/* reexport safe */ _utils_morph_js__WEBPACK_IMPORTED_MODULE_12__["default"]),
+/* harmony export */   "patterns": () => (/* reexport safe */ _utils_patterns_js__WEBPACK_IMPORTED_MODULE_13__["default"]),
+/* harmony export */   "scroll": () => (/* reexport safe */ _utils_scroll_js__WEBPACK_IMPORTED_MODULE_14__["default"]),
+/* harmony export */   "throttle": () => (/* reexport safe */ _utils_throttle_js__WEBPACK_IMPORTED_MODULE_15__["default"]),
+/* harmony export */   "uid": () => (/* reexport safe */ _utils_uid_js__WEBPACK_IMPORTED_MODULE_16__["default"])
 /* harmony export */ });
 /* harmony import */ var _utils_clone_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/clone.js */ "./node_modules/quasar/src/utils/clone.js");
 /* harmony import */ var _utils_colors_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./utils/colors.js */ "./node_modules/quasar/src/utils/colors.js");
@@ -47875,7 +48080,7 @@ function __splitDate (str, mask, dateLocale, calendar, defaultModel) {
   }
 
   const
-    langOpts = dateLocale !== void 0 ? dateLocale : _lang_js__WEBPACK_IMPORTED_MODULE_3__.default.props.date,
+    langOpts = dateLocale !== void 0 ? dateLocale : _lang_js__WEBPACK_IMPORTED_MODULE_3__["default"].props.date,
     months = langOpts.months,
     monthsShort = langOpts.monthsShort
 
@@ -48519,7 +48724,7 @@ function formatDate (val, mask, dateLocale, __forcedYear, __forcedTimezoneOffset
 
   const locale = dateLocale !== void 0
     ? dateLocale
-    : _lang_js__WEBPACK_IMPORTED_MODULE_3__.default.props.date
+    : _lang_js__WEBPACK_IMPORTED_MODULE_3__["default"].props.date
 
   return mask.replace(
     token,
@@ -49435,7 +49640,7 @@ function merge (target, source) {
       }
     }
 
-    let vm = new vue__WEBPACK_IMPORTED_MODULE_1__.default({
+    let vm = new vue__WEBPACK_IMPORTED_MODULE_1__["default"]({
       name: 'QGlobalDialog',
 
       el: node,
@@ -50711,7 +50916,7 @@ function parseFeatures (winFeatures) {
 function openWindow (url, reject, windowFeatures) {
   let open = window.open
 
-  if (_plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.cordova === true) {
+  if (_plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.cordova === true) {
     if (cordova !== void 0 && cordova.InAppBrowser !== void 0 && cordova.InAppBrowser.open !== void 0) {
       open = cordova.InAppBrowser.open
     }
@@ -50721,14 +50926,14 @@ function openWindow (url, reject, windowFeatures) {
       })
     }
   }
-  else if (vue__WEBPACK_IMPORTED_MODULE_2__.default.prototype.$q.electron !== void 0) {
-    return vue__WEBPACK_IMPORTED_MODULE_2__.default.prototype.$q.electron.shell.openExternal(url)
+  else if (vue__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.$q.electron !== void 0) {
+    return vue__WEBPACK_IMPORTED_MODULE_2__["default"].prototype.$q.electron.shell.openExternal(url)
   }
 
   const win = open(url, '_blank', parseFeatures(windowFeatures))
 
   if (win) {
-    _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.desktop && win.focus()
+    _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.desktop && win.focus()
     return win
   }
   else {
@@ -50738,7 +50943,7 @@ function openWindow (url, reject, windowFeatures) {
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((url, reject, windowFeatures) => {
   if (
-    _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.ios === true &&
+    _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.ios === true &&
     window.SafariViewController !== void 0
   ) {
     window.SafariViewController.isAvailable(available => {
@@ -51399,7 +51604,7 @@ function clearSelection () {
     }
     else if (selection.removeAllRanges !== void 0) {
       selection.removeAllRanges()
-      _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.default.is.mobile !== true && selection.addRange(document.createRange())
+      _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__["default"].is.mobile !== true && selection.addRange(document.createRange())
     }
   }
   else if (document.selection !== void 0) {
@@ -51899,10 +52104,10 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   version: _package_json__WEBPACK_IMPORTED_MODULE_1__.version,
-  install: _install_js__WEBPACK_IMPORTED_MODULE_0__.default,
-  lang: _lang_js__WEBPACK_IMPORTED_MODULE_2__.default,
-  iconSet: _icon_set_js__WEBPACK_IMPORTED_MODULE_3__.default,
-  ssrUpdate: _ssr_update_js__WEBPACK_IMPORTED_MODULE_4__.default
+  install: _install_js__WEBPACK_IMPORTED_MODULE_0__["default"],
+  lang: _lang_js__WEBPACK_IMPORTED_MODULE_2__["default"],
+  iconSet: _icon_set_js__WEBPACK_IMPORTED_MODULE_3__["default"],
+  ssrUpdate: _ssr_update_js__WEBPACK_IMPORTED_MODULE_4__["default"]
 });
 
 
@@ -52694,11 +52899,11 @@ var options = {};
 options.insert = "head";
 options.singleton = false;
 
-var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_10_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_10_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_layout_vue_vue_type_style_index_0_id_0d6ae8e6_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_1__.default, options);
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_10_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_10_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_layout_vue_vue_type_style_index_0_id_0d6ae8e6_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_1__["default"], options);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_10_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_10_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_layout_vue_vue_type_style_index_0_id_0d6ae8e6_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_1__.default.locals || {});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_10_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_10_0_rules_0_use_2_node_modules_vue_loader_lib_index_js_vue_loader_options_layout_vue_vue_type_style_index_0_id_0d6ae8e6_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
 
 /***/ }),
 
@@ -52724,11 +52929,11 @@ var options = {};
 options.insert = "head";
 options.singleton = false;
 
-var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Card_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__.default, options);
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Card_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__["default"], options);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Card_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__.default.locals || {});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_Card_vue_vue_type_style_index_0_lang_scss___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
 
 /***/ }),
 
@@ -52754,11 +52959,11 @@ var options = {};
 options.insert = "head";
 options.singleton = false;
 
-var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_ba2a5068_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_1__.default, options);
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_ba2a5068_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_1__["default"], options);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_ba2a5068_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_1__.default.locals || {});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_13_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_style_index_0_id_ba2a5068_scoped_true_lang_scss___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
 
 /***/ }),
 
@@ -52784,11 +52989,11 @@ var options = {};
 options.insert = "head";
 options.singleton = false;
 
-var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_EmpresaAvatar_vue_vue_type_style_index_0_id_5f950d5f_lang_sass_scoped_true___WEBPACK_IMPORTED_MODULE_1__.default, options);
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_EmpresaAvatar_vue_vue_type_style_index_0_id_5f950d5f_lang_sass_scoped_true___WEBPACK_IMPORTED_MODULE_1__["default"], options);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_EmpresaAvatar_vue_vue_type_style_index_0_id_5f950d5f_lang_sass_scoped_true___WEBPACK_IMPORTED_MODULE_1__.default.locals || {});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_EmpresaAvatar_vue_vue_type_style_index_0_id_5f950d5f_lang_sass_scoped_true___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
 
 /***/ }),
 
@@ -52814,11 +53019,11 @@ var options = {};
 options.insert = "head";
 options.singleton = false;
 
-var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_FormularioNegocios_vue_vue_type_style_index_0_id_681591ee_lang_sass_scoped_true___WEBPACK_IMPORTED_MODULE_1__.default, options);
+var update = _node_modules_style_loader_dist_runtime_injectStylesIntoStyleTag_js__WEBPACK_IMPORTED_MODULE_0___default()(_node_modules_css_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_FormularioNegocios_vue_vue_type_style_index_0_id_681591ee_lang_sass_scoped_true___WEBPACK_IMPORTED_MODULE_1__["default"], options);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_FormularioNegocios_vue_vue_type_style_index_0_id_681591ee_lang_sass_scoped_true___WEBPACK_IMPORTED_MODULE_1__.default.locals || {});
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_css_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_2_node_modules_sass_loader_dist_cjs_js_clonedRuleSet_16_0_rules_0_use_3_node_modules_vue_loader_lib_index_js_vue_loader_options_FormularioNegocios_vue_vue_type_style_index_0_id_681591ee_lang_sass_scoped_true___WEBPACK_IMPORTED_MODULE_1__["default"].locals || {});
 
 /***/ }),
 
@@ -54971,8 +55176,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__.default)(
-  _Card_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _Card_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _Card_vue_vue_type_template_id_a5f338fa___WEBPACK_IMPORTED_MODULE_0__.render,
   _Card_vue_vue_type_template_id_a5f338fa___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
   false,
@@ -55012,8 +55217,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__.default)(
-  _EmpresaAvatar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _EmpresaAvatar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _EmpresaAvatar_vue_vue_type_template_id_5f950d5f_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
   _EmpresaAvatar_vue_vue_type_template_id_5f950d5f_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
   false,
@@ -55053,8 +55258,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__.default)(
-  _FormularioNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _FormularioNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _FormularioNegocios_vue_vue_type_template_id_681591ee_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
   _FormularioNegocios_vue_vue_type_template_id_681591ee_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
   false,
@@ -55094,8 +55299,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__.default)(
-  _index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _index_vue_vue_type_template_id_ba2a5068_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
   _index_vue_vue_type_template_id_ba2a5068_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
   false,
@@ -55135,8 +55340,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__.default)(
-  _layout_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _layout_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _layout_vue_vue_type_template_id_0d6ae8e6_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
   _layout_vue_vue_type_template_id_0d6ae8e6_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
   false,
@@ -55174,8 +55379,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 ;
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__.default)(
-  _ListaNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _ListaNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _ListaNegocios_vue_vue_type_template_id_5a74079b_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
   _ListaNegocios_vue_vue_type_template_id_5a74079b_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
   false,
@@ -55213,8 +55418,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 ;
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__.default)(
-  _PerfilNegocio_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _PerfilNegocio_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _PerfilNegocio_vue_vue_type_template_id_693207ed_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
   _PerfilNegocio_vue_vue_type_template_id_693207ed_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
   false,
@@ -55252,8 +55457,8 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 ;
-var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__.default)(
-  _Registrar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__.default,
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _Registrar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _Registrar_vue_vue_type_template_id_332c68bc___WEBPACK_IMPORTED_MODULE_0__.render,
   _Registrar_vue_vue_type_template_id_332c68bc___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
   false,
@@ -55282,7 +55487,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Card_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Card.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/components/Card.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Card_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Card_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
@@ -55298,7 +55503,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_EmpresaAvatar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./EmpresaAvatar.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/components/EmpresaAvatar.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_EmpresaAvatar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_EmpresaAvatar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
@@ -55314,7 +55519,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_FormularioNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./FormularioNegocios.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/components/FormularioNegocios.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_FormularioNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_FormularioNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
@@ -55330,7 +55535,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./index.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/index.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_index_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
@@ -55346,7 +55551,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_layout_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./layout.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/layouts/layout.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_layout_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_layout_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
@@ -55362,7 +55567,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ListaNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./ListaNegocios.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/ListaNegocios.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ListaNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ListaNegocios_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
@@ -55378,7 +55583,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PerfilNegocio_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./PerfilNegocio.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/PerfilNegocio.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PerfilNegocio_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_PerfilNegocio_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
@@ -55394,7 +55599,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Registrar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./Registrar.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/site/js/pages/Registrar.vue?vue&type=script&lang=js&");
- /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Registrar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__.default); 
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Registrar_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 
@@ -76010,6 +76215,17 @@ var index = {
 
 /***/ }),
 
+/***/ "./node_modules/axios/package.json":
+/*!*****************************************!*\
+  !*** ./node_modules/axios/package.json ***!
+  \*****************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"name":"axios","version":"0.21.3","description":"Promise based HTTP client for the browser and node.js","main":"index.js","scripts":{"test":"grunt test","start":"node ./sandbox/server.js","build":"NODE_ENV=production grunt build","preversion":"npm test","version":"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json","postversion":"git push && git push --tags","examples":"node ./examples/server.js","coveralls":"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js","fix":"eslint --fix lib/**/*.js"},"repository":{"type":"git","url":"https://github.com/axios/axios.git"},"keywords":["xhr","http","ajax","promise","node"],"author":"Matt Zabriskie","license":"MIT","bugs":{"url":"https://github.com/axios/axios/issues"},"homepage":"https://axios-http.com","devDependencies":{"coveralls":"^3.0.0","es6-promise":"^4.2.4","grunt":"^1.3.0","grunt-banner":"^0.6.0","grunt-cli":"^1.2.0","grunt-contrib-clean":"^1.1.0","grunt-contrib-watch":"^1.0.0","grunt-eslint":"^23.0.0","grunt-karma":"^4.0.0","grunt-mocha-test":"^0.13.3","grunt-ts":"^6.0.0-beta.19","grunt-webpack":"^4.0.2","istanbul-instrumenter-loader":"^1.0.0","jasmine-core":"^2.4.1","karma":"^6.3.2","karma-chrome-launcher":"^3.1.0","karma-firefox-launcher":"^2.1.0","karma-jasmine":"^1.1.1","karma-jasmine-ajax":"^0.1.13","karma-safari-launcher":"^1.0.0","karma-sauce-launcher":"^4.3.6","karma-sinon":"^1.0.5","karma-sourcemap-loader":"^0.3.8","karma-webpack":"^4.0.2","load-grunt-tasks":"^3.5.2","minimist":"^1.2.0","mocha":"^8.2.1","sinon":"^4.5.0","terser-webpack-plugin":"^4.2.3","typescript":"^4.0.5","url-search-params":"^0.10.0","webpack":"^4.44.2","webpack-dev-server":"^3.11.0"},"browser":{"./lib/adapters/http.js":"./lib/adapters/xhr.js"},"jsdelivr":"dist/axios.min.js","unpkg":"dist/axios.min.js","typings":"./index.d.ts","dependencies":{"follow-redirects":"^1.14.0"},"bundlesize":[{"path":"./dist/axios.min.js","threshold":"5kB"}]}');
+
+/***/ }),
+
 /***/ "./node_modules/quasar/package.json":
 /*!******************************************!*\
   !*** ./node_modules/quasar/package.json ***!
@@ -76125,7 +76341,7 @@ __webpack_require__.r(__webpack_exports__);
 
  // import iconSet from 'quasar/icon-set/fontawesome-v5'
 
-vue__WEBPACK_IMPORTED_MODULE_6__.default.use(quasar__WEBPACK_IMPORTED_MODULE_3__.default, {
+vue__WEBPACK_IMPORTED_MODULE_6__["default"].use(quasar__WEBPACK_IMPORTED_MODULE_3__["default"], {
   // iconSet: iconSet,
   config: {
     dark: false,
@@ -76133,14 +76349,14 @@ vue__WEBPACK_IMPORTED_MODULE_6__.default.use(quasar__WEBPACK_IMPORTED_MODULE_3__
     preFetch: true
   }
 });
-vue__WEBPACK_IMPORTED_MODULE_6__.default.use(vue_masonry_css__WEBPACK_IMPORTED_MODULE_4__.default);
-vue__WEBPACK_IMPORTED_MODULE_6__.default.use((vue_croppa__WEBPACK_IMPORTED_MODULE_5___default()));
-window.vue = new vue__WEBPACK_IMPORTED_MODULE_6__.default({
-  router: _router__WEBPACK_IMPORTED_MODULE_1__.default,
-  store: _store_store__WEBPACK_IMPORTED_MODULE_0__.default,
+vue__WEBPACK_IMPORTED_MODULE_6__["default"].use(vue_masonry_css__WEBPACK_IMPORTED_MODULE_4__["default"]);
+vue__WEBPACK_IMPORTED_MODULE_6__["default"].use((vue_croppa__WEBPACK_IMPORTED_MODULE_5___default()));
+window.vue = new vue__WEBPACK_IMPORTED_MODULE_6__["default"]({
+  router: _router__WEBPACK_IMPORTED_MODULE_1__["default"],
+  store: _store_store__WEBPACK_IMPORTED_MODULE_0__["default"],
   data: {},
   render: function render(h) {
-    return h(_index__WEBPACK_IMPORTED_MODULE_2__.default);
+    return h(_index__WEBPACK_IMPORTED_MODULE_2__["default"]);
   }
 }).$mount('#appsite');
 })();

@@ -90,7 +90,7 @@ export default {
       let obj = {
         pagina: this.pagina,
         numlist: this.numlist,
-        categoria: this.categoriaSeleccionada
+        categoria: this.categoriaSeleccionada.value
       }
       await this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
     },
@@ -100,7 +100,7 @@ export default {
         let obj = {
           pagina: this.$store.state.admin.empresas.data.pagina+n,
           numlist: this.$store.state.admin.empresas.data.numList,
-          categoria: this.categoriaSeleccionada
+          categoria: this.categoriaSeleccionada.value
         }
         this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
       }
@@ -112,7 +112,7 @@ export default {
         let obj = {
           pagina: this.$store.state.admin.empresas.data.pagina+n,
           numlist: this.$store.state.admin.empresas.data.numList,
-          categoria: this.categoriaSeleccionada
+          categoria: this.categoriaSeleccionada.value
         }
         this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
       }
