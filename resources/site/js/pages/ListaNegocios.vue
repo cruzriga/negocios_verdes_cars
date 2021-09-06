@@ -3,9 +3,6 @@
     </div> -->
 	<div class="q-gutter-lg" style="min-height: calc(100vh - 172px)">
 		<q-item-label  header>
-			<q-toolbar>
-				<!-- q-select v-model="model" :options="categories" label="Categorías" / -->
-			</q-toolbar>
 			<q-toolbar class="text-primary" style="height: 50px">
 				<q-input @keyup.enter="buscar"  v-model="search" placeholder="Buscar" color="teal" >
 				<template v-slot:prepend>
@@ -13,6 +10,17 @@
 					<q-icon v-else name="clear" class="cursor-pointer" @click="search = ''" />
 				</template>
 				</q-input>
+
+        <!-- Filtro de Categorías -->
+        <q-select v-model="categoriaSeleccionada" @input="AXIO_GET_EMPRESAS" :options="categorias" clearable label="Filtrar por categorías" style="min-width: 250px; max-width:400px;" class="q-pl-lg">
+          <template v-slot:no-option>
+            <q-item>
+              <q-item-section class="text-grey">Seleccione un filtro </q-item-section>
+            </q-item>
+          </template>
+        </q-select>
+        <!-- /Filtro de Categorías -->
+
 				<q-space/>
 				<div>
 					<span class="q-mr-md text-teal text-body2">
@@ -35,6 +43,7 @@
 </template>
 
 <script>
+import {mapGetters} from "vuex";
 import Card from '../components/Card'
 export default {
   name: 'ListaEmpresas',
@@ -44,12 +53,23 @@ export default {
       items : [1],
       pagina:0,
       numlist: 50,
-      search:''
+      search:'',
+      categoriaSeleccionada: {
+        label: 'Seleccionar categoría',
+        value: null,
+      },
     }
   }, 
   beforeMount() {
     this.AXIO_GET_EMPRESAS();
-  },     
+  },
+  computed: {
+    categorias() {
+      return this.$store.state.listado.ListaEmpresas.data.categorias.map((c) => {
+                  return { value: c.idcategoria, label: c.nombre }
+              });
+    }
+  },    
   methods: {
     buscar(){
 
@@ -59,19 +79,22 @@ export default {
       }
       this.$store.dispatch('listado/BUSCAR_EMPRESAS',obj);
     },
-    AXIO_GET_EMPRESAS() {
+    async AXIO_GET_EMPRESAS() {
+      console.log('Categoria seleccionada: ', this.categoriaSeleccionada.value)
       let obj = {
         pagina: this.pagina,
-        numlist: this.numlist
+        numlist: this.numlist,
+        categoria: this.categoriaSeleccionada
       }
-      this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
+      await this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
     },
     backPage(n){
-      let actual = this.$store.state.admin.empresas.data.pagina+1
+      let actual = this.$store.state.admin.empresas.data.pagina+1;
       if(actual!=1){
         let obj = {
           pagina: this.$store.state.admin.empresas.data.pagina+n,
-          numlist: this.$store.state.admin.empresas.data.numList
+          numlist: this.$store.state.admin.empresas.data.numList,
+          categoria: this.categoriaSeleccionada
         }
         this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
       }
@@ -82,7 +105,8 @@ export default {
       if(actual!=total){
         let obj = {
           pagina: this.$store.state.admin.empresas.data.pagina+n,
-          numlist: this.$store.state.admin.empresas.data.numList
+          numlist: this.$store.state.admin.empresas.data.numList,
+          categoria: this.categoriaSeleccionada
         }
         this.$store.dispatch('listado/CARGAR_EMPRESAS',obj);
       }

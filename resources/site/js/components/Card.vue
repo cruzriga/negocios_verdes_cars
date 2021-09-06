@@ -68,11 +68,7 @@
 <script>
 export default {
   name: 'Card',
-  props: {
-    prop: {
-      type: Object
-    }
-  },
+  props: ['prop'],
   data () {
     return {
       root_url,

@@ -16,7 +16,10 @@ const store =
             ListaEmpresas:{
                 data:{
                     pagina:0,
-                    empresas:[]
+                    empresas:[],
+                    categorias: [],
+                    subcategorias: [],
+                    tipossubcategorias: []
                 }
             },
             cargando:false
@@ -25,6 +28,7 @@ const store =
             bg(state){
                 return ;
             },
+            
         },
         mutations:{
             [EMPRESAS](state, empresas){
@@ -38,7 +42,7 @@ const store =
         actions:{
             async CARGAR_EMPRESAS ({ commit },datos){
                 commit(CARGANDO,true)
-                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina='+datos.pagina+'&numlist='+datos.numlist)
+                let resp = await request('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist + '&categoria=' + datos.categoria)
                 // console.log(resp)
                 if(resp.ok){
                     if (resp.resp!=null && resp.resp!='') {

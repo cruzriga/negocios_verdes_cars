@@ -189,8 +189,9 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $numList = $input->get("numlist", 50, "int");
         $buscar = $input->get("buscar", '', "string");
         $campo = $input->get("campo", '', "string");
+        $categoriaFiltro = $input->get("categoria", 0, "int");
 
-        $empresas= $model->getEmpresas($pagina,$numList,$buscar,$campo);
+        $empresas= $model->getEmpresas($pagina,$numList,$buscar,$campo, $categoriaFiltro);
         if (empty($empresas)){ echo false;die;}
         foreach ($empresas as $key => $value) {
             $categoria          = $model->getCategorias($value->idcategoria)[0];
@@ -224,6 +225,9 @@ class MrNegociosVerdeController extends JControllerLegacy {
         $datos->pagina = $pagina;
         $datos->numList = $numList;
         $datos->empresas = $empresas;
+        $datos->categorias = $model->getCategorias();
+        $datos->subcategorias = $model->getSubCategorias();
+        $datos->tipossubcategorias = $model->getTipoSubCategorias();
         try 
         {   
             echo new JResponseJson($datos, "It worked!");

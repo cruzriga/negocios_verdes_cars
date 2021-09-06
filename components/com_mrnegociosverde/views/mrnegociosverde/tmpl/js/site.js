@@ -1925,11 +1925,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Card',
-  props: {
-    prop: {
-      type: Object
-    }
-  },
+  props: ['prop'],
   data: function data() {
     return {
       root_url: root_url,
@@ -3359,7 +3355,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _components_Card__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../components/Card */ "./resources/site/js/components/Card.vue");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _components_Card__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/Card */ "./resources/site/js/components/Card.vue");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3397,21 +3409,36 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'ListaEmpresas',
   components: {
-    Card: _components_Card__WEBPACK_IMPORTED_MODULE_0__.default
+    Card: _components_Card__WEBPACK_IMPORTED_MODULE_1__.default
   },
   data: function data() {
     return {
       items: [1],
       pagina: 0,
       numlist: 50,
-      search: ''
+      search: '',
+      categoriaSeleccionada: {
+        label: 'Seleccionar categoría',
+        value: null
+      }
     };
   },
   beforeMount: function beforeMount() {
     this.AXIO_GET_EMPRESAS();
+  },
+  computed: {
+    categorias: function categorias() {
+      return this.$store.state.listado.ListaEmpresas.data.categorias.map(function (c) {
+        return {
+          value: c.idcategoria,
+          label: c.nombre
+        };
+      });
+    }
   },
   methods: {
     buscar: function buscar() {
@@ -3422,11 +3449,30 @@ __webpack_require__.r(__webpack_exports__);
       this.$store.dispatch('listado/BUSCAR_EMPRESAS', obj);
     },
     AXIO_GET_EMPRESAS: function AXIO_GET_EMPRESAS() {
-      var obj = {
-        pagina: this.pagina,
-        numlist: this.numlist
-      };
-      this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
+      var _this = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var obj;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                console.log('Categoria seleccionada: ', _this.categoriaSeleccionada.value);
+                obj = {
+                  pagina: _this.pagina,
+                  numlist: _this.numlist,
+                  categoria: _this.categoriaSeleccionada
+                };
+                _context.next = 4;
+                return _this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
+
+              case 4:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
     },
     backPage: function backPage(n) {
       var actual = this.$store.state.admin.empresas.data.pagina + 1;
@@ -3434,7 +3480,8 @@ __webpack_require__.r(__webpack_exports__);
       if (actual != 1) {
         var obj = {
           pagina: this.$store.state.admin.empresas.data.pagina + n,
-          numlist: this.$store.state.admin.empresas.data.numList
+          numlist: this.$store.state.admin.empresas.data.numList,
+          categoria: this.categoriaSeleccionada
         };
         this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
       }
@@ -3446,7 +3493,8 @@ __webpack_require__.r(__webpack_exports__);
       if (actual != total) {
         var obj = {
           pagina: this.$store.state.admin.empresas.data.pagina + n,
-          numlist: this.$store.state.admin.empresas.data.numList
+          numlist: this.$store.state.admin.empresas.data.numList,
+          categoria: this.categoriaSeleccionada
         };
         this.$store.dispatch('listado/CARGAR_EMPRESAS', obj);
       }
@@ -4437,7 +4485,10 @@ var store = {
     ListaEmpresas: {
       data: {
         pagina: 0,
-        empresas: []
+        empresas: [],
+        categorias: [],
+        subcategorias: [],
+        tipossubcategorias: []
       }
     },
     cargando: false
@@ -4463,7 +4514,7 @@ var store = {
                 commit = _ref.commit;
                 commit(CARGANDO, true);
                 _context.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist + '&categoria=' + datos.categoria);
 
               case 4:
                 resp = _context.sent;
@@ -57493,8 +57544,6 @@ var render = function() {
         "q-item-label",
         { attrs: { header: "" } },
         [
-          _c("q-toolbar"),
-          _vm._v(" "),
           _c(
             "q-toolbar",
             { staticClass: "text-primary", staticStyle: { height: "50px" } },
@@ -57539,6 +57588,43 @@ var render = function() {
                     _vm.search = $$v
                   },
                   expression: "search"
+                }
+              }),
+              _vm._v(" "),
+              _c("q-select", {
+                staticClass: "q-pl-lg",
+                staticStyle: { "min-width": "250px", "max-width": "400px" },
+                attrs: {
+                  options: _vm.categorias,
+                  clearable: "",
+                  label: "Filtrar por categorías"
+                },
+                on: { input: _vm.AXIO_GET_EMPRESAS },
+                scopedSlots: _vm._u([
+                  {
+                    key: "no-option",
+                    fn: function() {
+                      return [
+                        _c(
+                          "q-item",
+                          [
+                            _c("q-item-section", { staticClass: "text-grey" }, [
+                              _vm._v("Seleccione un filtro ")
+                            ])
+                          ],
+                          1
+                        )
+                      ]
+                    },
+                    proxy: true
+                  }
+                ]),
+                model: {
+                  value: _vm.categoriaSeleccionada,
+                  callback: function($$v) {
+                    _vm.categoriaSeleccionada = $$v
+                  },
+                  expression: "categoriaSeleccionada"
                 }
               }),
               _vm._v(" "),

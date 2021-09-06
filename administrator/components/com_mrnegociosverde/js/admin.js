@@ -5689,7 +5689,10 @@ var store = {
     ListaEmpresas: {
       data: {
         pagina: 0,
-        empresas: []
+        empresas: [],
+        categorias: [],
+        subcategorias: [],
+        tipossubcategorias: []
       }
     },
     cargando: false
@@ -5715,7 +5718,7 @@ var store = {
                 commit = _ref.commit;
                 commit(CARGANDO, true);
                 _context.next = 4;
-                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist);
+                return (0,_util__WEBPACK_IMPORTED_MODULE_1__.request)('index.php?option=com_mrnegociosverde&task=getempresassite&format=json&pagina=' + datos.pagina + '&numlist=' + datos.numlist + '&categoria=' + datos.categoria);
 
               case 4:
                 resp = _context.sent;

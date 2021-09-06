@@ -174,13 +174,14 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
     }
 
-    public function getEmpresas($pagina=0,$limite=50,$buscar=null,$campo='e.nombreempresa') {
+    public function getEmpresas($pagina=0,$limite=50,$buscar=null,$campo='e.nombreempresa', $categoria=null) {
         $app = JFactory::getApplication();
         $db = JFactory::getDbo();
         // $query = $db->getQuery(true);
         
         $limit	= $app->getUserStateFromRequest('global.list.limit', 'limit', $limite, 'int'); //I guess getUserStateFromRequest is for session or different reasons
         $limitstart	= JRequest::getVar('limitstart', $pagina, '', 'int');
+
         $query = $db->getQuery(true)
             ->select('*')
             ->from($db->quoteName('#__negocios_v_empresas','e'))
@@ -188,6 +189,12 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
 			->where($db->quoteName('e.activo') . ' = ' . $db->quote('1'))
             ->order('e.nombreempresa DESC')
         ;
+        
+        // Filtrar Categoria si está puesto el valor: 
+        if (!empty($categoria)) {
+            $query->where($db->quoteName('e.idcategoria') . ' = ' . $db->quote($categoria));
+        }
+
         // $buscar='bbb';
         if (!empty($buscar) && !empty($campo)) {
             $query->where($db->quoteName($campo) .( ($campo=='e.idempresa')?' = '. $db->quote($db->escape($buscar)):' like '. $db->quote($db->escape($buscar.'%')) ));
