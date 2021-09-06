@@ -2095,10 +2095,34 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2737,53 +2761,73 @@ var optionsmunicipios = [{
 }];
 var anexofile = [{
   name: 'fFichaInscripcion',
-  label: 'Formato - Ficha de inscripción',
+  label: 'Formato - Ficha de inscripción (*Obligatorio)',
   doc: 'ficha_inscripcion_nv_v2020.xlsx',
   icon: 'xlsx',
-  urlActual: null
+  urlActual: null,
+  color: 'teal',
+  hint: ''
 }, {
   name: 'aListadoAsociados',
-  label: 'Anexo - Listado de asociados',
+  label: 'Anexo - Listado de asociados (*Obligatorio)',
   doc: 'anexo-listado_asociados.xlsx',
   icon: 'xlsx',
-  urlActual: null
+  urlActual: null,
+  color: 'teal',
+  hint: ''
 }, {
   name: 'aCartaConsentimiento',
-  label: 'Anexo - Carta de consentimiento',
+  label: 'Anexo - Carta de consentimiento (*Obligatorio)',
   doc: 'carta_de_consentimiento_informado_v2020.docx',
   icon: 'docx',
-  urlActual: null
+  urlActual: null,
+  color: 'teal',
+  hint: ''
 }, {
   name: 'aCartaIntencion',
   label: 'Anexo - Carta de intención',
   doc: 'carta-de-intencion-nodo--aliados.docx',
   icon: 'docx',
-  urlActual: null
+  urlActual: null,
+  color: 'primary',
+  hint: 'Opcional'
 }];
 var anexarfile = [{
   name: 'cExistenciaRepresentacionLegalVigente',
-  label: 'Certificado de existencia y representación legal vigente',
-  urlActual: null
+  label: 'Certificado de existencia y representación legal vigente (*Obligatorio)',
+  urlActual: null,
+  color: 'teal',
+  hint: 'Opcional'
 }, {
   name: 'cDisponeEmpresa',
   label: 'Certificaciones con las que dispone actualmente la empresa',
-  urlActual: null
+  urlActual: null,
+  color: 'primary',
+  hint: ''
 }, {
   name: 'prActualEmpresa',
   label: 'Permisos o registros con los que cuenta actualmente la empresa',
-  urlActual: null
+  urlActual: null,
+  color: 'primary',
+  hint: ''
 }, {
   name: 'rutFacturacionDian',
   label: 'RUT o resolución de facturación DIAN',
-  urlActual: null
+  urlActual: null,
+  color: 'primary',
+  hint: ''
 }, {
   name: 'listadoAsociadosDiligenciado',
   label: 'Listado de asociados diligenciado',
-  urlActual: null
+  urlActual: null,
+  color: 'primary',
+  hint: ''
 }, {
   name: 'cartaConcentimientoInformadoFirma',
   label: 'Carta de consentimiento informado diligenciada y firmada - Anexo 2',
-  urlActual: null
+  urlActual: null,
+  color: 'primary',
+  hint: ''
 }];
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'FormularioNegocios',
@@ -3364,6 +3408,12 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -5295,17 +5345,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./node_modules/quasar/package.json":
-/*!******************************************!*\
-  !*** ./node_modules/quasar/package.json ***!
-  \******************************************/
-/***/ ((module) => {
-
-"use strict";
-module.exports = JSON.parse('{"_args":[["quasar@1.15.5","/Users/pedrozopayares/Documents/GitHub/negocios_verdes_cars"]],"_development":true,"_from":"quasar@1.15.5","_id":"quasar@1.15.5","_inBundle":false,"_integrity":"sha512-6A1o/kjFU72fJaQ+2flm7zK/NPDg/6z3oQ0twxZW/PxkMwZXANjq3fAXvzI3bpFXi4x8s4nQ6qiDFNAW8RTFjA==","_location":"/quasar","_phantomChildren":{},"_requested":{"type":"version","registry":true,"raw":"quasar@1.15.5","name":"quasar","escapedName":"quasar","rawSpec":"1.15.5","saveSpec":null,"fetchSpec":"1.15.5"},"_requiredBy":["#DEV:/"],"_resolved":"https://registry.npmjs.org/quasar/-/quasar-1.15.5.tgz","_spec":"1.15.5","_where":"/Users/pedrozopayares/Documents/GitHub/negocios_verdes_cars","author":{"name":"Razvan Stoenescu","email":"razvan.stoenescu@gmail.com","url":"https://quasar.dev"},"browserslist":["last 1 version, not dead, ie >= 11"],"bugs":{"url":"https://github.com/quasarframework/quasar/issues"},"description":"Build high-performance VueJS user interfaces (SPA, PWA, SSR, Mobile and Desktop) in record time","devDependencies":{"@quasar/app":"^2.0.6","@quasar/extras":"^1.9.0","@rollup/plugin-buble":"^0.21.1","@rollup/plugin-json":"^4.0.2","@rollup/plugin-node-resolve":"^7.1.0","babel-eslint":"^10.0.2","babel-preset-es2015-rollup":"^3.0.0","eslint":"^7.4.0","eslint-config-standard":"^12.0.0","eslint-friendly-formatter":"^4.0.1","eslint-loader":"^4.0.2","eslint-plugin-import":"^2.18.2","eslint-plugin-node":"^9.1.0","eslint-plugin-promise":"^4.2.1","eslint-plugin-standard":"^4.0.1","eslint-plugin-vue":"^5.2.3","friendly-errors-webpack-plugin":"^1.7.0","json-beautify":"^1.1.1","module-alias":"^2.2.2","recast":"^0.18.5","rimraf":"^3.0.1","rollup":"^1.31.0","table":"^5.4.6","uglify-es":"^3.3.9"},"engines":{"node":">= 10.0.0","npm":">= 5.6.0","yarn":">= 1.6.0"},"files":["dist","lang","icon-set","src","wrappers"],"funding":{"type":"github","url":"https://donate.quasar.dev"},"homepage":"https://quasar.dev","keywords":["vuejs","vue","quasar","js","phone","tablet","desktop","spa","pwa","website","electron"],"license":"MIT","main":"dist/quasar.common.js","module":"src/index.esm.js","name":"quasar","repository":{"type":"git","url":"git+https://github.com/quasarframework/quasar.git"},"scripts":{"build":"node build/script.build.js","clean":"node build/script.clean.js","dev":"cd ./dev && node ./script.dev.js dev && cd ..","dev:capacitor:android":"cd ./dev && node ./script.dev.js dev -m capacitor -T android && cd ..","dev:capacitor:ios":"cd ./dev && node ./script.dev.js dev -m capacitor -T ios && cd ..","dev:cordova:android":"cd ./dev && node ./script.dev.js dev -m cordova -T android && cd ..","dev:cordova:ios":"cd ./dev && node ./script.dev.js dev -m cordova -T ios && cd ..","dev:quploader":"cd dev/upload-server && yarn && cd ../.. && node dev/upload-server/server.js","dev:ssr":"cd ./dev && node ./script.dev.js dev -m ssr && cd ..","dev:umd":"node build/script.test-umd.js","lint":"eslint --ext .js,.vue src dev","lint-fix":"eslint --ext .js,.vue src dev --fix","test":"yarn lint && yarn build"},"typings":"dist/types/index.d.ts","version":"1.15.5","vetur":{"tags":"dist/vetur/quasar-tags.json","attributes":"dist/vetur/quasar-attributes.json"},"web-types":"dist/web-types/web-types.json"}');
-
-/***/ }),
-
 /***/ "./node_modules/quasar/src/body.js":
 /*!*****************************************!*\
   !*** ./node_modules/quasar/src/body.js ***!
@@ -7138,15 +7177,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _icon_QIcon_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../icon/QIcon.js */ "./node_modules/quasar/src/components/icon/QIcon.js");
 /* harmony import */ var _spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../spinner/QSpinner.js */ "./node_modules/quasar/src/components/spinner/QSpinner.js");
 /* harmony import */ var _mixins_btn_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../mixins/btn.js */ "./node_modules/quasar/src/mixins/btn.js");
 /* harmony import */ var _utils_slot_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils/slot.js */ "./node_modules/quasar/src/utils/slot.js");
 /* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
-/* harmony import */ var _utils_touch_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/touch.js */ "./node_modules/quasar/src/utils/touch.js");
-/* harmony import */ var _utils_key_composition_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils/key-composition.js */ "./node_modules/quasar/src/utils/key-composition.js");
-
+/* harmony import */ var _utils_key_composition_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/key-composition.js */ "./node_modules/quasar/src/utils/key-composition.js");
 
 
 
@@ -7167,7 +7204,7 @@ let
 
 const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_6__.default.extend({
   name: 'QBtn',
 
   mixins: [ _mixins_btn_js__WEBPACK_IMPORTED_MODULE_2__.default ],
@@ -7208,7 +7245,8 @@ const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
           keyup: this.__onLoadingEvt
         }
       }
-      else if (this.isActionable === true) {
+
+      if (this.isActionable === true) {
         const on = {
           ...this.qListeners,
           click: this.click,
@@ -7223,7 +7261,10 @@ const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
         return on
       }
 
-      return {}
+      return {
+        // needed; especially for disabled <a> tags
+        click: _utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stopAndPrevent
+      }
     },
 
     directives () {
@@ -7300,7 +7341,7 @@ const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
     },
 
     __onKeydown (e) {
-      if ((0,_utils_key_composition_js__WEBPACK_IMPORTED_MODULE_6__.isKeyCode)(e, [ 13, 32 ]) === true) {
+      if ((0,_utils_key_composition_js__WEBPACK_IMPORTED_MODULE_5__.isKeyCode)(e, [ 13, 32 ]) === true) {
         (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_4__.stopAndPrevent)(e)
 
         if (keyboardTarget !== this.$el) {
@@ -7323,7 +7364,7 @@ const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
       if (touchTarget !== this.$el) {
         touchTarget !== void 0 && this.__cleanup()
         touchTarget = this.$el
-        const target = this.touchTargetEl = (0,_utils_touch_js__WEBPACK_IMPORTED_MODULE_5__.getTouchTarget)(e.target)
+        const target = this.touchTargetEl = e.target
         target.addEventListener('touchcancel', this.__onPressEnd, passiveCapture)
         target.addEventListener('touchend', this.__onPressEnd, passiveCapture)
       }
@@ -7358,7 +7399,7 @@ const iconAttrs = { role: 'img', 'aria-hidden': 'true' }
       }
 
       if (e !== void 0 && e.type === 'keyup') {
-        if (keyboardTarget === this.$el && (0,_utils_key_composition_js__WEBPACK_IMPORTED_MODULE_6__.isKeyCode)(e, [ 13, 32 ]) === true) {
+        if (keyboardTarget === this.$el && (0,_utils_key_composition_js__WEBPACK_IMPORTED_MODULE_5__.isKeyCode)(e, [ 13, 32 ]) === true) {
           // for click trigger
           const evt = new MouseEvent('click', e)
           evt.qKeyEvent = true
@@ -8135,15 +8176,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../mixins/listeners.js */ "./node_modules/quasar/src/mixins/listeners.js");
-/* harmony import */ var _utils_slot_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/slot.js */ "./node_modules/quasar/src/utils/slot.js");
 
 
 
 
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_2__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_1__.default.extend({
   name: 'QChatMessage',
 
   mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
@@ -8192,43 +8231,50 @@ __webpack_require__.r(__webpack_exports__);
   },
 
   methods: {
-    __getText (h) {
-      const
-        domPropText = this.textSanitize === true ? 'textContent' : 'innerHTML',
-        domPropStamp = this.stampSanitize === true ? 'textContent' : 'innerHTML'
+    __wrapStamp (h, node) {
+      if (this.$scopedSlots.stamp !== void 0) {
+        return [ node, h('div', { staticClass: 'q-message-stamp' }, this.$scopedSlots.stamp()) ]
+      }
 
-      return this.text.map((msg, index) => h('div', {
+      if (this.stamp) {
+        const domPropStamp = this.stampSanitize === true ? 'textContent' : 'innerHTML'
+
+        return [
+          node,
+          h('div', {
+            staticClass: 'q-message-stamp',
+            domProps: { [domPropStamp]: this.stamp }
+          })
+        ]
+      }
+
+      return [ node ]
+    },
+
+    __getText (h, contentList, withSlots) {
+      const domPropText = this.textSanitize === true ? 'textContent' : 'innerHTML'
+
+      if (
+        withSlots === true &&
+        contentList.some(entry => entry.tag === void 0 && entry.text !== void 0) === true
+      ) {
+        return [
+          h('div', { class: this.messageClass }, [
+            h('div', { class: this.textClass }, this.__wrapStamp(h, h('div', contentList)))
+          ])
+        ]
+      }
+
+      const content = withSlots === true
+        ? (contentList.length > 1 ? (text => text) : (text => h('div', [ text ])))
+        : (text => h('div', { domProps: { [domPropText]: text } }))
+
+      return contentList.map((msg, index) => h('div', {
         key: index,
         class: this.messageClass
       }, [
-        h('div', { class: this.textClass }, [
-          h('div', { domProps: { [domPropText]: msg } }),
-          this.stamp
-            ? h('div', {
-              staticClass: 'q-message-stamp',
-              domProps: { [domPropStamp]: this.stamp }
-            })
-            : null
-        ])
+        h('div', { class: this.textClass }, this.__wrapStamp(h, content(msg)))
       ]))
-    },
-
-    __getMessage (h) {
-      const content = (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_1__.uniqueSlot)(this, 'default', [])
-
-      this.stamp !== void 0 && content.push(
-        h('div', {
-          staticClass: 'q-message-stamp',
-          domProps: { [this.stampSanitize === true ? 'textContent' : 'innerHTML']: this.stamp }
-        })
-      )
-
-      return h('div', { class: this.messageClass }, [
-        h('div', {
-          staticClass: 'q-message-text-content',
-          class: this.textClass
-        }, content)
-      ])
     }
   },
 
@@ -8249,19 +8295,28 @@ __webpack_require__.r(__webpack_exports__);
 
     const msg = []
 
-    this.name !== void 0 && msg.push(
-      h('div', {
-        class: `q-message-name q-message-name--${this.op}`,
-        domProps: { [this.nameSanitize === true ? 'textContent' : 'innerHTML']: this.name }
-      })
-    )
+    if (this.$scopedSlots.name !== void 0) {
+      msg.push(
+        h('div', {
+          class: `q-message-name q-message-name--${this.op}`
+        }, this.$scopedSlots.name())
+      )
+    }
+    else if (this.name !== void 0) {
+      msg.push(
+        h('div', {
+          class: `q-message-name q-message-name--${this.op}`,
+          domProps: { [this.nameSanitize === true ? 'textContent' : 'innerHTML']: this.name }
+        })
+      )
+    }
 
     this.text !== void 0 && msg.push(
-      this.__getText(h)
+      this.__getText(h, this.text)
     )
 
     this.$scopedSlots.default !== void 0 && msg.push(
-      this.__getMessage(h)
+      this.__getText(h, this.$scopedSlots.default(), true)
     )
 
     container.push(
@@ -8270,12 +8325,19 @@ __webpack_require__.r(__webpack_exports__);
 
     const child = []
 
-    this.label && child.push(
-      h('div', {
-        staticClass: 'q-message-label text-center',
-        domProps: { [this.labelSanitize === true ? 'textContent' : 'innerHTML']: this.label }
-      })
-    )
+    if (this.$scopedSlots.label !== void 0) {
+      child.push(
+        h('div', { staticClass: 'q-message-label' }, this.$scopedSlots.label())
+      )
+    }
+    else if (this.label !== void 0) {
+      child.push(
+        h('div', {
+          staticClass: 'q-message-label',
+          domProps: { [this.labelSanitize === true ? 'textContent' : 'innerHTML']: this.label }
+        })
+      )
+    }
 
     child.push(
       h('div', { class: this.containerClass }, container)
@@ -9323,6 +9385,12 @@ const palette = [
     },
 
     __getTuneTab (h) {
+      const attrs = {
+        inputmode: 'numeric',
+        maxlength: 3,
+        readonly: this.editable !== true
+      }
+
       return [
         h('div', { staticClass: 'row items-center no-wrap' }, [
           h('div', ['R']),
@@ -9341,13 +9409,8 @@ const palette = [
             })
           }),
           h('input', {
-            domProps: {
-              value: this.model.r
-            },
-            attrs: {
-              maxlength: 3,
-              readonly: this.editable !== true
-            },
+            domProps: { value: this.model.r },
+            attrs,
             on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'rIn', {
               input: evt => this.__onNumericChange(evt.target.value, 'r', 255, evt),
               change: _utils_event_js__WEBPACK_IMPORTED_MODULE_3__.stop,
@@ -9373,13 +9436,8 @@ const palette = [
             })
           }),
           h('input', {
-            domProps: {
-              value: this.model.g
-            },
-            attrs: {
-              maxlength: 3,
-              readonly: this.editable !== true
-            },
+            domProps: { value: this.model.g },
+            attrs,
             on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'gIn', {
               input: evt => this.__onNumericChange(evt.target.value, 'g', 255, evt),
               change: _utils_event_js__WEBPACK_IMPORTED_MODULE_3__.stop,
@@ -9405,13 +9463,8 @@ const palette = [
             })
           }),
           h('input', {
-            domProps: {
-              value: this.model.b
-            },
-            attrs: {
-              maxlength: 3,
-              readonly: this.editable !== true
-            },
+            domProps: { value: this.model.b },
+            attrs,
             on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'bIn', {
               input: evt => this.__onNumericChange(evt.target.value, 'b', 255, evt),
               change: _utils_event_js__WEBPACK_IMPORTED_MODULE_3__.stop,
@@ -9435,13 +9488,8 @@ const palette = [
             })
           }),
           h('input', {
-            domProps: {
-              value: this.model.a
-            },
-            attrs: {
-              maxlength: 3,
-              readonly: this.editable !== true
-            },
+            domProps: { value: this.model.a },
+            attrs,
             on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_2__.default)(this, 'aIn', {
               input: evt => this.__onNumericChange(evt.target.value, 'a', 100, evt),
               change: _utils_event_js__WEBPACK_IMPORTED_MODULE_3__.stop,
@@ -9519,7 +9567,7 @@ const palette = [
       evt !== void 0 && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_3__.stop)(evt)
 
       if (!/^[0-9]+$/.test(value)) {
-        change && this.$forceUpdate()
+        change === true && this.$forceUpdate()
         return
       }
 
@@ -11104,7 +11152,7 @@ const lineStr = ' \u2014 '
 
     __emitImmediately (reason) {
       const date = this.daysModel[0] !== void 0 && this.daysModel[0].dateHash !== null
-        ? this.daysModel[0]
+        ? { ...this.daysModel[0] }
         : { ...this.viewModel } // inherit day, hours, minutes, milliseconds...
 
       // nextTick required because of animation delay in viewModel
@@ -11856,7 +11904,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _mixins_history_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../mixins/history.js */ "./node_modules/quasar/src/mixins/history.js");
 /* harmony import */ var _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../mixins/model-toggle.js */ "./node_modules/quasar/src/mixins/model-toggle.js");
 /* harmony import */ var _mixins_portal_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../mixins/portal.js */ "./node_modules/quasar/src/mixins/portal.js");
@@ -11867,6 +11915,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_slot_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../utils/slot.js */ "./node_modules/quasar/src/utils/slot.js");
 /* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
 /* harmony import */ var _utils_cache_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../utils/cache.js */ "./node_modules/quasar/src/utils/cache.js");
+/* harmony import */ var _utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../utils/focus-manager.js */ "./node_modules/quasar/src/utils/focus-manager.js");
+
 
 
 
@@ -11899,7 +11949,7 @@ const transitions = {
   left: ['slide-right', 'slide-left']
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_11__.default.extend({
   name: 'QDialog',
 
   mixins: [
@@ -11941,7 +11991,8 @@ const transitions = {
 
   data () {
     return {
-      transitionState: this.showing
+      transitionState: this.showing,
+      animating: false
     }
   },
 
@@ -11968,6 +12019,7 @@ const transitions = {
     classes () {
       return `q-dialog__inner--${this.maximized === true ? 'maximized' : 'minimized'} ` +
         `q-dialog__inner--${this.position} ${positionClass[this.position]}` +
+        (this.animating === true ? ' q-dialog__inner--animating' : '') +
         (this.fullWidth === true ? ' q-dialog__inner--fullwidth' : '') +
         (this.fullHeight === true ? ' q-dialog__inner--fullheight' : '') +
         (this.square === true ? ' q-dialog__inner--square' : '')
@@ -12016,14 +12068,16 @@ const transitions = {
 
   methods: {
     focus () {
-      let node = this.__getInnerNode()
+      (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_10__.addFocusFn)(() => {
+        let node = this.__getInnerNode()
 
-      if (node === void 0 || node.contains(document.activeElement) === true) {
-        return
-      }
+        if (node === void 0 || node.contains(document.activeElement) === true) {
+          return
+        }
 
-      node = node.querySelector('[autofocus], [data-autofocus]') || node
-      node.focus()
+        node = node.querySelector('[autofocus], [data-autofocus]') || node
+        node.focus()
+      })
     },
 
     shake () {
@@ -12072,6 +12126,7 @@ const transitions = {
       })
 
       this.__showPortal()
+      this.animating = true
 
       if (this.noFocus !== true) {
         // IE can have null document.activeElement
@@ -12105,6 +12160,8 @@ const transitions = {
           this.__portal.$el.click()
         }
 
+        this.animating = false
+        this.__showPortal(true)
         this.$emit('show', evt)
       }, 300)
     },
@@ -12112,6 +12169,7 @@ const transitions = {
     __hide (evt) {
       this.__removeHistory()
       this.__cleanup(true)
+      this.animating = true
 
       // check null for IE
       if (this.__refocusTarget !== void 0 && this.__refocusTarget !== null) {
@@ -12122,6 +12180,7 @@ const transitions = {
 
       this.__setTimeout(() => {
         this.__hidePortal()
+        this.animating = false
         this.$emit('hide', evt)
       }, 300)
     },
@@ -13024,7 +13083,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _editor_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./editor-utils.js */ "./node_modules/quasar/src/components/editor/editor-utils.js");
 /* harmony import */ var _editor_caret_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./editor-caret.js */ "./node_modules/quasar/src/components/editor/editor-caret.js");
 /* harmony import */ var _mixins_fullscreen_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../mixins/fullscreen.js */ "./node_modules/quasar/src/mixins/fullscreen.js");
@@ -13034,6 +13093,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
 /* harmony import */ var _utils_extend_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../utils/extend.js */ "./node_modules/quasar/src/utils/extend.js");
 /* harmony import */ var _utils_key_composition_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utils/key-composition.js */ "./node_modules/quasar/src/utils/key-composition.js");
+/* harmony import */ var _utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../utils/focus-manager.js */ "./node_modules/quasar/src/utils/focus-manager.js");
 
 
 
@@ -13048,7 +13108,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__.default.extend({
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__.default.extend({
   name: 'QEditor',
 
   mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_4__.default, _mixins_fullscreen_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_dark_js__WEBPACK_IMPORTED_MODULE_3__.default ],
@@ -13466,7 +13527,9 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     focus () {
-      this.$refs.content !== void 0 && this.$refs.content.focus()
+      (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_9__.addFocusFn)(() => {
+        this.$refs.content !== void 0 && this.$refs.content.focus()
+      })
     },
 
     getContentEl () {
@@ -14527,7 +14590,7 @@ const eventName = 'q:expansion-item:close'
       let child
 
       if (this.$scopedSlots.header !== void 0) {
-        child = this.$scopedSlots.header().slice()
+        child = [].concat(this.$scopedSlots.header())
       }
       else {
         child = [
@@ -14759,6 +14822,14 @@ const alignValues = [ 'left', 'center', 'right' ]
         (this.showing === true ? ' q-fab--opened' : '')
     },
 
+    actionsClasses () {
+      return `q-fab__actions--${this.direction}` + (this.showing === true ? ' q-fab__actions--opened' : '')
+    },
+
+    iconHolderClasses () {
+      return this.showing === true ? 'q-fab__icon-holder--opened' : ''
+    },
+
     attrs () {
       return {
         'aria-expanded': this.showing === true ? 'true' : 'false',
@@ -14782,7 +14853,7 @@ const alignValues = [ 'left', 'center', 'right' ]
     const child = []
 
     this.hideIcon !== true && child.push(
-      h('div', { staticClass: 'q-fab__icon-holder' }, [
+      h('div', { staticClass: 'q-fab__icon-holder', class: this.iconHolderClasses }, [
         h(_icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__.default, {
           staticClass: 'q-fab__icon absolute-full',
           props: { name: this.icon || this.$q.iconSet.fab.icon }
@@ -14824,7 +14895,7 @@ const alignValues = [ 'left', 'center', 'right' ]
 
       h('div', {
         staticClass: 'q-fab__actions flex no-wrap inline',
-        class: `q-fab__actions--${this.direction}`
+        class: this.actionsClasses
       }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_5__.slot)(this, 'default'))
     ])
   }
@@ -14990,7 +15061,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../plugins/Platform.js */ "./node_modules/quasar/src/plugins/Platform.js");
 /* harmony import */ var _icon_QIcon_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../icon/QIcon.js */ "./node_modules/quasar/src/components/icon/QIcon.js");
 /* harmony import */ var _spinner_QSpinner_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../spinner/QSpinner.js */ "./node_modules/quasar/src/components/spinner/QSpinner.js");
@@ -15000,6 +15071,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_slot_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils/slot.js */ "./node_modules/quasar/src/utils/slot.js");
 /* harmony import */ var _utils_uid_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../utils/uid.js */ "./node_modules/quasar/src/utils/uid.js");
 /* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
+/* harmony import */ var _utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../utils/focus-manager.js */ "./node_modules/quasar/src/utils/focus-manager.js");
+
 
 
 
@@ -15019,7 +15092,7 @@ function getTargetUid (val) {
   return val === void 0 ? `f_${(0,_utils_uid_js__WEBPACK_IMPORTED_MODULE_7__.default)()}` : val
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__.default.extend({
   name: 'QField',
 
   mixins: [ _mixins_dark_js__WEBPACK_IMPORTED_MODULE_4__.default, _mixins_validate_js__WEBPACK_IMPORTED_MODULE_3__.default, _mixins_attrs_js__WEBPACK_IMPORTED_MODULE_5__.default ],
@@ -15239,15 +15312,19 @@ function getTargetUid (val) {
 
   methods: {
     focus () {
-      if (this.showPopup !== void 0) {
-        this.showPopup()
-        return
-      }
+      this.focusFn !== void 0 && (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_9__.removeFocusFn)(this.focusFn)
+      this.focusFn = (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_9__.addFocusFn)(() => {
+        if (this.showPopup !== void 0) {
+          this.showPopup()
+          return
+        }
 
-      this.__focus()
+        this.__focus()
+      })
     },
 
     blur () {
+      this.focusFn !== void 0 && (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_9__.removeFocusFn)(this.focusFn)
       const el = document.activeElement
       // IE can have null document.activeElement
       if (el !== null && this.$el.contains(el)) {
@@ -15391,7 +15468,7 @@ function getTargetUid (val) {
 
       if (this.hasError === true) {
         if (this.computedErrorMessage !== void 0) {
-          msg = [ h('div', [ this.computedErrorMessage ]) ]
+          msg = [ h('div', { attrs: { role: 'alert' } }, [ this.computedErrorMessage ]) ]
           key = this.computedErrorMessage
         }
         else {
@@ -15763,7 +15840,20 @@ __webpack_require__.r(__webpack_exports__);
     __addFiles (e, fileList) {
       const files = this.__processFiles(e, fileList, this.innerValue, this.isAppending)
 
-      files !== void 0 && this.__emitValue(
+      // if nothing to do...
+      if (files === void 0) { return }
+
+      // protect against input @change being called in a loop
+      // like it happens on Safari, so don't emit same thing:
+      if (
+        this.multiple === true
+          ? this.value && files.every(f => this.innerValue.includes(f))
+          : this.value === files[ 0 ]
+      ) {
+        return
+      }
+
+      this.__emitValue(
         this.isAppending === true
           ? this.innerValue.concat(files)
           : files
@@ -15793,48 +15883,66 @@ __webpack_require__.r(__webpack_exports__);
       return this.__getDnd(h, 'file')
     },
 
+    __getFiller (h) {
+      return [
+        h('input', {
+          class: [ this.inputClass, 'q-file__filler' ],
+          style: this.inputStyle,
+          tabindex: -1
+        })
+      ]
+    },
+
     __getSelection (h) {
       if (this.$scopedSlots.file !== void 0) {
-        return this.innerValue.map((file, index) => this.$scopedSlots.file({ index, file, ref: this }))
+        return this.innerValue.length === 0
+          ? this.__getFiller(h)
+          : this.innerValue.map((file, index) => this.$scopedSlots.file({ index, file, ref: this }))
       }
 
       if (this.$scopedSlots.selected !== void 0) {
-        return this.$scopedSlots.selected({ files: this.innerValue, ref: this })
+        return this.innerValue.length === 0
+          ? this.__getFiller(h)
+          : this.$scopedSlots.selected({ files: this.innerValue, ref: this })
       }
 
       if (this.useChips === true) {
-        return this.innerValue.map((file, i) => h(_chip_QChip_js__WEBPACK_IMPORTED_MODULE_1__.default, {
-          key: 'file-' + i,
-          props: {
-            removable: this.editable,
-            dense: true,
-            textColor: this.color,
-            tabindex: this.tabindex
-          },
-          on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'rem#' + i, {
-            remove: () => { this.removeAtIndex(i) }
-          })
-        }, [
-          h('span', {
-            staticClass: 'ellipsis',
-            domProps: {
-              textContent: file.name
-            }
-          })
-        ]))
+        return this.innerValue.length === 0
+          ? this.__getFiller(h)
+          : this.innerValue.map((file, i) => h(_chip_QChip_js__WEBPACK_IMPORTED_MODULE_1__.default, {
+            key: 'file-' + i,
+            props: {
+              removable: this.editable,
+              dense: true,
+              textColor: this.color,
+              tabindex: this.tabindex
+            },
+            on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_6__.default)(this, 'rem#' + i, {
+              remove: () => { this.removeAtIndex(i) }
+            })
+          }, [
+            h('span', {
+              staticClass: 'ellipsis',
+              domProps: {
+                textContent: file.name
+              }
+            })
+          ]))
       }
 
-      return [
-        h('div', {
-          style: this.inputStyle,
-          class: this.inputClass,
-          domProps: {
-            textContent: this.displayValue !== void 0
-              ? this.displayValue
-              : this.selectedString
-          }
-        })
-      ]
+      const textContent = this.displayValue !== void 0
+        ? this.displayValue
+        : this.selectedString
+
+      return textContent.length > 0
+        ? [
+          h('div', {
+            style: this.inputStyle,
+            class: this.inputClass,
+            domProps: { textContent }
+          })
+        ]
+        : this.__getFiller(h)
     },
 
     __getInput (h) {
@@ -16165,10 +16273,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../mixins/listeners.js */ "./node_modules/quasar/src/mixins/listeners.js");
 /* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
 /* harmony import */ var _utils_slot_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../utils/slot.js */ "./node_modules/quasar/src/utils/slot.js");
+/* harmony import */ var _utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../utils/focus-manager.js */ "./node_modules/quasar/src/utils/focus-manager.js");
 
 
 
@@ -16176,7 +16285,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_3__.default.extend({
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
   name: 'QForm',
 
   mixins: [ _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_0__.default ],
@@ -16317,10 +16427,14 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     focus () {
-      const target = this.$el.querySelector('[autofocus], [data-autofocus]') ||
-        Array.prototype.find.call(this.$el.querySelectorAll('[tabindex]'), el => el.tabIndex > -1)
+      (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_3__.addFocusFn)(() => {
+        if (!this.$el) { return }
 
-      target !== null && target !== void 0 && target.focus()
+        const target = this.$el.querySelector('[autofocus], [data-autofocus]') ||
+          Array.prototype.find.call(this.$el.querySelectorAll('[tabindex]'), el => el.tabIndex > -1)
+
+        target !== null && target !== void 0 && target.focus()
+      })
     },
 
     getValidationComponents () {
@@ -16745,6 +16859,9 @@ __webpack_require__.r(__webpack_exports__);
       }
       else if (icon.startsWith('ti-') === true) {
         cls = `themify-icon ${icon}`
+      }
+      else if (icon.startsWith('bi-') === true) {
+        cls = `bootstrap-icons ${icon}`
       }
       else {
         cls = 'material-icons'
@@ -17559,7 +17676,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _field_QField_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../field/QField.js */ "./node_modules/quasar/src/components/field/QField.js");
 /* harmony import */ var _mixins_form_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../mixins/form.js */ "./node_modules/quasar/src/mixins/form.js");
 /* harmony import */ var _mixins_file_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../mixins/file.js */ "./node_modules/quasar/src/mixins/file.js");
@@ -17567,6 +17684,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _mixins_composition_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../mixins/composition.js */ "./node_modules/quasar/src/mixins/composition.js");
 /* harmony import */ var _mixins_listeners_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../mixins/listeners.js */ "./node_modules/quasar/src/mixins/listeners.js");
 /* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
+/* harmony import */ var _utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../utils/focus-manager.js */ "./node_modules/quasar/src/utils/focus-manager.js");
 
 
 
@@ -17579,7 +17697,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_7__.default.extend({
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_8__.default.extend({
   name: 'QInput',
 
   mixins: [
@@ -17665,6 +17784,10 @@ __webpack_require__.r(__webpack_exports__);
       return this.type === 'textarea' || this.autogrow === true
     },
 
+    isTypeText () {
+      return this.isTextarea === true || ['text', 'search', 'url', 'tel', 'password'].includes(this.type)
+    },
+
     fieldClass () {
       return `q-${this.isTextarea === true ? 'textarea' : 'input'}` +
         (this.autogrow === true ? ' q-textarea--autogrow' : '')
@@ -17728,19 +17851,25 @@ __webpack_require__.r(__webpack_exports__);
 
   methods: {
     focus () {
-      const el = document.activeElement
-      if (
-        this.$refs.input !== void 0 &&
-        this.$refs.input !== el &&
-        // IE can have null document.activeElement
-        (el === null || el.id !== this.targetUid)
-      ) {
-        this.$refs.input.focus()
-      }
+      (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_7__.addFocusFn)(() => {
+        const el = document.activeElement
+        if (
+          this.$refs.input !== void 0 &&
+          this.$refs.input !== el &&
+          // IE can have null document.activeElement
+          (el === null || el.id !== this.targetUid)
+        ) {
+          this.$refs.input.focus()
+        }
+      })
     },
 
     select () {
       this.$refs.input !== void 0 && this.$refs.input.select()
+    },
+
+    getNativeElement () {
+      return this.$refs.input
     },
 
     __onPaste (e) {
@@ -17753,7 +17882,7 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     __onInput (e) {
-      if (e && e.target && e.target.composing === true) {
+      if (!e || !e.target || e.target.composing === true) {
         return
       }
 
@@ -17769,6 +17898,18 @@ __webpack_require__.r(__webpack_exports__);
       }
       else {
         this.__emitValue(val)
+
+        if (this.isTypeText === true && e.target === document.activeElement) {
+          const { selectionStart, selectionEnd } = e.target
+
+          if (selectionStart !== void 0 && selectionEnd !== void 0) {
+            this.$nextTick(() => {
+              if (e.target === document.activeElement && val.indexOf(e.target.value) === 0) {
+                e.target.setSelectionRange(selectionStart, selectionEnd)
+              }
+            })
+          }
+        }
       }
 
       // we need to trigger it immediately too,
@@ -17985,7 +18126,7 @@ __webpack_require__.r(__webpack_exports__);
 
   computed: {
     value () {
-      return this.margin !== void 0 || this.threshold !== void 0
+      return this.root !== void 0 || this.margin !== void 0 || this.threshold !== void 0
         ? {
           handler: this.__trigger,
           cfg: {
@@ -19054,11 +19195,12 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-function width (val, reverse) {
-  if (reverse === true) {
-    return { transform: `translateX(100%) scale3d(${-val},1,1)` }
+function width (val, reverse, $q) {
+  return {
+    transform: reverse === true
+      ? `translateX(${$q.lang.rtl === true ? '-' : ''}100%) scale3d(${-val},1,1)`
+      : `scale3d(${val},1,1)`
   }
-  return { transform: `scale3d(${val},1,1)` }
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_4__.default.extend({
@@ -19108,7 +19250,7 @@ function width (val, reverse) {
     },
 
     trackStyle () {
-      return width(this.buffer !== void 0 ? this.buffer : 1, this.reverse)
+      return width(this.buffer !== void 0 ? this.buffer : 1, this.reverse, this.$q)
     },
 
     trackClass () {
@@ -19118,7 +19260,7 @@ function width (val, reverse) {
     },
 
     modelStyle () {
-      return width(this.motion === true ? 1 : this.value, this.reverse)
+      return width(this.motion === true ? 1 : this.value, this.reverse, this.$q)
     },
 
     modelClasses () {
@@ -19128,6 +19270,10 @@ function width (val, reverse) {
 
     stripeStyle () {
       return { width: (this.value * 100) + '%' }
+    },
+
+    stripeClass () {
+      return this.reverse === true ? 'absolute-right' : 'absolute-left'
     },
 
     attrs () {
@@ -19157,8 +19303,9 @@ function width (val, reverse) {
 
     this.stripe === true && this.motion === false && child.push(
       h('div', {
-        staticClass: 'q-linear-progress__stripe absolute-full',
-        style: this.stripeStyle
+        staticClass: 'q-linear-progress__stripe',
+        style: this.stripeStyle,
+        class: this.stripeClass
       })
     )
 
@@ -19357,7 +19504,7 @@ function globalHandler (evt) {
 
         if (
           evt.qClickOutside !== true &&
-          target !== void 0 &&
+          document.body.contains(target) === true &&
           target.nodeType !== 8 &&
           // directives that prevent click by using pointer-events none generate click on html element
           target !== document.documentElement &&
@@ -19449,7 +19596,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _mixins_anchor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../mixins/anchor.js */ "./node_modules/quasar/src/mixins/anchor.js");
 /* harmony import */ var _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../mixins/model-toggle.js */ "./node_modules/quasar/src/mixins/model-toggle.js");
 /* harmony import */ var _mixins_dark_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../mixins/dark.js */ "./node_modules/quasar/src/mixins/dark.js");
@@ -19461,7 +19608,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
 /* harmony import */ var _utils_escape_key_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../utils/escape-key.js */ "./node_modules/quasar/src/utils/escape-key.js");
 /* harmony import */ var _utils_slot_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../utils/slot.js */ "./node_modules/quasar/src/utils/slot.js");
-/* harmony import */ var _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../utils/position-engine.js */ "./node_modules/quasar/src/utils/position-engine.js");
+/* harmony import */ var _utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../../utils/focus-manager.js */ "./node_modules/quasar/src/utils/focus-manager.js");
+/* harmony import */ var _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ../../utils/position-engine.js */ "./node_modules/quasar/src/utils/position-engine.js");
 
 
 
@@ -19480,7 +19628,8 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_12__.default.extend({
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_13__.default.extend({
   name: 'QMenu',
 
   mixins: [
@@ -19512,15 +19661,15 @@ __webpack_require__.r(__webpack_exports__);
 
     anchor: {
       type: String,
-      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_11__.validatePosition
+      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_12__.validatePosition
     },
     self: {
       type: String,
-      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_11__.validatePosition
+      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_12__.validatePosition
     },
     offset: {
       type: Array,
-      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_11__.validateOffset
+      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_12__.validateOffset
     },
 
     scrollTarget: {
@@ -19541,7 +19690,7 @@ __webpack_require__.r(__webpack_exports__);
 
   computed: {
     anchorOrigin () {
-      return (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_11__.parsePosition)(
+      return (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_12__.parsePosition)(
         this.anchor || (
           this.cover === true ? 'center middle' : 'bottom start'
         ),
@@ -19552,7 +19701,7 @@ __webpack_require__.r(__webpack_exports__);
     selfOrigin () {
       return this.cover === true
         ? this.anchorOrigin
-        : (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_11__.parsePosition)(this.self || 'top start', this.$q.lang.rtl)
+        : (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_12__.parsePosition)(this.self || 'top start', this.$q.lang.rtl)
     },
 
     menuClass () {
@@ -19591,14 +19740,16 @@ __webpack_require__.r(__webpack_exports__);
 
   methods: {
     focus () {
-      let node = this.__portal !== void 0 && this.__portal.$refs !== void 0
-        ? this.__portal.$refs.inner
-        : void 0
+      (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_11__.addFocusFn)(() => {
+        let node = this.__portal !== void 0 && this.__portal.$refs !== void 0
+          ? this.__portal.$refs.inner
+          : void 0
 
-      if (node !== void 0 && node.contains(document.activeElement) !== true) {
-        node = node.querySelector('[autofocus], [data-autofocus]') || node
-        node.focus()
-      }
+        if (node !== void 0 && node.contains(document.activeElement) !== true) {
+          node = node.querySelector('[autofocus], [data-autofocus]') || node
+          node.focus()
+        }
+      })
     },
 
     __show (evt) {
@@ -19657,6 +19808,7 @@ __webpack_require__.r(__webpack_exports__);
         }
 
         this.updatePosition()
+        this.__showPortal(true)
         this.$emit('show', evt)
       }, 300)
     },
@@ -19738,7 +19890,7 @@ __webpack_require__.r(__webpack_exports__);
         return
       }
 
-      (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_11__.setPosition)({
+      (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_12__.setPosition)({
         el,
         offset: this.offset,
         anchorEl: this.anchorEl,
@@ -20140,10 +20292,12 @@ __webpack_require__.r(__webpack_exports__);
   },
 
   computed: {
-    height () {
-      return this.layout.container === true
-        ? this.layout.containerHeight
-        : this.layout.height
+    scrollHeight () {
+      return this.layout.height - (
+        this.layout.container === true
+          ? this.layout.containerHeight
+          : this.$q.screen.height
+      )
     },
 
     onEvents () {
@@ -20163,7 +20317,7 @@ __webpack_require__.r(__webpack_exports__);
       handler (val) {
         if (val === true) {
           if (this.heightWatcher === void 0) {
-            this.heightWatcher = this.$watch('height', this.__updateVisibility)
+            this.heightWatcher = this.$watch('scrollHeight', this.__updateVisibility)
           }
         }
         else if (this.heightWatcher !== void 0) {
@@ -20177,15 +20331,12 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     __isVisible () {
       return this.reverse === true
-        ? this.height - this.layout.scroll.position > this.scrollOffset
+        ? this.scrollHeight - this.layout.scroll.position > this.scrollOffset
         : this.layout.scroll.position > this.scrollOffset
     },
 
     __onClick (e) {
-      const target = this.layout.container === true
-        ? (0,_utils_scroll_js__WEBPACK_IMPORTED_MODULE_1__.getScrollTarget)(this.$el)
-        : (0,_utils_scroll_js__WEBPACK_IMPORTED_MODULE_1__.getScrollTarget)(this.layout.$el)
-
+      const target = (0,_utils_scroll_js__WEBPACK_IMPORTED_MODULE_1__.getScrollTarget)(this.layout.container === true ? this.$el : this.layout.$el)
       ;(0,_utils_scroll_js__WEBPACK_IMPORTED_MODULE_1__.setScrollPosition)(target, this.reverse === true ? this.layout.height : 0, this.duration)
       this.$emit('click', e)
     },
@@ -20653,6 +20804,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     textColor: String,
 
+    activeColor: String,
+    activeTextColor: String,
+
     inputStyle: [Array, String, Object],
     inputClass: [Array, String, Object],
 
@@ -20699,6 +20853,7 @@ __webpack_require__.r(__webpack_exports__);
     round: Boolean,
     rounded: Boolean,
 
+    flat: Boolean,
     outline: Boolean,
     unelevated: Boolean,
     push: Boolean,
@@ -20707,7 +20862,7 @@ __webpack_require__.r(__webpack_exports__);
     dense: Boolean,
     padding: {
       type: String,
-      default: '6px 5px'
+      default: '3px 2px'
     }
   },
 
@@ -20734,7 +20889,7 @@ __webpack_require__.r(__webpack_exports__);
       },
       set (val) {
         val = parseInt(val, 10)
-        if (this.disable || isNaN(val) || val === 0) {
+        if (this.disable || isNaN(val)) {
           return
         }
         const value = (0,_utils_format_js__WEBPACK_IMPORTED_MODULE_5__.between)(val, this.min, this.max)
@@ -20799,6 +20954,14 @@ __webpack_require__.r(__webpack_exports__);
         ripple: this.ripple !== null
           ? this.ripple
           : true
+      }
+    },
+
+    activeBtnProps () {
+      return {
+        flat: this.flat,
+        color: this.activeColor || this.color,
+        textColor: this.activeTextColor || this.textColor
       }
     }
   },
@@ -20945,27 +21108,39 @@ __webpack_require__.r(__webpack_exports__);
       }
       if (boundaryStart) {
         const active = this.min === this.value
+        const btn = {
+          disable: this.disable,
+          flat: !active,
+          label: this.min
+        }
+
+        if (active) {
+          btn.color = this.activeColor || this.color
+          btn.textColor = this.activeTextColor || this.textColor
+        }
+
         contentStart.push(this.__getBtn(h, {
           key: 'bns',
           style
-        }, {
-          disable: this.disable,
-          flat: !active,
-          textColor: active ? this.textColor : null,
-          label: this.min
-        }, this.min))
+        }, btn, this.min))
       }
       if (boundaryEnd) {
         const active = this.max === this.value
+        const btn = {
+          disable: this.disable,
+          flat: !active,
+          label: this.max
+        }
+
+        if (active) {
+          btn.color = this.activeColor || this.color
+          btn.textColor = this.activeTextColor || this.textColor
+        }
+
         contentEnd.unshift(this.__getBtn(h, {
           key: 'bne',
           style
-        }, {
-          disable: this.disable,
-          flat: !active,
-          textColor: active ? this.textColor : null,
-          label: this.max
-        }, this.max))
+        }, btn, this.max))
       }
       if (ellipsesStart) {
         contentStart.push(this.__getBtn(h, {
@@ -20988,16 +21163,20 @@ __webpack_require__.r(__webpack_exports__);
         }, pgTo + 1))
       }
       for (let i = pgFrom; i <= pgTo; i++) {
-        const active = i === this.value
+        const btn = {
+          disable: this.disable,
+          flat: true,
+          label: i
+        }
+
+        if (i === this.value) {
+          Object.assign(btn, this.activeBtnProps)
+        }
+
         contentMiddle.push(this.__getBtn(h, {
           key: `bpg${i}`,
           style
-        }, {
-          disable: this.disable,
-          flat: !active,
-          textColor: active ? this.textColor : null,
-          label: i
-        }, i))
+        }, btn, i))
       }
     }
 
@@ -21411,7 +21590,7 @@ __webpack_require__.r(__webpack_exports__);
         title = (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_5__.slot)(this, 'title', this.title),
         child = this.$scopedSlots.default === void 0
           ? []
-          : this.$scopedSlots.default(this.defaultSlotScope).slice()
+          : [].concat(this.$scopedSlots.default(this.defaultSlotScope))
 
       title && child.unshift(
         h('div', { staticClass: 'q-dialog__title q-mt-sm q-mb-sm' }, [ title ])
@@ -21827,7 +22006,7 @@ const
       }
 
       if (event.isFirst === true) {
-        if ((0,_utils_scroll_js__WEBPACK_IMPORTED_MODULE_4__.getScrollPosition)(this.__scrollTarget) !== 0) {
+        if ((0,_utils_scroll_js__WEBPACK_IMPORTED_MODULE_4__.getScrollPosition)(this.__scrollTarget) !== 0 || event.direction !== 'down') {
           if (this.pulling === true) {
             this.pulling = false
             this.state = 'pull'
@@ -23278,7 +23457,9 @@ __webpack_require__.r(__webpack_exports__);
       default: null
     },
 
-    horizontal: Boolean
+    horizontal: Boolean,
+
+    tabindex: [String, Number]
   },
 
   data () {
@@ -23379,6 +23560,12 @@ __webpack_require__.r(__webpack_exports__);
         },
         value: this.__panThumb
       }]
+    },
+
+    scrollAttrs () {
+      if (this.tabindex !== void 0) {
+        return { tabindex: this.tabindex }
+      }
     }
   },
 
@@ -23508,7 +23695,8 @@ __webpack_require__.r(__webpack_exports__);
     }, [
       h('div', {
         ref: 'target',
-        staticClass: 'scroll relative-position fit hide-scrollbar'
+        staticClass: 'scroll relative-position fit hide-scrollbar',
+        attrs: this.scrollAttrs
       }, [
         h('div', {
           staticClass: 'absolute',
@@ -24052,8 +24240,15 @@ const reEscapeList = '.*+?^${}()|[]\\'
           dark: this.isOptionsDark
         }
 
+        const itemAttrs = {
+          role: 'option',
+          id: `${this.targetUid}_${index}`
+        }
+
         if (disable !== true) {
           this.isOptionSelected(opt) === true && (itemProps.active = true)
+          itemAttrs['aria-selected'] = itemProps.active === true ? 'true' : 'false'
+
           this.optionIndex === index && (itemProps.focused = true)
         }
 
@@ -24073,7 +24268,8 @@ const reEscapeList = '.*+?^${}()|[]\\'
           focused: itemProps.focused,
           toggleOption: this.toggleOption,
           setOptionIndex: this.setOptionIndex,
-          itemProps
+          itemProps,
+          itemAttrs
         }
 
         if (options[i] === void 0 || (0,_utils_is_js__WEBPACK_IMPORTED_MODULE_8__.isDeepEqual)(option, options[i]) !== true) {
@@ -24156,6 +24352,23 @@ const reEscapeList = '.*+?^${}()|[]\\'
       return this.virtualScrollItemSize === void 0
         ? (this.dense === true ? 24 : 48)
         : this.virtualScrollItemSize
+    },
+
+    comboboxAttrs () {
+      return {
+        role: 'combobox',
+        'aria-multiselectable': this.multiple === true ? 'true' : 'false',
+        'aria-expanded': this.menu === true ? 'true' : 'false',
+        'aria-owns': `${this.targetUid}_lb`,
+        'aria-activedescendant': `${this.targetUid}_${this.optionIndex}`
+      }
+    },
+
+    listboxAttrs () {
+      return {
+        role: 'listbox',
+        id: `${this.targetUid}_lb`
+      }
     }
   },
 
@@ -24637,7 +24850,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
       }
 
       if (this.$scopedSlots.selected !== void 0) {
-        return this.$scopedSlots.selected().slice()
+        return [].concat(this.$scopedSlots.selected())
       }
 
       if (this.useChips === true) {
@@ -24689,7 +24902,8 @@ const reEscapeList = '.*+?^${}()|[]\\'
             staticClass: 'no-outline',
             attrs: {
               id: this.targetUid,
-              tabindex: this.tabindex
+              tabindex: this.tabindex,
+              ...this.comboboxAttrs
             },
             on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'f-tget', {
               keydown: this.__onTargetKeydown,
@@ -24749,6 +24963,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
         : scope => h(_item_QItem_js__WEBPACK_IMPORTED_MODULE_3__.default, {
           key: scope.index,
           props: scope.itemProps,
+          attrs: scope.itemAttrs,
           on: scope.itemEvents
         }, [
           h(_item_QItemSection_js__WEBPACK_IMPORTED_MODULE_4__.default, [
@@ -24806,7 +25021,8 @@ const reEscapeList = '.*+?^${}()|[]\\'
           autocomplete: this.autocomplete,
           'data-autofocus': fromDialog === true ? false : this.autofocus,
           disabled: this.disable === true,
-          readonly: this.readonly === true
+          readonly: this.readonly === true,
+          ...this.comboboxAttrs
         },
         on: this.inputControlEvents
       }
@@ -25017,6 +25233,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
           transitionHide: this.transitionHide,
           separateClosePopup: true
         },
+        attrs: this.listboxAttrs,
         on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'menu', {
           '&scroll': this.__onVirtualScrollEvt,
           'before-hide': this.__closeMenu,
@@ -25077,6 +25294,7 @@ const reEscapeList = '.*+?^${}()|[]\\'
           staticClass: 'scroll',
           class: this.menuContentClass,
           style: this.popupContentStyle,
+          attrs: this.listboxAttrs,
           on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_13__.default)(this, 'virtMenu', {
             click: _utils_event_js__WEBPACK_IMPORTED_MODULE_9__.prevent,
             '&scroll': this.__onVirtualScrollEvt
@@ -30920,7 +31138,7 @@ __webpack_require__.r(__webpack_exports__);
   computed: {
     classes () {
       return 'q-td' + (this.autoWidth === true ? ' q-table--col-auto-width' : '') +
-        (this.noHover === true ? ' q-td--no-hover' : '')
+        (this.noHover === true ? ' q-td--no-hover' : '') + ' '
     }
   },
 
@@ -30942,10 +31160,12 @@ __webpack_require__.r(__webpack_exports__);
 
     if (col === void 0) { return }
 
+    const row = this.props.row
+
     return h('td', {
       on,
-      style: col.style,
-      class: this.classes + ' ' + col.__tdClass
+      style: col.__tdStyle(row),
+      class: this.classes + col.__tdClass(row)
     }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_1__.slot)(this, 'default'))
   }
 }));
@@ -31186,8 +31406,8 @@ __webpack_require__.r(__webpack_exports__);
           return slot !== void 0
             ? slot(this.__getBodyCellScope({ key, row, pageIndex, col }))
             : h('td', {
-              class: col.__tdClass,
-              style: col.style
+              class: col.__tdClass(row),
+              style: col.__tdStyle(row)
             }, this.getCellValue(col, row))
         })
 
@@ -31619,16 +31839,32 @@ __webpack_require__.r(__webpack_exports__);
 
       return cols.map(col => {
         const align = col.align || 'right'
+        const alignClass = `text-${align}`
 
         return {
           ...col,
           align,
           __iconClass: `q-table__sort-icon q-table__sort-icon--${align}`,
-          __thClass: `text-${align}` +
+          __thClass: alignClass +
             (col.headerClasses !== void 0 ? ' ' + col.headerClasses : '') +
             (col.sortable === true ? ' sortable' : '') +
             (col.name === sortBy ? ` sorted ${descending === true ? 'sort-desc' : ''}` : ''),
-          __tdClass: `text-${align}${col.classes !== void 0 ? ' ' + col.classes : ''}`
+
+          __tdStyle: col.style !== void 0
+            ? (
+              typeof col.style !== 'function'
+                ? () => col.style
+                : col.style
+            )
+            : () => null,
+
+          __tdClass: col.classes !== void 0
+            ? (
+              typeof col.classes !== 'function'
+                ? () => alignClass + ' ' + col.classes
+                : row => alignClass + ' ' + col.classes(row)
+            )
+            : () => alignClass
         }
       })
     },
@@ -32358,6 +32594,12 @@ __webpack_require__.r(__webpack_exports__);
             : (A === B ? 0 : dir)
         })
       }
+    },
+
+    columnSortOrder: {
+      type: String,
+      validator: v => v === 'ad' || v === 'da',
+      default: 'ad'
     }
   },
 
@@ -32373,24 +32615,46 @@ __webpack_require__.r(__webpack_exports__);
 
   methods: {
     sort (col /* String(col name) or Object(col definition) */) {
+      let sortOrder = this.columnSortOrder
+
       if (col === Object(col)) {
+        if (col.sortOrder) {
+          sortOrder = col.sortOrder
+        }
+
         col = col.name
+      }
+      else {
+        const def = this.colList.find(def => def.name === col)
+        if (def !== void 0 && def.sortOrder) {
+          sortOrder = def.sortOrder
+        }
       }
 
       let { sortBy, descending } = this.computedPagination
 
       if (sortBy !== col) {
         sortBy = col
-        descending = false
+        descending = sortOrder === 'da'
       }
       else if (this.binaryStateSort === true) {
         descending = !descending
       }
       else if (descending === true) {
-        sortBy = null
+        if (sortOrder === 'ad') {
+          sortBy = null
+        }
+        else {
+          descending = false
+        }
       }
-      else {
-        descending = true
+      else { // ascending
+        if (sortOrder === 'ad') {
+          descending = true
+        }
+        else {
+          sortBy = null
+        }
       }
 
       this.setPagination({ sortBy, descending, page: 1 })
@@ -33307,6 +33571,10 @@ const
       this.__updateArrows()
       return done
     }
+  },
+
+  activated () {
+    this.__recalculateScroll()
   },
 
   created () {
@@ -34791,17 +35059,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _mixins_anchor_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../mixins/anchor.js */ "./node_modules/quasar/src/mixins/anchor.js");
 /* harmony import */ var _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../mixins/model-toggle.js */ "./node_modules/quasar/src/mixins/model-toggle.js");
 /* harmony import */ var _mixins_portal_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../mixins/portal.js */ "./node_modules/quasar/src/mixins/portal.js");
 /* harmony import */ var _mixins_transition_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../mixins/transition.js */ "./node_modules/quasar/src/mixins/transition.js");
 /* harmony import */ var _utils_scroll_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../utils/scroll.js */ "./node_modules/quasar/src/utils/scroll.js");
-/* harmony import */ var _utils_touch_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/touch.js */ "./node_modules/quasar/src/utils/touch.js");
-/* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
-/* harmony import */ var _utils_selection_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../utils/selection.js */ "./node_modules/quasar/src/utils/selection.js");
-/* harmony import */ var _utils_slot_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utils/slot.js */ "./node_modules/quasar/src/utils/slot.js");
-/* harmony import */ var _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../utils/position-engine.js */ "./node_modules/quasar/src/utils/position-engine.js");
+/* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
+/* harmony import */ var _utils_selection_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../utils/selection.js */ "./node_modules/quasar/src/utils/selection.js");
+/* harmony import */ var _utils_slot_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../utils/slot.js */ "./node_modules/quasar/src/utils/slot.js");
+/* harmony import */ var _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../utils/position-engine.js */ "./node_modules/quasar/src/utils/position-engine.js");
 
 
 
@@ -34815,8 +35082,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_10__.default.extend({
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (vue__WEBPACK_IMPORTED_MODULE_9__.default.extend({
   name: 'QTooltip',
 
   mixins: [ _mixins_anchor_js__WEBPACK_IMPORTED_MODULE_0__.default, _mixins_model_toggle_js__WEBPACK_IMPORTED_MODULE_1__.default, _mixins_portal_js__WEBPACK_IMPORTED_MODULE_2__.default, _mixins_transition_js__WEBPACK_IMPORTED_MODULE_3__.default ],
@@ -34841,17 +35107,17 @@ __webpack_require__.r(__webpack_exports__);
     anchor: {
       type: String,
       default: 'bottom middle',
-      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_9__.validatePosition
+      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_8__.validatePosition
     },
     self: {
       type: String,
       default: 'top middle',
-      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_9__.validatePosition
+      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_8__.validatePosition
     },
     offset: {
       type: Array,
       default: () => [14, 14],
-      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_9__.validateOffset
+      validator: _utils_position_engine_js__WEBPACK_IMPORTED_MODULE_8__.validateOffset
     },
 
     scrollTarget: {
@@ -34871,11 +35137,11 @@ __webpack_require__.r(__webpack_exports__);
 
   computed: {
     anchorOrigin () {
-      return (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_9__.parsePosition)(this.anchor, this.$q.lang.rtl)
+      return (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_8__.parsePosition)(this.anchor, this.$q.lang.rtl)
     },
 
     selfOrigin () {
-      return (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_9__.parsePosition)(this.self, this.$q.lang.rtl)
+      return (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_8__.parsePosition)(this.self, this.$q.lang.rtl)
     },
 
     hideOnRouteChange () {
@@ -34902,6 +35168,7 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       this.__setTimeout(() => {
+        this.__showPortal(true)
         this.$emit('show', evt)
       }, 300)
     },
@@ -34927,7 +35194,7 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       this.__unconfigureScrollTarget()
-      ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_6__.cleanEvt)(this, 'tooltipTemp')
+      ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_5__.cleanEvt)(this, 'tooltipTemp')
     },
 
     updatePosition () {
@@ -34942,7 +35209,7 @@ __webpack_require__.r(__webpack_exports__);
         return
       }
 
-      (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_9__.setPosition)({
+      (0,_utils_position_engine_js__WEBPACK_IMPORTED_MODULE_8__.setPosition)({
         el,
         offset: this.offset,
         anchorEl: this.anchorEl,
@@ -34955,14 +35222,14 @@ __webpack_require__.r(__webpack_exports__);
 
     __delayShow (evt) {
       if (this.$q.platform.is.mobile === true) {
-        (0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_7__.clearSelection)()
+        (0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_6__.clearSelection)()
         document.body.classList.add('non-selectable')
 
-        const target = (0,_utils_touch_js__WEBPACK_IMPORTED_MODULE_5__.getTouchTarget)(this.anchorEl)
+        const target = this.anchorEl
         const evts = ['touchmove', 'touchcancel', 'touchend', 'click']
           .map(e => ([ target, e, '__delayHide', 'passiveCapture' ]))
 
-        ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_6__.addEvt)(this, 'tooltipTemp', evts)
+        ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_5__.addEvt)(this, 'tooltipTemp', evts)
       }
 
       this.__setTimeout(() => {
@@ -34974,8 +35241,8 @@ __webpack_require__.r(__webpack_exports__);
       this.__clearTimeout()
 
       if (this.$q.platform.is.mobile === true) {
-        (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_6__.cleanEvt)(this, 'tooltipTemp')
-        ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_7__.clearSelection)()
+        (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_5__.cleanEvt)(this, 'tooltipTemp')
+        ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_6__.clearSelection)()
         // delay needed otherwise selection still occurs
         setTimeout(() => {
           document.body.classList.remove('non-selectable')
@@ -34999,7 +35266,7 @@ __webpack_require__.r(__webpack_exports__);
           [ this.anchorEl, 'mouseleave', '__delayHide', 'passive' ]
         ]
 
-      ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_6__.addEvt)(this, 'anchor', evts)
+      ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_5__.addEvt)(this, 'anchor', evts)
     },
 
     __unconfigureScrollTarget () {
@@ -35031,7 +35298,7 @@ __webpack_require__.r(__webpack_exports__);
           attrs: {
             role: 'complementary'
           }
-        }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_8__.slot)(this, 'default')) : null
+        }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_7__.slot)(this, 'default')) : null
       ])
     }
   },
@@ -36117,9 +36384,9 @@ __webpack_require__.r(__webpack_exports__);
 
       const files = processedFiles
         .filter(file => this.files.findIndex(f => file.name === f.name) === -1)
-      
+
       if (files === void 0) { return }
-      
+
       const fileInput = this.__getFileInput()
       if (fileInput !== void 0) {
         fileInput.value = ''
@@ -37927,10 +38194,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../plugins/Platform.js */ "./node_modules/quasar/src/plugins/Platform.js");
-/* harmony import */ var _utils_touch_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/touch.js */ "./node_modules/quasar/src/utils/touch.js");
-/* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
-/* harmony import */ var _utils_selection_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/selection.js */ "./node_modules/quasar/src/utils/selection.js");
-
+/* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
+/* harmony import */ var _utils_selection_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/selection.js */ "./node_modules/quasar/src/utils/selection.js");
 
 
 
@@ -37938,8 +38203,8 @@ __webpack_require__.r(__webpack_exports__);
 function destroy (el) {
   const ctx = el.__qtouchhold
   if (ctx !== void 0) {
-    (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.cleanEvt)(ctx, 'main')
-    ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.cleanEvt)(ctx, 'temp')
+    (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.cleanEvt)(ctx, 'main')
+    ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.cleanEvt)(ctx, 'temp')
 
     clearTimeout(ctx.timer)
     ctx.styleCleanup !== void 0 && ctx.styleCleanup()
@@ -37966,11 +38231,11 @@ function destroy (el) {
 
     const ctx = {
       handler: binding.value,
-      noop: _utils_event_js__WEBPACK_IMPORTED_MODULE_2__.noop,
+      noop: _utils_event_js__WEBPACK_IMPORTED_MODULE_1__.noop,
 
       mouseStart (evt) {
-        if (typeof ctx.handler === 'function' && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.leftClick)(evt) === true) {
-          (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'temp', [
+        if (typeof ctx.handler === 'function' && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.leftClick)(evt) === true) {
+          (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'temp', [
             [ document, 'mousemove', 'move', 'passiveCapture' ],
             [ document, 'click', 'end', 'notPassiveCapture' ]
           ])
@@ -37980,8 +38245,8 @@ function destroy (el) {
 
       touchStart (evt) {
         if (evt.target !== void 0 && typeof ctx.handler === 'function') {
-          const target = (0,_utils_touch_js__WEBPACK_IMPORTED_MODULE_1__.getTouchTarget)(evt.target)
-          ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'temp', [
+          const target = evt.target
+          ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'temp', [
             [ target, 'touchmove', 'move', 'passiveCapture' ],
             [ target, 'touchcancel', 'end', 'notPassiveCapture' ],
             [ target, 'touchend', 'end', 'notPassiveCapture' ]
@@ -37991,13 +38256,13 @@ function destroy (el) {
       },
 
       start (evt, mouseEvent) {
-        ctx.origin = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.position)(evt)
+        ctx.origin = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.position)(evt)
 
         const startTime = Date.now()
 
         if (_plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.client.is.mobile === true) {
           document.body.classList.add('non-selectable')
-          ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_3__.clearSelection)()
+          ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_2__.clearSelection)()
 
           ctx.styleCleanup = withDelay => {
             ctx.styleCleanup = void 0
@@ -38007,7 +38272,7 @@ function destroy (el) {
             }
 
             if (withDelay === true) {
-              (0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_3__.clearSelection)()
+              (0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_2__.clearSelection)()
               setTimeout(remove, 10)
             }
             else { remove() }
@@ -38020,7 +38285,7 @@ function destroy (el) {
           : ctx.touchSensitivity
 
         ctx.timer = setTimeout(() => {
-          ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_3__.clearSelection)()
+          ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_2__.clearSelection)()
           ctx.triggered = true
 
           ctx.handler({
@@ -38034,7 +38299,7 @@ function destroy (el) {
       },
 
       move (evt) {
-        const { top, left } = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.position)(evt)
+        const { top, left } = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.position)(evt)
         if (
           Math.abs(left - ctx.origin.left) >= ctx.sensitivity ||
           Math.abs(top - ctx.origin.top) >= ctx.sensitivity
@@ -38044,13 +38309,13 @@ function destroy (el) {
       },
 
       end (evt) {
-        (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.cleanEvt)(ctx, 'temp')
+        (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.cleanEvt)(ctx, 'temp')
 
         // delay needed otherwise selection still occurs
         ctx.styleCleanup !== void 0 && ctx.styleCleanup(ctx.triggered)
 
         if (ctx.triggered === true) {
-          evt !== void 0 && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.stopAndPrevent)(evt)
+          evt !== void 0 && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.stopAndPrevent)(evt)
         }
         else {
           clearTimeout(ctx.timer)
@@ -38072,11 +38337,11 @@ function destroy (el) {
 
     el.__qtouchhold = ctx
 
-    modifiers.mouse === true && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'main', [
+    modifiers.mouse === true && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'main', [
       [ el, 'mousedown', 'mouseStart', `passive${modifiers.mouseCapture === true ? 'Capture' : ''}` ]
     ])
 
-    _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.client.has.touch === true && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'main', [
+    _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.client.has.touch === true && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'main', [
       [ el, 'touchstart', 'touchStart', `passive${modifiers.capture === true ? 'Capture' : ''}` ],
       [ el, 'touchend', 'noop', 'notPassiveCapture' ]
     ])
@@ -38299,7 +38564,7 @@ let uid = 0
 
       touchStart (evt) {
         if ((0,_utils_touch_js__WEBPACK_IMPORTED_MODULE_1__.shouldStart)(evt, ctx)) {
-          const target = (0,_utils_touch_js__WEBPACK_IMPORTED_MODULE_1__.getTouchTarget)(evt.target)
+          const target = evt.target
 
           ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'temp', [
             [ target, 'touchmove', 'move', 'notPassiveCapture' ],
@@ -38549,11 +38814,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../plugins/Platform.js */ "./node_modules/quasar/src/plugins/Platform.js");
-/* harmony import */ var _utils_touch_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/touch.js */ "./node_modules/quasar/src/utils/touch.js");
-/* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
-/* harmony import */ var _utils_selection_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/selection.js */ "./node_modules/quasar/src/utils/selection.js");
-/* harmony import */ var _utils_key_composition_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../utils/key-composition.js */ "./node_modules/quasar/src/utils/key-composition.js");
-
+/* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
+/* harmony import */ var _utils_selection_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/selection.js */ "./node_modules/quasar/src/utils/selection.js");
+/* harmony import */ var _utils_key_composition_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/key-composition.js */ "./node_modules/quasar/src/utils/key-composition.js");
 
 
 
@@ -38574,7 +38837,7 @@ const
   keyRegex = new RegExp(`^([\\d+]+|${Object.keys(keyCodes).join('|')})$`, 'i')
 
 function shouldEnd (evt, origin) {
-  const { top, left } = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.position)(evt)
+  const { top, left } = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.position)(evt)
 
   return Math.abs(left - origin.left) >= 7 ||
     Math.abs(top - origin.top) >= 7
@@ -38585,8 +38848,8 @@ function destroy (el) {
   if (ctx !== void 0) {
     clearTimeout(ctx.timer)
 
-    ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.cleanEvt)(ctx, 'main')
-    ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.cleanEvt)(ctx, 'temp')
+    ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.cleanEvt)(ctx, 'main')
+    ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.cleanEvt)(ctx, 'temp')
 
     ctx.styleCleanup !== void 0 && ctx.styleCleanup()
 
@@ -38630,11 +38893,11 @@ function destroy (el) {
       keyboard,
       handler: value,
 
-      noop: _utils_event_js__WEBPACK_IMPORTED_MODULE_2__.noop,
+      noop: _utils_event_js__WEBPACK_IMPORTED_MODULE_1__.noop,
 
       mouseStart (evt) {
-        if (ctx.event === void 0 && typeof ctx.handler === 'function' && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.leftClick)(evt) === true) {
-          (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'temp', [
+        if (ctx.event === void 0 && typeof ctx.handler === 'function' && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.leftClick)(evt) === true) {
+          (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'temp', [
             [ document, 'mousemove', 'move', 'passiveCapture' ],
             [ document, 'click', 'end', 'notPassiveCapture' ]
           ])
@@ -38643,16 +38906,16 @@ function destroy (el) {
       },
 
       keyboardStart (evt) {
-        if (typeof ctx.handler === 'function' && (0,_utils_key_composition_js__WEBPACK_IMPORTED_MODULE_4__.isKeyCode)(evt, keyboard) === true) {
+        if (typeof ctx.handler === 'function' && (0,_utils_key_composition_js__WEBPACK_IMPORTED_MODULE_3__.isKeyCode)(evt, keyboard) === true) {
           if (durations[0] === 0 || ctx.event !== void 0) {
-            (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.stopAndPrevent)(evt)
+            (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.stopAndPrevent)(evt)
             el.focus()
             if (ctx.event !== void 0) {
               return
             }
           }
 
-          (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'temp', [
+          (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'temp', [
             [ document, 'keyup', 'end', 'notPassiveCapture' ],
             [ document, 'click', 'end', 'notPassiveCapture' ]
           ])
@@ -38662,8 +38925,8 @@ function destroy (el) {
 
       touchStart (evt) {
         if (evt.target !== void 0 && typeof ctx.handler === 'function') {
-          const target = (0,_utils_touch_js__WEBPACK_IMPORTED_MODULE_1__.getTouchTarget)(evt.target)
-          ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'temp', [
+          const target = evt.target
+          ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'temp', [
             [ target, 'touchmove', 'move', 'passiveCapture' ],
             [ target, 'touchcancel', 'end', 'notPassiveCapture' ],
             [ target, 'touchend', 'end', 'notPassiveCapture' ]
@@ -38674,7 +38937,7 @@ function destroy (el) {
 
       start (evt, mouseEvent, keyboardEvent) {
         if (keyboardEvent !== true) {
-          ctx.origin = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.position)(evt)
+          ctx.origin = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.position)(evt)
         }
 
         function styleCleanup (withDelay) {
@@ -38687,7 +38950,7 @@ function destroy (el) {
           }
 
           if (withDelay === true) {
-            (0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_3__.clearSelection)()
+            (0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_2__.clearSelection)()
             setTimeout(remove, 10)
           }
           else { remove() }
@@ -38695,7 +38958,7 @@ function destroy (el) {
 
         if (_plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.client.is.mobile === true) {
           document.body.classList.add('non-selectable')
-          ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_3__.clearSelection)()
+          ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_2__.clearSelection)()
           ctx.styleCleanup = styleCleanup
         }
 
@@ -38719,13 +38982,13 @@ function destroy (el) {
               ctx.event.keyCode = evt.keyCode
             }
             else {
-              ctx.event.position = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.position)(evt)
+              ctx.event.position = (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.position)(evt)
             }
 
             if (_plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.client.is.mobile !== true) {
               document.documentElement.style.cursor = 'pointer'
               document.body.classList.add('non-selectable')
-              ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_3__.clearSelection)()
+              ;(0,_utils_selection_js__WEBPACK_IMPORTED_MODULE_2__.clearSelection)()
               ctx.styleCleanup = styleCleanup
             }
           }
@@ -38762,9 +39025,9 @@ function destroy (el) {
         }
 
         ctx.styleCleanup !== void 0 && ctx.styleCleanup(true)
-        evt !== void 0 && ctx.event.repeatCount > 0 && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.stopAndPrevent)(evt)
+        evt !== void 0 && ctx.event.repeatCount > 0 && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.stopAndPrevent)(evt)
 
-        ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.cleanEvt)(ctx, 'temp')
+        ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.cleanEvt)(ctx, 'temp')
         clearTimeout(ctx.timer)
 
         ctx.event = void 0
@@ -38773,16 +39036,16 @@ function destroy (el) {
 
     el.__qtouchrepeat = ctx
 
-    modifiers.mouse === true && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'main', [
+    modifiers.mouse === true && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'main', [
       [ el, 'mousedown', 'mouseStart', `passive${modifiers.mouseCapture === true ? 'Capture' : ''}` ]
     ])
 
-    _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.client.has.touch === true && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'main', [
+    _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.client.has.touch === true && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'main', [
       [ el, 'touchstart', 'touchStart', `passive${modifiers.capture === true ? 'Capture' : ''}` ],
       [ el, 'touchend', 'noop', 'notPassiveCapture' ]
     ])
 
-    keyboard.length > 0 && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'main', [
+    keyboard.length > 0 && (0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(ctx, 'main', [
       [ el, 'keydown', 'keyboardStart', `notPassive${modifiers.keyCapture === true ? 'Capture' : ''}` ]
     ])
   },
@@ -38895,7 +39158,7 @@ function destroy (el) {
 
       touchStart (evt) {
         if ((0,_utils_touch_js__WEBPACK_IMPORTED_MODULE_1__.shouldStart)(evt, ctx)) {
-          const target = (0,_utils_touch_js__WEBPACK_IMPORTED_MODULE_1__.getTouchTarget)(evt.target)
+          const target = evt.target
           ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_2__.addEvt)(ctx, 'temp', [
             [ target, 'touchmove', 'move', 'notPassiveCapture' ],
             [ target, 'touchcancel', 'end', 'notPassiveCapture' ],
@@ -39178,9 +39441,9 @@ function getShouldExitFn (cfg) {
     // then we got nothing to do
     if (
       // if we're on Capacitor mode
-      capacitor === true
+      capacitor === true &&
       // and it's also not in Capacitor's main instance
-      && (window.Capacitor === void 0 || window.Capacitor.Plugins.App === void 0)
+      (window.Capacitor === void 0 || window.Capacitor.Plugins.App === void 0)
     ) {
       return
     }
@@ -39769,9 +40032,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _utils_selection_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils/selection.js */ "./node_modules/quasar/src/utils/selection.js");
 /* harmony import */ var _utils_event_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/event.js */ "./node_modules/quasar/src/utils/event.js");
-/* harmony import */ var _utils_touch_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/touch.js */ "./node_modules/quasar/src/utils/touch.js");
-/* harmony import */ var _utils_key_composition_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../utils/key-composition.js */ "./node_modules/quasar/src/utils/key-composition.js");
-
+/* harmony import */ var _utils_key_composition_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/key-composition.js */ "./node_modules/quasar/src/utils/key-composition.js");
 
 
 
@@ -39834,7 +40095,7 @@ __webpack_require__.r(__webpack_exports__);
     },
 
     __toggleKey (evt) {
-      (0,_utils_key_composition_js__WEBPACK_IMPORTED_MODULE_3__.isKeyCode)(evt, 13) === true && this.toggle(evt)
+      (0,_utils_key_composition_js__WEBPACK_IMPORTED_MODULE_2__.isKeyCode)(evt, 13) === true && this.toggle(evt)
     },
 
     __mobileCleanup (evt) {
@@ -39858,7 +40119,7 @@ __webpack_require__.r(__webpack_exports__);
       this.hide(evt)
       this.anchorEl.classList.add('non-selectable')
 
-      const target = (0,_utils_touch_js__WEBPACK_IMPORTED_MODULE_2__.getTouchTarget)(evt.target)
+      const target = evt.target
       ;(0,_utils_event_js__WEBPACK_IMPORTED_MODULE_1__.addEvt)(this, 'anchor', [
         [ target, 'touchmove', '__mobileCleanup', 'passive' ],
         [ target, 'touchend', '__mobileCleanup', 'passive' ],
@@ -41337,6 +41598,10 @@ const MARKER = String.fromCharCode(1)
       this.__updateMaskInternals()
     },
 
+    autogrow () {
+      this.__updateMaskInternals()
+    },
+
     mask (v) {
       if (v !== void 0) {
         this.__updateMaskValue(this.innerValue, true)
@@ -41401,7 +41666,7 @@ const MARKER = String.fromCharCode(1)
     __updateMaskInternals () {
       this.hasMask = this.mask !== void 0 &&
         this.mask.length > 0 &&
-        ['text', 'search', 'url', 'tel', 'password'].includes(this.type)
+        (this.autogrow === true || ['textarea', 'text', 'search', 'url', 'tel', 'password'].includes(this.type))
 
       if (this.hasMask === false) {
         this.computedUnmask = void 0
@@ -41544,7 +41809,11 @@ const MARKER = String.fromCharCode(1)
 
         if (['deleteContentBackward', 'deleteContentForward'].indexOf(inputType) > -1) {
           const cursor = this.reverseFillMask === true
-            ? Math.max(0, masked.length - (masked === this.maskReplaced ? 0 : Math.min(preMasked.length, endReverse) + 1)) + 1
+            ? (
+              end === 0
+                ? (masked.length > preMasked.length ? 1 : 0)
+                : Math.max(0, masked.length - (masked === this.maskReplaced ? 0 : Math.min(preMasked.length, endReverse) + 1)) + 1
+            )
             : end
           inp.setSelectionRange(cursor, cursor, 'forward')
 
@@ -41554,7 +41823,13 @@ const MARKER = String.fromCharCode(1)
         if (this.reverseFillMask === true) {
           if (changed === true) {
             const cursor = Math.max(0, masked.length - (masked === this.maskReplaced ? 0 : Math.min(preMasked.length, endReverse + 1)))
-            this.__moveCursorRightReverse(inp, cursor, cursor)
+
+            if (cursor === 1 && end === 1) {
+              inp.setSelectionRange(cursor, cursor, 'forward')
+            }
+            else {
+              this.__moveCursorRightReverse(inp, cursor, cursor)
+            }
           }
           else {
             const cursor = masked.length - endReverse
@@ -41772,7 +42047,7 @@ const MARKER = String.fromCharCode(1)
 
       let valIndex = val.length - 1, output = ''
 
-      for (let maskIndex = mask.length - 1; maskIndex >= 0; maskIndex--) {
+      for (let maskIndex = mask.length - 1; maskIndex >= 0 && valIndex > -1; maskIndex--) {
         const maskDef = mask[maskIndex]
 
         let valChar = val[valIndex]
@@ -42016,18 +42291,18 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const PanelWrapper = vue__WEBPACK_IMPORTED_MODULE_5__.default.extend({
-  name: 'QTabPanelWrapper',
+function getPanelWrapper (h) {
+  return h('div', {
+    staticClass: 'q-panel scroll',
+    attrs: { role: 'tabpanel' },
+    // stop propagation of content emitted @input
+    // which would tamper with Panel's model
+    on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__.default)(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_2__.stop })
+  }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_3__.slot)(this, 'default'))
+}
 
-  render (h) {
-    return h('div', {
-      staticClass: 'q-panel scroll',
-      attrs: { role: 'tabpanel' },
-      // stop propagation of content emitted @input
-      // which would tamper with Panel's model
-      on: (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__.default)(this, 'stop', { input: _utils_event_js__WEBPACK_IMPORTED_MODULE_2__.stop })
-    }, (0,_utils_slot_js__WEBPACK_IMPORTED_MODULE_3__.slot)(this, 'default'))
-  }
+const PanelWrapper = vue__WEBPACK_IMPORTED_MODULE_5__.default.extend({
+  render: getPanelWrapper
 })
 
 const PanelParentMixin = {
@@ -42093,11 +42368,16 @@ const PanelParentMixin = {
     },
 
     keepAliveProps () {
-      const props = {}
-      this.keepAliveInclude !== void 0 && (props.include = this.keepAliveInclude)
-      this.keepAliveExclude !== void 0 && (props.exclude = this.keepAliveExclude)
-      this.keepAliveMax !== void 0 && (props.max = this.keepAliveMax)
-      return props
+      return {
+        include: this.keepAliveInclude,
+        exclude: this.keepAliveExclude,
+        max: this.keepAliveMax
+      }
+    },
+
+    needsUniqueWrapper () {
+      return this.keepAliveInclude !== void 0 ||
+        this.keepAliveExclude !== void 0
     }
   },
 
@@ -42221,11 +42501,17 @@ const PanelParentMixin = {
 
       const content = this.keepAlive === true
         ? [
-          h('keep-alive', [
-            h(PanelWrapper, {
-              key: this.contentKey,
-              props: this.keepAliveProps
-            }, [ panel ])
+          h('keep-alive', { props: this.keepAliveProps }, [
+            h(
+              this.needsUniqueWrapper === true
+                ? (0,_utils_cache_js__WEBPACK_IMPORTED_MODULE_4__.cacheWithFn)(this, this.contentKey, () => vue__WEBPACK_IMPORTED_MODULE_5__.default.extend({
+                  name: this.contentKey,
+                  render: getPanelWrapper
+                }))
+                : PanelWrapper,
+              { key: this.contentKey },
+              [ panel ]
+            )
           ])
         ]
         : [
@@ -42290,9 +42576,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "closePortals": () => (/* binding */ closePortals),
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
+/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm.js");
 /* harmony import */ var _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../plugins/Platform.js */ "./node_modules/quasar/src/plugins/Platform.js");
 /* harmony import */ var _utils_dom_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/dom.js */ "./node_modules/quasar/src/utils/dom.js");
+/* harmony import */ var _utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../utils/focus-manager.js */ "./node_modules/quasar/src/utils/focus-manager.js");
+
 
 
 
@@ -42369,7 +42657,18 @@ const Portal = {
   },
 
   methods: {
-    __showPortal () {
+    __showPortal (isReady) {
+      if (isReady === true) {
+        (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_2__.removeFocusWaitFlag)(this.focusObj)
+        return
+      }
+
+      if (this.focusObj === void 0) {
+        this.focusObj = {}
+      }
+
+      (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_2__.addFocusWaitFlag)(this.focusObj)
+
       if (this.$q.fullscreen !== void 0 && this.$q.fullscreen.isCapable === true) {
         const append = isFullscreen => {
           if (this.__portal === void 0) {
@@ -42403,6 +42702,8 @@ const Portal = {
     },
 
     __hidePortal () {
+      (0,_utils_focus_manager_js__WEBPACK_IMPORTED_MODULE_2__.removeFocusWaitFlag)(this.focusObj)
+
       if (this.__portal !== void 0) {
         if (this.unwatchFullscreen !== void 0) {
           this.unwatchFullscreen()
@@ -42425,7 +42726,7 @@ const Portal = {
             $el: this.$el,
             $refs: this.$refs
           }
-          : new vue__WEBPACK_IMPORTED_MODULE_2__.default({
+          : new vue__WEBPACK_IMPORTED_MODULE_3__.default({
             name: 'QPortal',
             parent: this,
 
@@ -43082,6 +43383,11 @@ const lazyRulesValues = [ true, false, 'ondemand' ]
           this.validate()
         }
       }
+    },
+
+    hasError (invalid) {
+      const targetEl = document.getElementById(this.targetUid)
+      targetEl !== null && targetEl.setAttribute('aria-invalid', invalid === true)
     }
   },
 
@@ -44718,16 +45024,18 @@ const Loading = {
       : { ...defaults, ...opts }
 
     props.customClass += ` text-${props.backgroundColor}`
-    props.uid = `l_${uid++}`
 
     this.isActive = true
 
     if (vm !== void 0) {
+      props.uid = uid
       vm.$forceUpdate()
       return
     }
 
+    props.uid = ++uid
     clearTimeout(timeout)
+
     timeout = setTimeout(() => {
       timeout = void 0
 
@@ -44773,6 +45081,7 @@ const Loading = {
                   size: props.spinnerSize
                 }
               }),
+
               (props.message && h('div', {
                 class: `text-${props.messageColor}`,
                 domProps: {
@@ -48834,6 +49143,60 @@ function extend () {
 
 /***/ }),
 
+/***/ "./node_modules/quasar/src/utils/focus-manager.js":
+/*!********************************************************!*\
+  !*** ./node_modules/quasar/src/utils/focus-manager.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "addFocusWaitFlag": () => (/* binding */ addFocusWaitFlag),
+/* harmony export */   "removeFocusWaitFlag": () => (/* binding */ removeFocusWaitFlag),
+/* harmony export */   "addFocusFn": () => (/* binding */ addFocusFn),
+/* harmony export */   "removeFocusFn": () => (/* binding */ removeFocusFn)
+/* harmony export */ });
+let queue = []
+const waitFlags = []
+
+function addFocusWaitFlag (flag) {
+  waitFlags.push(flag)
+}
+
+function removeFocusWaitFlag (flag) {
+  const index = waitFlags.indexOf(flag)
+  if (index !== -1) {
+    waitFlags.splice(index, 1)
+  }
+
+  if (waitFlags.length === 0 && queue.length > 0) {
+    // only call last focus handler (can't focus multiple things at once)
+    queue[ queue.length - 1 ]()
+    queue = []
+  }
+}
+
+function addFocusFn (fn) {
+  if (waitFlags.length === 0) {
+    fn()
+  }
+  else {
+    queue.push(fn)
+    return fn
+  }
+}
+
+function removeFocusFn (fn) {
+  const index = queue.indexOf(fn)
+  if (index !== -1) {
+    queue.splice(index, 1)
+  }
+}
+
+
+/***/ }),
+
 /***/ "./node_modules/quasar/src/utils/format.js":
 /*!*************************************************!*\
   !*** ./node_modules/quasar/src/utils/format.js ***!
@@ -51069,7 +51432,7 @@ function slot (vm, slotName, otherwise) {
 
 function uniqueSlot (vm, slotName, otherwise) {
   return vm.$scopedSlots[slotName] !== void 0
-    ? vm.$scopedSlots[slotName]().slice()
+    ? [].concat(vm.$scopedSlots[slotName]())
     : otherwise
 }
 
@@ -51177,12 +51540,8 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "getModifierDirections": () => (/* binding */ getModifierDirections),
-/* harmony export */   "getTouchTarget": () => (/* binding */ getTouchTarget),
 /* harmony export */   "shouldStart": () => (/* binding */ shouldStart)
 /* harmony export */ });
-/* harmony import */ var _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../plugins/Platform.js */ "./node_modules/quasar/src/plugins/Platform.js");
-
-
 const directions = [ 'left', 'right', 'up', 'down', 'horizontal', 'vertical' ]
 
 const modifiersAll = {
@@ -51226,13 +51585,6 @@ function getModifierDirections (mod) {
 
   return dir
 }
-
-const getTouchTarget = _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.isSSR === false && _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.iosEmulated !== true && (
-  _plugins_Platform_js__WEBPACK_IMPORTED_MODULE_0__.client.is.ios === true ||
-  window.navigator.vendor.toLowerCase().indexOf('apple') > -1
-)
-  ? () => document
-  : target => target
 
 function shouldStart (evt, ctx) {
   return ctx.event === void 0 &&
@@ -51348,9 +51700,6 @@ __webpack_require__.r(__webpack_exports__);
 function getVmOfNode (el) {
   for (let node = el; node !== null; node = node.parentNode) {
     // node.__vue__ can be null if the instance was destroyed
-    if (node.__vue__ === null) {
-      return
-    }
     if (node.__vue__ !== void 0) {
       return node.__vue__
     }
@@ -51358,6 +51707,11 @@ function getVmOfNode (el) {
 }
 
 function isVmChildOf (childVm, parentVm) {
+  // node.__vue__ can be null if the instance was destroyed
+  if (childVm === null || parentVm === null) {
+    return null
+  }
+
   for (let vm = childVm; vm !== void 0; vm = vm.$parent) {
     if (vm === parentVm) {
       return true
@@ -51450,16 +51804,20 @@ function decode (value) {
 }
 
 function getEmptyStorage () {
+  const getVal = () => null
+
   return {
-    has: _utils_event_js__WEBPACK_IMPORTED_MODULE_0__.noop,
-    getLength: _utils_event_js__WEBPACK_IMPORTED_MODULE_0__.noop,
-    getItem: _utils_event_js__WEBPACK_IMPORTED_MODULE_0__.noop,
-    getIndex: _utils_event_js__WEBPACK_IMPORTED_MODULE_0__.noop,
-    getAll: _utils_event_js__WEBPACK_IMPORTED_MODULE_0__.noop,
+    has: () => false,
+    getLength: () => 0,
+    getItem: getVal,
+    getIndex: getVal,
+    getKey: getVal,
+    getAll: () => {},
+    getAllKeys: () => [],
     set: _utils_event_js__WEBPACK_IMPORTED_MODULE_0__.noop,
     remove: _utils_event_js__WEBPACK_IMPORTED_MODULE_0__.noop,
     clear: _utils_event_js__WEBPACK_IMPORTED_MODULE_0__.noop,
-    isEmpty: _utils_event_js__WEBPACK_IMPORTED_MODULE_0__.noop
+    isEmpty: () => true
   }
 }
 
@@ -51644,9 +52002,9 @@ var runtime = (function (exports) {
   // This is a polyfill for %IteratorPrototype% for environments that
   // don't natively support it.
   var IteratorPrototype = {};
-  IteratorPrototype[iteratorSymbol] = function () {
+  define(IteratorPrototype, iteratorSymbol, function () {
     return this;
-  };
+  });
 
   var getProto = Object.getPrototypeOf;
   var NativeIteratorPrototype = getProto && getProto(getProto(values([])));
@@ -51660,8 +52018,9 @@ var runtime = (function (exports) {
 
   var Gp = GeneratorFunctionPrototype.prototype =
     Generator.prototype = Object.create(IteratorPrototype);
-  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
-  GeneratorFunctionPrototype.constructor = GeneratorFunction;
+  GeneratorFunction.prototype = GeneratorFunctionPrototype;
+  define(Gp, "constructor", GeneratorFunctionPrototype);
+  define(GeneratorFunctionPrototype, "constructor", GeneratorFunction);
   GeneratorFunction.displayName = define(
     GeneratorFunctionPrototype,
     toStringTagSymbol,
@@ -51775,9 +52134,9 @@ var runtime = (function (exports) {
   }
 
   defineIteratorMethods(AsyncIterator.prototype);
-  AsyncIterator.prototype[asyncIteratorSymbol] = function () {
+  define(AsyncIterator.prototype, asyncIteratorSymbol, function () {
     return this;
-  };
+  });
   exports.AsyncIterator = AsyncIterator;
 
   // Note that simple async functions are implemented on top of
@@ -51970,13 +52329,13 @@ var runtime = (function (exports) {
   // iterator prototype chain incorrectly implement this, causing the Generator
   // object to not be returned from this call. This ensures that doesn't happen.
   // See https://github.com/facebook/regenerator/issues/274 for more details.
-  Gp[iteratorSymbol] = function() {
+  define(Gp, iteratorSymbol, function() {
     return this;
-  };
+  });
 
-  Gp.toString = function() {
+  define(Gp, "toString", function() {
     return "[object Generator]";
-  };
+  });
 
   function pushTryEntry(locs) {
     var entry = { tryLoc: locs[0] };
@@ -52295,14 +52654,19 @@ try {
 } catch (accidentalStrictMode) {
   // This module should not be running in strict mode, so the above
   // assignment should always work unless something is misconfigured. Just
-  // in case runtime.js accidentally runs in strict mode, we can escape
+  // in case runtime.js accidentally runs in strict mode, in modern engines
+  // we can explicitly access globalThis. In older engines we can escape
   // strict mode using a global Function call. This could conceivably fail
   // if a Content Security Policy forbids using Function, but in that case
   // the proper solution is to fix the accidental strict mode problem. If
   // you've misconfigured your bundler to force strict mode and applied a
   // CSP to forbid Function, and you're not willing to fix either of those
   // problems, please detail your unique predicament in a GitHub issue.
-  Function("r", "regeneratorRuntime = r")(runtime);
+  if (typeof globalThis === "object") {
+    globalThis.regeneratorRuntime = runtime;
+  } else {
+    Function("r", "regeneratorRuntime = r")(runtime);
+  }
 }
 
 
@@ -55660,725 +56024,376 @@ var render = function() {
         },
         [
           _c(
-            "masonry",
-            { attrs: { cols: { default: 2, 1000: 2, 700: 1 }, gutter: 10 } },
+            "q-card",
+            { staticClass: "my-card q-ma-md" },
             [
+              _c("q-card-section", [
+                _c("div", { staticClass: "text-h6" }, [
+                  _vm._v("Informacion de la empresa")
+                ])
+              ]),
+              _vm._v(" "),
+              _c("q-separator"),
+              _vm._v(" "),
               _c(
-                "q-card",
-                { staticClass: "my-card q-ma-md" },
+                "q-card-section",
                 [
-                  _c("q-card-section", [
-                    _c("div", { staticClass: "text-h6" }, [
-                      _vm._v("Informacion de la empresa")
-                    ])
-                  ]),
-                  _vm._v(" "),
-                  _c("q-separator"),
-                  _vm._v(" "),
-                  _c("q-card-section", [
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: "Nombre De la Empresa",
-                                type: "text",
-                                counter: "",
-                                maxlength: "200",
-                                rules: _vm.formulario.nombreempresa.rules
-                              },
-                              model: {
-                                value: _vm.formulario.nombreempresa.data,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.formulario.nombreempresa,
-                                    "data",
-                                    $$v
-                                  )
-                                },
-                                expression: "formulario.nombreempresa.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: "Representante Legal",
-                                type: "text",
-                                counter: "",
-                                maxlength: "200",
-                                rules: _vm.formulario.representantelegal.rules
-                              },
-                              model: {
-                                value: _vm.formulario.representantelegal.data,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.formulario.representantelegal,
-                                    "data",
-                                    $$v
-                                  )
-                                },
-                                expression: "formulario.representantelegal.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: _vm.formulario.descripcion.label,
-                                type: "textarea",
-                                counter: "",
-                                maxlength: "500",
-                                rules: _vm.formulario.descripcion.rules,
-                                hint: _vm.formulario.descripcion.hint
-                              },
-                              model: {
-                                value: _vm.formulario.descripcion.data,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.formulario.descripcion,
-                                    "data",
-                                    $$v
-                                  )
-                                },
-                                expression: "formulario.descripcion.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: "Telefono",
-                                counter: "",
-                                maxlength: "12",
-                                dense: _vm.dense,
-                                rules: _vm.formulario.telefono.rules
-                              },
-                              scopedSlots: _vm._u([
-                                {
-                                  key: "prepend",
-                                  fn: function() {
-                                    return [
-                                      _c("q-icon", { attrs: { name: "call" } })
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              ]),
-                              model: {
-                                value: _vm.formulario.telefono.data,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.formulario.telefono, "data", $$v)
-                                },
-                                expression: "formulario.telefono.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-select", {
-                              attrs: {
-                                name: _vm.formulario.municipio.nombre,
-                                label: _vm.formulario.municipio.label,
-                                options: _vm.options,
-                                "emit-value": "",
-                                clearable: ""
-                              },
-                              scopedSlots: _vm._u([
-                                {
-                                  key: "no-option",
-                                  fn: function() {
-                                    return [
-                                      _c(
-                                        "q-item",
-                                        [
-                                          _c(
-                                            "q-item-section",
-                                            { staticClass: "text-grey" },
-                                            [
-                                              _vm._v(
-                                                "\n                      Sin Resultados\n                    "
-                                              )
-                                            ]
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ]
-                                  },
-                                  proxy: true
-                                },
-                                {
-                                  key: "option",
-                                  fn: function(scope) {
-                                    return [
-                                      _c(
-                                        "q-item",
-                                        _vm._g(
-                                          _vm._b(
-                                            {},
-                                            "q-item",
-                                            scope.itemProps,
-                                            false
-                                          ),
-                                          scope.itemEvents
-                                        ),
-                                        [
-                                          _c(
-                                            "q-item-section",
-                                            { attrs: { avatar: "" } },
-                                            [
-                                              _c("q-icon", {
-                                                attrs: { name: scope.opt.icon }
-                                              })
-                                            ],
-                                            1
-                                          ),
-                                          _vm._v(" "),
-                                          _c(
-                                            "q-item-section",
-                                            [
-                                              _c("q-item-label", {
-                                                domProps: {
-                                                  innerHTML: _vm._s(
-                                                    scope.opt.label
-                                                  )
-                                                }
-                                              })
-                                            ],
-                                            1
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ]
+                  _c(
+                    "masonry",
+                    {
+                      attrs: {
+                        cols: { default: 2, 1000: 2, 700: 1 },
+                        gutter: 10
+                      }
+                    },
+                    [
+                      _c(
+                        "div",
+                        { attrs: { cass: "justify-center items-center" } },
+                        [
+                          _c("div", { staticClass: "text-h6" }, [
+                            _vm._v("Logo")
+                          ]),
+                          _vm._v(" "),
+                          _c("div", { staticClass: "column items-center" }, [
+                            _c(
+                              "div",
+                              { staticClass: "col" },
+                              [
+                                _c("EmpresaAvatar", {
+                                  ref: "child",
+                                  attrs: {
+                                    urlImg: _vm.formulario.imagenlogo.data
                                   }
-                                },
-                                {
-                                  key: "prepend",
-                                  fn: function() {
-                                    return [
-                                      _c("q-icon", {
-                                        attrs: { name: "explore" }
-                                      })
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              ]),
-                              model: {
-                                value: _vm.formulario.municipio.data,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.formulario.municipio,
-                                    "data",
-                                    $$v
-                                  )
-                                },
-                                expression: "formulario.municipio.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: "Direccion",
-                                type: "text",
-                                counter: "",
-                                maxlength: "200",
-                                dense: _vm.dense,
-                                rules: _vm.formulario.direccion.rules
-                              },
-                              scopedSlots: _vm._u([
-                                {
-                                  key: "prepend",
-                                  fn: function() {
-                                    return [
-                                      _c("q-icon", {
-                                        attrs: { name: "location_on" }
-                                      })
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              ]),
-                              model: {
-                                value: _vm.formulario.direccion.data,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.formulario.direccion,
-                                    "data",
-                                    $$v
-                                  )
-                                },
-                                expression: "formulario.direccion.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: "Email",
-                                dense: _vm.dense,
-                                rules: _vm.formulario.email.rules
-                              },
-                              scopedSlots: _vm._u([
-                                {
-                                  key: "prepend",
-                                  fn: function() {
-                                    return [
-                                      _c("q-icon", { attrs: { name: "mail" } })
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              ]),
-                              model: {
-                                value: _vm.formulario.email.data,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.formulario.email, "data", $$v)
-                                },
-                                expression: "formulario.email.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: "Twitter",
-                                dense: _vm.dense,
-                                rules: _vm.formulario.twitter.rules
-                              },
-                              scopedSlots: _vm._u([
-                                {
-                                  key: "prepend",
-                                  fn: function() {
-                                    return [
-                                      _c("q-icon", {
-                                        attrs: {
-                                          name: "img:media/iconssvg/gorjeo.svg"
-                                        }
-                                      })
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              ]),
-                              model: {
-                                value: _vm.formulario.twitter.data,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.formulario.twitter, "data", $$v)
-                                },
-                                expression: "formulario.twitter.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: "Facebook",
-                                dense: _vm.dense,
-                                rules: _vm.formulario.facebook.rules
-                              },
-                              scopedSlots: _vm._u([
-                                {
-                                  key: "prepend",
-                                  fn: function() {
-                                    return [
-                                      _c("q-icon", {
-                                        attrs: {
-                                          name:
-                                            "img:media/iconssvg/facebook.svg"
-                                        }
-                                      })
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              ]),
-                              model: {
-                                value: _vm.formulario.facebook.data,
-                                callback: function($$v) {
-                                  _vm.$set(_vm.formulario.facebook, "data", $$v)
-                                },
-                                expression: "formulario.facebook.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: "Instagram",
-                                dense: _vm.dense,
-                                rules: _vm.formulario.instagram.rules
-                              },
-                              scopedSlots: _vm._u([
-                                {
-                                  key: "prepend",
-                                  fn: function() {
-                                    return [
-                                      _c("q-icon", {
-                                        attrs: {
-                                          name:
-                                            "img:media/iconssvg/instagram.svg"
-                                        }
-                                      })
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              ]),
-                              model: {
-                                value: _vm.formulario.instagram.data,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.formulario.instagram,
-                                    "data",
-                                    $$v
-                                  )
-                                },
-                                expression: "formulario.instagram.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "div",
-                      { staticClass: "row justify-center items-center" },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "col-12 col-md-9",
-                            staticStyle: { width: "100%" }
-                          },
-                          [
-                            _c("q-input", {
-                              attrs: {
-                                label: "Link Video YouTube",
-                                dense: _vm.dense,
-                                rules: _vm.formulario.twitter.rules
-                              },
-                              scopedSlots: _vm._u([
-                                {
-                                  key: "prepend",
-                                  fn: function() {
-                                    return [
-                                      _c("q-icon", {
-                                        attrs: {
-                                          name: "img:media/iconssvg/youtube.svg"
-                                        }
-                                      })
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              ]),
-                              model: {
-                                value: _vm.formulario.linkvideo.data,
-                                callback: function($$v) {
-                                  _vm.$set(
-                                    _vm.formulario.linkvideo,
-                                    "data",
-                                    $$v
-                                  )
-                                },
-                                expression: "formulario.linkvideo.data"
-                              }
-                            })
-                          ],
-                          1
-                        )
-                      ]
-                    )
-                  ])
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "q-card",
-                { staticClass: "my-card q-ma-md" },
-                [
-                  _c("q-card-section", [
-                    _c("div", { staticClass: "text-h6" }, [_vm._v("Logo")])
-                  ]),
-                  _vm._v(" "),
-                  _c("q-separator"),
-                  _vm._v(" "),
-                  _c(
-                    "q-card-section",
-                    { attrs: { cass: "justify-center items-center" } },
-                    [
-                      _c("div", { staticClass: "column items-center" }, [
-                        _c(
-                          "div",
-                          { staticClass: "col" },
-                          [
-                            _c("EmpresaAvatar", {
-                              ref: "child",
-                              attrs: { urlImg: _vm.formulario.imagenlogo.data }
-                            })
-                          ],
-                          1
-                        )
-                      ])
-                    ]
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c("q-card", { staticClass: "my-card q-ma-md" }),
-              _vm._v(" "),
-              _c(
-                "q-card",
-                { staticClass: "my-card q-ma-md" },
-                [
-                  _c("q-card-section", [
-                    _c("div", { staticClass: "text-h6" }, [
-                      _vm._v("Clasificación del negocio")
-                    ])
-                  ]),
-                  _vm._v(" "),
-                  _c("q-separator"),
-                  _vm._v(" "),
-                  _c(
-                    "q-card-section",
-                    [
-                      _c("q-select", {
-                        attrs: {
-                          name: _vm.formulario.categoria.nombre,
-                          label: _vm.formulario.categoria.label,
-                          "transition-show": "flip-up",
-                          "transition-hide": "flip-down",
-                          "option-label": "nombre",
-                          "option-value": "idcategoria",
-                          options:
-                            this.$store.state.formulario.categoria != null
-                              ? this.$store.state.formulario.categoria
-                                  .categorias
-                              : [],
-                          filled: "",
-                          rules: _vm.formulario.categoria.rules
-                        },
-                        on: { input: _vm.onchange },
-                        scopedSlots: _vm._u(
-                          [
-                            _vm.formulario.categoria.data != null
-                              ? {
-                                  key: "append",
-                                  fn: function() {
-                                    return [
-                                      _c("q-icon", {
-                                        staticClass: "cursor-pointer",
-                                        attrs: { name: "cancel" },
-                                        on: {
-                                          click: function($event) {
-                                            $event.stopPropagation()
-                                            return _vm.nullselect($event)
-                                          }
-                                        }
-                                      })
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              : null
-                          ],
-                          null,
-                          true
-                        ),
-                        model: {
-                          value: _vm.formulario.categoria.data,
-                          callback: function($$v) {
-                            _vm.$set(_vm.formulario.categoria, "data", $$v)
-                          },
-                          expression: "formulario.categoria.data"
-                        }
-                      }),
+                                })
+                              ],
+                              1
+                            )
+                          ])
+                        ]
+                      ),
                       _vm._v(" "),
                       _c(
-                        "q-intersection",
-                        {
-                          attrs: {
-                            "transition-hide": "jump-up",
-                            transition: "scale",
-                            leave: "scale"
-                          }
-                        },
+                        "div",
+                        { staticClass: "row justify-center items-center" },
                         [
-                          _vm.formulario.categoria.data != null
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: _vm.formulario.descripcion.label,
+                                  type: "textarea",
+                                  counter: "",
+                                  maxlength: "500",
+                                  rules: _vm.formulario.descripcion.rules,
+                                  hint: _vm.formulario.descripcion.hint
+                                },
+                                model: {
+                                  value: _vm.formulario.descripcion.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.descripcion,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "formulario.descripcion.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: "Nombre De la Empresa",
+                                  type: "text",
+                                  counter: "",
+                                  maxlength: "200",
+                                  rules: _vm.formulario.nombreempresa.rules
+                                },
+                                model: {
+                                  value: _vm.formulario.nombreempresa.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.nombreempresa,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "formulario.nombreempresa.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: "Representante Legal",
+                                  type: "text",
+                                  counter: "",
+                                  maxlength: "200",
+                                  rules: _vm.formulario.representantelegal.rules
+                                },
+                                model: {
+                                  value: _vm.formulario.representantelegal.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.representantelegal,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression:
+                                    "formulario.representantelegal.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        [
+                          _c("q-select", {
+                            attrs: {
+                              name: _vm.formulario.categoria.nombre,
+                              label: _vm.formulario.categoria.label,
+                              "transition-show": "flip-up",
+                              "transition-hide": "flip-down",
+                              "option-label": "nombre",
+                              "option-value": "idcategoria",
+                              options:
+                                this.$store.state.formulario.categoria != null
+                                  ? this.$store.state.formulario.categoria
+                                      .categorias
+                                  : [],
+                              filled: "",
+                              rules: _vm.formulario.categoria.rules
+                            },
+                            on: { input: _vm.onchange },
+                            scopedSlots: _vm._u(
+                              [
+                                _vm.formulario.categoria.data != null
+                                  ? {
+                                      key: "append",
+                                      fn: function() {
+                                        return [
+                                          _c("q-icon", {
+                                            staticClass: "cursor-pointer",
+                                            attrs: { name: "cancel" },
+                                            on: {
+                                              click: function($event) {
+                                                $event.stopPropagation()
+                                                return _vm.nullselect.apply(
+                                                  null,
+                                                  arguments
+                                                )
+                                              }
+                                            }
+                                          })
+                                        ]
+                                      },
+                                      proxy: true
+                                    }
+                                  : null
+                              ],
+                              null,
+                              true
+                            ),
+                            model: {
+                              value: _vm.formulario.categoria.data,
+                              callback: function($$v) {
+                                _vm.$set(_vm.formulario.categoria, "data", $$v)
+                              },
+                              expression: "formulario.categoria.data"
+                            }
+                          }),
+                          _vm._v(" "),
+                          _c(
+                            "q-intersection",
+                            {
+                              attrs: {
+                                "transition-hide": "jump-up",
+                                transition: "scale",
+                                leave: "scale"
+                              }
+                            },
+                            [
+                              _vm.formulario.categoria.data != null
+                                ? _c("q-select", {
+                                    attrs: {
+                                      name: _vm.formulario.subcategoria.nombre,
+                                      label: _vm.formulario.subcategoria.label,
+                                      "transition-show": "flip-up",
+                                      "transition-hide": "flip-down",
+                                      "option-label": "nombre",
+                                      "option-value": "idsubcategoria",
+                                      options:
+                                        this.$store.state.formulario
+                                          .categoria != null
+                                          ? this.$store.state.formulario.categoria.subcategorias.filter(
+                                              function(post) {
+                                                return (
+                                                  post.idcategoria ==
+                                                  _vm.formulario.categoria.data
+                                                    .idcategoria
+                                                )
+                                              }
+                                            )
+                                          : [],
+                                      filled: ""
+                                    },
+                                    on: { input: _vm.onchange },
+                                    scopedSlots: _vm._u(
+                                      [
+                                        {
+                                          key: "option",
+                                          fn: function(scope) {
+                                            return [
+                                              _c(
+                                                "q-item",
+                                                _vm._g(
+                                                  _vm._b(
+                                                    {},
+                                                    "q-item",
+                                                    scope.itemProps,
+                                                    false
+                                                  ),
+                                                  scope.itemEvents
+                                                ),
+                                                [
+                                                  _c(
+                                                    "q-item-section",
+                                                    [
+                                                      _c("q-item-label", {
+                                                        domProps: {
+                                                          innerHTML: _vm._s(
+                                                            scope.opt.nombre
+                                                          )
+                                                        }
+                                                      }),
+                                                      _vm._v(" "),
+                                                      _c(
+                                                        "q-item-label",
+                                                        {
+                                                          attrs: { caption: "" }
+                                                        },
+                                                        [
+                                                          _vm._v(
+                                                            "\n                        " +
+                                                              _vm._s(
+                                                                _vm.formulario
+                                                                  .categoria
+                                                                  .data != null
+                                                                  ? _vm
+                                                                      .formulario
+                                                                      .categoria
+                                                                      .data
+                                                                      .nombre
+                                                                  : ""
+                                                              ) +
+                                                              "\n                      "
+                                                          )
+                                                        ]
+                                                      )
+                                                    ],
+                                                    1
+                                                  )
+                                                ],
+                                                1
+                                              )
+                                            ]
+                                          }
+                                        }
+                                      ],
+                                      null,
+                                      false,
+                                      947812732
+                                    ),
+                                    model: {
+                                      value: _vm.formulario.subcategoria.data,
+                                      callback: function($$v) {
+                                        _vm.$set(
+                                          _vm.formulario.subcategoria,
+                                          "data",
+                                          $$v
+                                        )
+                                      },
+                                      expression: "formulario.subcategoria.data"
+                                    }
+                                  })
+                                : _vm._e()
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _vm.formulario.subcategoria.data != null &&
+                          this.$store.state.formulario.categoria.tiposubcategorias.filter(
+                            function(post) {
+                              return (
+                                post.idsubcategoria ==
+                                _vm.formulario.subcategoria.data.idsubcategoria
+                              )
+                            }
+                          ).length > 1
                             ? _c("q-select", {
                                 attrs: {
-                                  name: _vm.formulario.subcategoria.nombre,
-                                  label: _vm.formulario.subcategoria.label,
+                                  name: _vm.formulario.tiposubcategoria.nombre,
+                                  label: _vm.formulario.tiposubcategoria.label,
                                   "transition-show": "flip-up",
                                   "transition-hide": "flip-down",
                                   "option-label": "nombre",
-                                  "option-value": "idsubcategoria",
+                                  "option-value": "idtiposubcategoria",
                                   options:
                                     this.$store.state.formulario.categoria !=
                                     null
-                                      ? this.$store.state.formulario.categoria.subcategorias.filter(
+                                      ? this.$store.state.formulario.categoria.tiposubcategorias.filter(
                                           function(post) {
                                             return (
-                                              post.idcategoria ==
-                                              _vm.formulario.categoria.data
-                                                .idcategoria
+                                              post.idsubcategoria ==
+                                              _vm.formulario.subcategoria.data
+                                                .idsubcategoria
                                             )
                                           }
                                         )
                                       : [],
                                   filled: ""
                                 },
-                                on: { input: _vm.onchange },
                                 scopedSlots: _vm._u(
                                   [
                                     {
@@ -56413,15 +56428,17 @@ var render = function() {
                                                     { attrs: { caption: "" } },
                                                     [
                                                       _vm._v(
-                                                        _vm._s(
-                                                          _vm.formulario
-                                                            .categoria.data !=
-                                                            null
-                                                            ? _vm.formulario
-                                                                .categoria.data
-                                                                .nombre
-                                                            : ""
-                                                        )
+                                                        "\n                      " +
+                                                          _vm._s(
+                                                            _vm.formulario
+                                                              .categoria.data
+                                                              .nombre +
+                                                              " - " +
+                                                              _vm.formulario
+                                                                .subcategoria
+                                                                .data.nombre
+                                                          ) +
+                                                          "\n                    "
                                                       )
                                                     ]
                                                   )
@@ -56437,18 +56454,18 @@ var render = function() {
                                   ],
                                   null,
                                   false,
-                                  728066844
+                                  2536331168
                                 ),
                                 model: {
-                                  value: _vm.formulario.subcategoria.data,
+                                  value: _vm.formulario.tiposubcategoria.data,
                                   callback: function($$v) {
                                     _vm.$set(
-                                      _vm.formulario.subcategoria,
+                                      _vm.formulario.tiposubcategoria,
                                       "data",
                                       $$v
                                     )
                                   },
-                                  expression: "formulario.subcategoria.data"
+                                  expression: "formulario.tiposubcategoria.data"
                                 }
                               })
                             : _vm._e()
@@ -56456,267 +56473,444 @@ var render = function() {
                         1
                       ),
                       _vm._v(" "),
-                      _vm.formulario.subcategoria.data != null &&
-                      this.$store.state.formulario.categoria.tiposubcategorias.filter(
-                        function(post) {
-                          return (
-                            post.idsubcategoria ==
-                            _vm.formulario.subcategoria.data.idsubcategoria
-                          )
-                        }
-                      ).length > 1
-                        ? _c("q-select", {
-                            attrs: {
-                              name: _vm.formulario.tiposubcategoria.nombre,
-                              label: _vm.formulario.tiposubcategoria.label,
-                              "transition-show": "flip-up",
-                              "transition-hide": "flip-down",
-                              "option-label": "nombre",
-                              "option-value": "idtiposubcategoria",
-                              options:
-                                this.$store.state.formulario.categoria != null
-                                  ? this.$store.state.formulario.categoria.tiposubcategorias.filter(
-                                      function(post) {
-                                        return (
-                                          post.idsubcategoria ==
-                                          _vm.formulario.subcategoria.data
-                                            .idsubcategoria
-                                        )
-                                      }
-                                    )
-                                  : [],
-                              filled: ""
-                            },
-                            scopedSlots: _vm._u(
-                              [
-                                {
-                                  key: "option",
-                                  fn: function(scope) {
-                                    return [
-                                      _c(
-                                        "q-item",
-                                        _vm._g(
-                                          _vm._b(
-                                            {},
-                                            "q-item",
-                                            scope.itemProps,
-                                            false
-                                          ),
-                                          scope.itemEvents
-                                        ),
-                                        [
-                                          _c(
-                                            "q-item-section",
-                                            [
-                                              _c("q-item-label", {
-                                                domProps: {
-                                                  innerHTML: _vm._s(
-                                                    scope.opt.nombre
-                                                  )
-                                                }
-                                              }),
-                                              _vm._v(" "),
-                                              _c(
-                                                "q-item-label",
-                                                { attrs: { caption: "" } },
-                                                [
-                                                  _vm._v(
-                                                    _vm._s(
-                                                      _vm.formulario.categoria
-                                                        .data.nombre +
-                                                        " - " +
-                                                        _vm.formulario
-                                                          .subcategoria.data
-                                                          .nombre
-                                                    )
-                                                  )
-                                                ]
-                                              )
-                                            ],
-                                            1
-                                          )
-                                        ],
-                                        1
-                                      )
-                                    ]
-                                  }
-                                }
-                              ],
-                              null,
-                              false,
-                              1344834240
-                            ),
-                            model: {
-                              value: _vm.formulario.tiposubcategoria.data,
-                              callback: function($$v) {
-                                _vm.$set(
-                                  _vm.formulario.tiposubcategoria,
-                                  "data",
-                                  $$v
-                                )
-                              },
-                              expression: "formulario.tiposubcategoria.data"
-                            }
-                          })
-                        : _vm._e()
-                    ],
-                    1
-                  )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c("q-card", { staticClass: "my-card q-ma-md" }),
-              _vm._v(" "),
-              _c(
-                "q-card",
-                { staticClass: "my-card q-ma-md" },
-                [
-                  _c("q-card-section", [
-                    _c(
-                      "div",
-                      { staticClass: "row fit justify-between" },
-                      [
-                        _c("span", { staticClass: "text-h6" }, [
-                          _vm._v("Productos")
-                        ]),
-                        _vm._v(" "),
-                        _c("q-btn", {
-                          attrs: {
-                            size: "",
-                            outline: "",
-                            rounded: "",
-                            label: "Agregar",
-                            "no-caps": "",
-                            color: "teal",
-                            icon: "add"
-                          },
-                          on: { click: _vm.addVisa }
-                        })
-                      ],
-                      1
-                    )
-                  ]),
-                  _vm._v(" "),
-                  _c("q-separator"),
-                  _vm._v(" "),
-                  _c(
-                    "q-card-section",
-                    { staticClass: "q-pa-none" },
-                    [
                       _c(
-                        "q-list",
-                        { attrs: { bordered: "", separator: "" } },
-                        _vm._l(
-                          _vm.formulario.productos.filter(function(post) {
-                            return post.activo == 1
-                          }),
-                          function(applicant, counter) {
-                            return _c(
-                              "q-item",
-                              {
-                                key: counter,
-                                staticClass: "row justify-center items-center"
-                              },
-                              [
-                                _c(
-                                  "q-item-section",
-                                  { attrs: { top: "" } },
-                                  [
-                                    _c(
-                                      "q-item-label",
-                                      { attrs: { lines: "1" } },
-                                      [
-                                        _c("q-input", {
-                                          attrs: {
-                                            label: "Nombrel del producto",
-                                            type: "text",
-                                            rules: [
-                                              function(val) {
-                                                return (
-                                                  (val && val.length > 0) ||
-                                                  "Campo vacio"
-                                                )
-                                              }
-                                            ]
-                                          },
-                                          model: {
-                                            value: applicant.nombre,
-                                            callback: function($$v) {
-                                              _vm.$set(applicant, "nombre", $$v)
-                                            },
-                                            expression: "applicant.nombre"
-                                          }
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: "Telefono",
+                                  counter: "",
+                                  maxlength: "12",
+                                  dense: _vm.dense,
+                                  rules: _vm.formulario.telefono.rules
+                                },
+                                scopedSlots: _vm._u([
+                                  {
+                                    key: "prepend",
+                                    fn: function() {
+                                      return [
+                                        _c("q-icon", {
+                                          attrs: { name: "call" }
                                         })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "q-item-label",
-                                      { attrs: { lines: "1" } },
-                                      [
-                                        _c("q-input", {
-                                          attrs: {
-                                            label: "Descripción",
-                                            type: "text",
-                                            rules: [
-                                              function(val) {
-                                                return (
-                                                  (val && val.length > 0) ||
-                                                  "Campo vacio"
-                                                )
-                                              }
-                                            ]
-                                          },
-                                          model: {
-                                            value: applicant.descripcion,
-                                            callback: function($$v) {
-                                              _vm.$set(
-                                                applicant,
-                                                "descripcion",
-                                                $$v
-                                              )
-                                            },
-                                            expression: "applicant.descripcion"
-                                          }
-                                        })
-                                      ],
-                                      1
-                                    ),
-                                    _vm._v(" "),
-                                    _c(
-                                      "q-item-label",
-                                      { staticClass: "text-right" },
-                                      [
-                                        counter >= 1
-                                          ? _c("q-btn", {
-                                              attrs: {
-                                                outline: "",
-                                                rounded: "",
-                                                color: "negative",
-                                                icon: "delete",
-                                                label: "Eliminar",
-                                                "no-caps": ""
-                                              },
-                                              on: {
-                                                click: function($event) {
-                                                  return _vm.deleteVisa(counter)
-                                                }
-                                              }
-                                            })
-                                          : _vm._e()
-                                      ],
-                                      1
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ]),
+                                model: {
+                                  value: _vm.formulario.telefono.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.telefono,
+                                      "data",
+                                      $$v
                                     )
-                                  ],
-                                  1
-                                )
+                                  },
+                                  expression: "formulario.telefono.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-select", {
+                                attrs: {
+                                  name: _vm.formulario.municipio.nombre,
+                                  label: _vm.formulario.municipio.label,
+                                  options: _vm.options,
+                                  "emit-value": "",
+                                  clearable: ""
+                                },
+                                scopedSlots: _vm._u([
+                                  {
+                                    key: "no-option",
+                                    fn: function() {
+                                      return [
+                                        _c(
+                                          "q-item",
+                                          [
+                                            _c(
+                                              "q-item-section",
+                                              { staticClass: "text-grey" },
+                                              [
+                                                _vm._v(
+                                                  "\n                      Sin Resultados\n                    "
+                                                )
+                                              ]
+                                            )
+                                          ],
+                                          1
+                                        )
+                                      ]
+                                    },
+                                    proxy: true
+                                  },
+                                  {
+                                    key: "option",
+                                    fn: function(scope) {
+                                      return [
+                                        _c(
+                                          "q-item",
+                                          _vm._g(
+                                            _vm._b(
+                                              {},
+                                              "q-item",
+                                              scope.itemProps,
+                                              false
+                                            ),
+                                            scope.itemEvents
+                                          ),
+                                          [
+                                            _c(
+                                              "q-item-section",
+                                              { attrs: { avatar: "" } },
+                                              [
+                                                _c("q-icon", {
+                                                  attrs: {
+                                                    name: scope.opt.icon
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "q-item-section",
+                                              [
+                                                _c("q-item-label", {
+                                                  domProps: {
+                                                    innerHTML: _vm._s(
+                                                      scope.opt.label
+                                                    )
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            )
+                                          ],
+                                          1
+                                        )
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    key: "prepend",
+                                    fn: function() {
+                                      return [
+                                        _c("q-icon", {
+                                          attrs: { name: "explore" }
+                                        })
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ]),
+                                model: {
+                                  value: _vm.formulario.municipio.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.municipio,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "formulario.municipio.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: "Direccion",
+                                  type: "text",
+                                  counter: "",
+                                  maxlength: "200",
+                                  dense: _vm.dense,
+                                  rules: _vm.formulario.direccion.rules
+                                },
+                                scopedSlots: _vm._u([
+                                  {
+                                    key: "prepend",
+                                    fn: function() {
+                                      return [
+                                        _c("q-icon", {
+                                          attrs: { name: "location_on" }
+                                        })
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ]),
+                                model: {
+                                  value: _vm.formulario.direccion.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.direccion,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "formulario.direccion.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: "Email",
+                                  dense: _vm.dense,
+                                  rules: _vm.formulario.email.rules
+                                },
+                                scopedSlots: _vm._u([
+                                  {
+                                    key: "prepend",
+                                    fn: function() {
+                                      return [
+                                        _c("q-icon", {
+                                          attrs: { name: "mail" }
+                                        })
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ]),
+                                model: {
+                                  value: _vm.formulario.email.data,
+                                  callback: function($$v) {
+                                    _vm.$set(_vm.formulario.email, "data", $$v)
+                                  },
+                                  expression: "formulario.email.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "q-card",
+                        { staticClass: "my-card q-ma-md" },
+                        [
+                          _c("q-card-section", [
+                            _c(
+                              "div",
+                              { staticClass: "row fit justify-between" },
+                              [
+                                _c("span", { staticClass: "text-h6" }, [
+                                  _vm._v("Productos")
+                                ]),
+                                _vm._v(" "),
+                                _c("q-btn", {
+                                  attrs: {
+                                    size: "",
+                                    outline: "",
+                                    rounded: "",
+                                    label: "Agregar",
+                                    "no-caps": "",
+                                    color: "teal",
+                                    icon: "add"
+                                  },
+                                  on: { click: _vm.addVisa }
+                                })
                               ],
                               1
                             )
-                          }
-                        ),
+                          ]),
+                          _vm._v(" "),
+                          _c("q-separator"),
+                          _vm._v(" "),
+                          _c(
+                            "q-card-section",
+                            { staticClass: "q-pa-none" },
+                            [
+                              _c(
+                                "q-list",
+                                { attrs: { bordered: "", separator: "" } },
+                                _vm._l(
+                                  _vm.formulario.productos.filter(function(
+                                    post
+                                  ) {
+                                    return post.activo == 1
+                                  }),
+                                  function(applicant, counter) {
+                                    return _c(
+                                      "q-item",
+                                      {
+                                        key: counter,
+                                        staticClass:
+                                          "row justify-center items-center"
+                                      },
+                                      [
+                                        _c(
+                                          "q-item-section",
+                                          { attrs: { top: "" } },
+                                          [
+                                            _c(
+                                              "q-item-label",
+                                              { attrs: { lines: "1" } },
+                                              [
+                                                _c("q-input", {
+                                                  attrs: {
+                                                    label:
+                                                      "Nombrel del producto",
+                                                    type: "text",
+                                                    rules: [
+                                                      function(val) {
+                                                        return (
+                                                          (val &&
+                                                            val.length > 0) ||
+                                                          "Campo vacio"
+                                                        )
+                                                      }
+                                                    ]
+                                                  },
+                                                  model: {
+                                                    value: applicant.nombre,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        applicant,
+                                                        "nombre",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "applicant.nombre"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "q-item-label",
+                                              { attrs: { lines: "1" } },
+                                              [
+                                                _c("q-input", {
+                                                  attrs: {
+                                                    label: "Descripción",
+                                                    type: "text",
+                                                    rules: [
+                                                      function(val) {
+                                                        return (
+                                                          (val &&
+                                                            val.length > 0) ||
+                                                          "Campo vacio"
+                                                        )
+                                                      }
+                                                    ]
+                                                  },
+                                                  model: {
+                                                    value:
+                                                      applicant.descripcion,
+                                                    callback: function($$v) {
+                                                      _vm.$set(
+                                                        applicant,
+                                                        "descripcion",
+                                                        $$v
+                                                      )
+                                                    },
+                                                    expression:
+                                                      "applicant.descripcion"
+                                                  }
+                                                })
+                                              ],
+                                              1
+                                            ),
+                                            _vm._v(" "),
+                                            _c(
+                                              "q-item-label",
+                                              { staticClass: "text-right" },
+                                              [
+                                                counter >= 1
+                                                  ? _c("q-btn", {
+                                                      attrs: {
+                                                        outline: "",
+                                                        rounded: "",
+                                                        color: "negative",
+                                                        icon: "delete",
+                                                        label: "Eliminar",
+                                                        "no-caps": ""
+                                                      },
+                                                      on: {
+                                                        click: function(
+                                                          $event
+                                                        ) {
+                                                          return _vm.deleteVisa(
+                                                            counter
+                                                          )
+                                                        }
+                                                      }
+                                                    })
+                                                  : _vm._e()
+                                              ],
+                                              1
+                                            )
+                                          ],
+                                          1
+                                        )
+                                      ],
+                                      1
+                                    )
+                                  }
+                                ),
+                                1
+                              )
+                            ],
+                            1
+                          )
+                        ],
                         1
                       )
                     ],
@@ -56724,10 +56918,246 @@ var render = function() {
                   )
                 ],
                 1
-              ),
-              _vm._v(" "),
-              _c("q-card", { staticClass: "my-card q-ma-md" }),
-              _vm._v(" "),
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "q-card",
+            [
+              _c(
+                "q-card-section",
+                [
+                  _c(
+                    "masonry",
+                    {
+                      attrs: {
+                        cols: { default: 2, 1000: 2, 700: 1 },
+                        gutter: 10
+                      }
+                    },
+                    [
+                      _c(
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: "Twitter",
+                                  dense: _vm.dense,
+                                  rules: _vm.formulario.twitter.rules,
+                                  hint: "Opcional"
+                                },
+                                scopedSlots: _vm._u([
+                                  {
+                                    key: "prepend",
+                                    fn: function() {
+                                      return [
+                                        _c("q-icon", {
+                                          attrs: {
+                                            name:
+                                              "img:media/iconssvg/gorjeo.svg"
+                                          }
+                                        })
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ]),
+                                model: {
+                                  value: _vm.formulario.twitter.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.twitter,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "formulario.twitter.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: "Facebook",
+                                  dense: _vm.dense,
+                                  rules: _vm.formulario.facebook.rules,
+                                  hint: "Opcional"
+                                },
+                                scopedSlots: _vm._u([
+                                  {
+                                    key: "prepend",
+                                    fn: function() {
+                                      return [
+                                        _c("q-icon", {
+                                          attrs: {
+                                            name:
+                                              "img:media/iconssvg/facebook.svg"
+                                          }
+                                        })
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ]),
+                                model: {
+                                  value: _vm.formulario.facebook.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.facebook,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "formulario.facebook.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: "Instagram",
+                                  dense: _vm.dense,
+                                  rules: _vm.formulario.instagram.rules,
+                                  hint: "Opcional"
+                                },
+                                scopedSlots: _vm._u([
+                                  {
+                                    key: "prepend",
+                                    fn: function() {
+                                      return [
+                                        _c("q-icon", {
+                                          attrs: {
+                                            name:
+                                              "img:media/iconssvg/instagram.svg"
+                                          }
+                                        })
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ]),
+                                model: {
+                                  value: _vm.formulario.instagram.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.instagram,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "formulario.instagram.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      ),
+                      _vm._v(" "),
+                      _c(
+                        "div",
+                        { staticClass: "row justify-center items-center" },
+                        [
+                          _c(
+                            "div",
+                            {
+                              staticClass: "col-12 col-md-9",
+                              staticStyle: { width: "100%" }
+                            },
+                            [
+                              _c("q-input", {
+                                attrs: {
+                                  label: "Link Video YouTube",
+                                  dense: _vm.dense,
+                                  rules: _vm.formulario.twitter.rules,
+                                  hint: "Opcional"
+                                },
+                                scopedSlots: _vm._u([
+                                  {
+                                    key: "prepend",
+                                    fn: function() {
+                                      return [
+                                        _c("q-icon", {
+                                          attrs: {
+                                            name:
+                                              "img:media/iconssvg/youtube.svg"
+                                          }
+                                        })
+                                      ]
+                                    },
+                                    proxy: true
+                                  }
+                                ]),
+                                model: {
+                                  value: _vm.formulario.linkvideo.data,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.formulario.linkvideo,
+                                      "data",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "formulario.linkvideo.data"
+                                }
+                              })
+                            ],
+                            1
+                          )
+                        ]
+                      )
+                    ]
+                  )
+                ],
+                1
+              )
+            ],
+            1
+          ),
+          _vm._v(" "),
+          _c(
+            "masonry",
+            { attrs: { cols: { default: 2, 1000: 2, 700: 1 }, gutter: 10 } },
+            [
               _c(
                 "q-card",
                 { staticClass: "my-card q-ma-md" },
@@ -56759,7 +57189,10 @@ var render = function() {
                               label: item.label,
                               name: item.name,
                               "max-files": "1",
-                              accept: ".xls , .xlsx, .docx, .doc, .pdf"
+                              accept: ".xls , .xlsx, .docx, .doc, .pdf",
+                              flat: "",
+                              hint: item.hint,
+                              color: item.color
                             },
                             on: {
                               removed: _vm.removeFiele,
@@ -56806,8 +57239,7 @@ var render = function() {
                                                 _vm._v(
                                                   _vm._s(
                                                     scope.uploadSizeLabel
-                                                  ) +
-                                                    " \n                      "
+                                                  ) + "\n                      "
                                                 )
                                               ]
                                             )
@@ -56886,7 +57318,7 @@ var render = function() {
                                                 [
                                                   _c("q-tooltip", [
                                                     _vm._v(
-                                                      "\n                          Descargar formato para diligenciar\n                        "
+                                                      "\n                        Descargar formato para diligenciar\n                      "
                                                     )
                                                   ])
                                                 ],
@@ -56984,7 +57416,7 @@ var render = function() {
                                                           _vm._s(
                                                             file.__sizeLabel
                                                           ) +
-                                                          "\n                         "
+                                                          "\n                        "
                                                       )
                                                     ]
                                                   )
@@ -57090,7 +57522,11 @@ var render = function() {
                                 "https://corpoguajira.gov.co/wp/wp-content/uploads/2020/11/RESOLUCION-POLITICA-DE-TRATAMIENTO-DE-DATOS-NUEVO-7-DE-OCT-DE-2020-1.pdf"
                             }
                           },
-                          [_vm._v("Política de tratamientos de datos ")]
+                          [
+                            _vm._v(
+                              "Política\n            de tratamientos de datos "
+                            )
+                          ]
                         ),
                         _vm._v(")\n          ")
                       ])
@@ -57107,7 +57543,7 @@ var render = function() {
                 [
                   _c("q-card-section", [
                     _c("div", { staticClass: "text-h6" }, [
-                      _vm._v("Documentación ")
+                      _vm._v("Documentación")
                     ])
                   ]),
                   _vm._v(" "),
@@ -57132,7 +57568,10 @@ var render = function() {
                               label: item.label,
                               name: item.name,
                               "max-files": "1",
-                              accept: ".xls , .xlsx, .docx, .doc, .pdf"
+                              accept: ".xls , .xlsx, .docx, .doc, .pdf",
+                              flat: "",
+                              hint: item.hint,
+                              color: item.color
                             },
                             on: {
                               removed: _vm.removeFiele,
@@ -57179,8 +57618,7 @@ var render = function() {
                                                 _vm._v(
                                                   _vm._s(
                                                     scope.uploadSizeLabel
-                                                  ) +
-                                                    " \n                      "
+                                                  ) + "\n                      "
                                                 )
                                               ]
                                             )
@@ -57274,7 +57712,7 @@ var render = function() {
                                                           _vm._s(
                                                             file.__sizeLabel
                                                           ) +
-                                                          "\n                         "
+                                                          "\n                        "
                                                       )
                                                     ]
                                                   )
@@ -57355,7 +57793,7 @@ var render = function() {
           _vm._v(" "),
           _c(
             "div",
-            { staticClass: "col-12" },
+            { staticClass: "col-12 q-my-lg" },
             [
               _c("q-btn", {
                 staticClass: "full-width",
@@ -57363,7 +57801,6 @@ var render = function() {
                   outline: "",
                   rounded: "",
                   type: "submit",
-                  size: "",
                   color: "teal",
                   label: "Enviar Formulario",
                   disable: !_vm.accept
@@ -57558,7 +57995,7 @@ var render = function() {
                     ) {
                       return null
                     }
-                    return _vm.buscar($event)
+                    return _vm.buscar.apply(null, arguments)
                   }
                 },
                 scopedSlots: _vm._u([
@@ -57592,33 +58029,62 @@ var render = function() {
               }),
               _vm._v(" "),
               _c("q-select", {
-                staticClass: "q-pl-lg",
-                staticStyle: { "min-width": "250px", "max-width": "400px" },
+                staticClass: "q-pl-lg text-primary",
+                staticStyle: { "min-width": "350px", "max-width": "600px" },
                 attrs: {
                   options: _vm.categorias,
-                  clearable: "",
-                  label: "Filtrar por categorías"
+                  label: "Filtrar por categorías",
+                  color: "teal"
                 },
                 on: { input: _vm.AXIO_GET_EMPRESAS },
-                scopedSlots: _vm._u([
-                  {
-                    key: "no-option",
-                    fn: function() {
-                      return [
-                        _c(
-                          "q-item",
-                          [
-                            _c("q-item-section", { staticClass: "text-grey" }, [
-                              _vm._v("Seleccione un filtro ")
-                            ])
-                          ],
-                          1
-                        )
-                      ]
+                scopedSlots: _vm._u(
+                  [
+                    {
+                      key: "no-option",
+                      fn: function() {
+                        return [
+                          _c(
+                            "q-item",
+                            [
+                              _c(
+                                "q-item-section",
+                                { staticClass: "text-grey" },
+                                [_vm._v("Seleccione un filtro ")]
+                              )
+                            ],
+                            1
+                          )
+                        ]
+                      },
+                      proxy: true
                     },
-                    proxy: true
-                  }
-                ]),
+                    _vm.categoriaSeleccionada.value != null
+                      ? {
+                          key: "append",
+                          fn: function() {
+                            return [
+                              _c("q-icon", {
+                                staticClass: "cursor-pointer",
+                                attrs: { name: "cancel" },
+                                on: {
+                                  click: function($event) {
+                                    $event.stopPropagation()
+                                    _vm.categoriaSeleccionada = {
+                                      label: "Seleccionar categoría",
+                                      value: null
+                                    }
+                                  }
+                                }
+                              })
+                            ]
+                          },
+                          proxy: true
+                        }
+                      : null
+                  ],
+                  null,
+                  true
+                ),
                 model: {
                   value: _vm.categoriaSeleccionada,
                   callback: function($$v) {
@@ -59087,7 +59553,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /*!
-  * vue-router v3.5.1
+  * vue-router v3.5.2
   * (c) 2021 Evan You
   * @license MIT
   */
@@ -60650,7 +61116,7 @@ function createMatcher (
     createRouteMap([route || parentOrRoute], pathList, pathMap, nameMap, parent);
 
     // add aliases of parent
-    if (parent) {
+    if (parent && parent.alias.length) {
       createRouteMap(
         // $flow-disable-line route is defined if parent is
         parent.alias.map(function (alias) { return ({ path: alias, children: [route] }); }),
@@ -61721,7 +62187,13 @@ var HTML5History = /*@__PURE__*/(function (History) {
 
 function getLocation (base) {
   var path = window.location.pathname;
-  if (base && path.toLowerCase().indexOf(base.toLowerCase()) === 0) {
+  var pathLowerCase = path.toLowerCase();
+  var baseLowerCase = base.toLowerCase();
+  // base="/a" shouldn't turn path="/app" into "/a/pp"
+  // https://github.com/vuejs/vue-router/issues/3555
+  // so we ensure the trailing slash in the base
+  if (base && ((pathLowerCase === baseLowerCase) ||
+    (pathLowerCase.indexOf(cleanPath(baseLowerCase + '/')) === 0))) {
     path = path.slice(base.length);
   }
   return (path || '/') + window.location.search + window.location.hash
@@ -62214,7 +62686,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '3.5.1';
+VueRouter.version = '3.5.2';
 VueRouter.isNavigationFailure = isNavigationFailure;
 VueRouter.NavigationFailureType = NavigationFailureType;
 VueRouter.START_LOCATION = START;
@@ -62240,8 +62712,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /*!
- * Vue.js v2.6.12
- * (c) 2014-2020 Evan You
+ * Vue.js v2.6.14
+ * (c) 2014-2021 Evan You
  * Released under the MIT License.
  */
 /*  */
@@ -63943,13 +64415,14 @@ function assertProp (
       type = [type];
     }
     for (var i = 0; i < type.length && !valid; i++) {
-      var assertedType = assertType(value, type[i]);
+      var assertedType = assertType(value, type[i], vm);
       expectedTypes.push(assertedType.expectedType || '');
       valid = assertedType.valid;
     }
   }
 
-  if (!valid) {
+  var haveExpectedTypes = expectedTypes.some(function (t) { return t; });
+  if (!valid && haveExpectedTypes) {
     warn(
       getInvalidTypeMessage(name, value, expectedTypes),
       vm
@@ -63967,9 +64440,9 @@ function assertProp (
   }
 }
 
-var simpleCheckRE = /^(String|Number|Boolean|Function|Symbol)$/;
+var simpleCheckRE = /^(String|Number|Boolean|Function|Symbol|BigInt)$/;
 
-function assertType (value, type) {
+function assertType (value, type, vm) {
   var valid;
   var expectedType = getType(type);
   if (simpleCheckRE.test(expectedType)) {
@@ -63984,7 +64457,12 @@ function assertType (value, type) {
   } else if (expectedType === 'Array') {
     valid = Array.isArray(value);
   } else {
-    valid = value instanceof type;
+    try {
+      valid = value instanceof type;
+    } catch (e) {
+      warn('Invalid prop type: "' + String(type) + '" is not a constructor', vm);
+      valid = false;
+    }
   }
   return {
     valid: valid,
@@ -63992,13 +64470,15 @@ function assertType (value, type) {
   }
 }
 
+var functionTypeCheckRE = /^\s*function (\w+)/;
+
 /**
  * Use function string name to check built-in types,
  * because a simple equality check will fail when running
  * across different vms / iframes.
  */
 function getType (fn) {
-  var match = fn && fn.toString().match(/^\s*function (\w+)/);
+  var match = fn && fn.toString().match(functionTypeCheckRE);
   return match ? match[1] : ''
 }
 
@@ -64023,18 +64503,19 @@ function getInvalidTypeMessage (name, value, expectedTypes) {
     " Expected " + (expectedTypes.map(capitalize).join(', '));
   var expectedType = expectedTypes[0];
   var receivedType = toRawType(value);
-  var expectedValue = styleValue(value, expectedType);
-  var receivedValue = styleValue(value, receivedType);
   // check if we need to specify expected value
-  if (expectedTypes.length === 1 &&
-      isExplicable(expectedType) &&
-      !isBoolean(expectedType, receivedType)) {
-    message += " with value " + expectedValue;
+  if (
+    expectedTypes.length === 1 &&
+    isExplicable(expectedType) &&
+    isExplicable(typeof value) &&
+    !isBoolean(expectedType, receivedType)
+  ) {
+    message += " with value " + (styleValue(value, expectedType));
   }
   message += ", got " + receivedType + " ";
   // check if we need to specify received value
   if (isExplicable(receivedType)) {
-    message += "with value " + receivedValue + ".";
+    message += "with value " + (styleValue(value, receivedType)) + ".";
   }
   return message
 }
@@ -64049,9 +64530,9 @@ function styleValue (value, type) {
   }
 }
 
+var EXPLICABLE_TYPES = ['string', 'number', 'boolean'];
 function isExplicable (value) {
-  var explicitTypes = ['string', 'number', 'boolean'];
-  return explicitTypes.some(function (elem) { return value.toLowerCase() === elem; })
+  return EXPLICABLE_TYPES.some(function (elem) { return value.toLowerCase() === elem; })
 }
 
 function isBoolean () {
@@ -64278,7 +64759,7 @@ if (true) {
   var allowedGlobals = makeMap(
     'Infinity,undefined,NaN,isFinite,isNaN,' +
     'parseFloat,parseInt,decodeURI,decodeURIComponent,encodeURI,encodeURIComponent,' +
-    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,' +
+    'Math,Number,Date,Array,Object,Boolean,String,RegExp,Map,Set,JSON,Intl,BigInt,' +
     'require' // for Webpack/Browserify
   );
 
@@ -64781,6 +65262,12 @@ function isWhitespace (node) {
 
 /*  */
 
+function isAsyncPlaceholder (node) {
+  return node.isComment && node.asyncFactory
+}
+
+/*  */
+
 function normalizeScopedSlots (
   slots,
   normalSlots,
@@ -64837,9 +65324,10 @@ function normalizeScopedSlot(normalSlots, key, fn) {
     res = res && typeof res === 'object' && !Array.isArray(res)
       ? [res] // single vnode
       : normalizeChildren(res);
+    var vnode = res && res[0];
     return res && (
-      res.length === 0 ||
-      (res.length === 1 && res[0].isComment) // #9658
+      !vnode ||
+      (res.length === 1 && vnode.isComment && !isAsyncPlaceholder(vnode)) // #9658, #10391
     ) ? undefined
       : res
   };
@@ -64912,26 +65400,28 @@ function renderList (
  */
 function renderSlot (
   name,
-  fallback,
+  fallbackRender,
   props,
   bindObject
 ) {
   var scopedSlotFn = this.$scopedSlots[name];
   var nodes;
-  if (scopedSlotFn) { // scoped slot
+  if (scopedSlotFn) {
+    // scoped slot
     props = props || {};
     if (bindObject) {
       if ( true && !isObject(bindObject)) {
-        warn(
-          'slot v-bind without argument expects an Object',
-          this
-        );
+        warn('slot v-bind without argument expects an Object', this);
       }
       props = extend(extend({}, bindObject), props);
     }
-    nodes = scopedSlotFn(props) || fallback;
+    nodes =
+      scopedSlotFn(props) ||
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender);
   } else {
-    nodes = this.$slots[name] || fallback;
+    nodes =
+      this.$slots[name] ||
+      (typeof fallbackRender === 'function' ? fallbackRender() : fallbackRender);
   }
 
   var target = props && props.slot;
@@ -64981,6 +65471,7 @@ function checkKeyCodes (
   } else if (eventKeyName) {
     return hyphenate(eventKeyName) !== key
   }
+  return eventKeyCode === undefined
 }
 
 /*  */
@@ -65512,8 +66003,10 @@ function createComponent (
 }
 
 function createComponentInstanceForVnode (
-  vnode, // we know it's MountedComponentVNode but flow doesn't
-  parent // activeInstance in lifecycle state
+  // we know it's MountedComponentVNode but flow doesn't
+  vnode,
+  // activeInstance in lifecycle state
+  parent
 ) {
   var options = {
     _isComponent: true,
@@ -65653,7 +66146,7 @@ function _createElement (
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag);
     if (config.isReservedTag(tag)) {
       // platform built-in elements
-      if ( true && isDef(data) && isDef(data.nativeOn)) {
+      if ( true && isDef(data) && isDef(data.nativeOn) && data.tag !== 'component') {
         warn(
           ("The .native modifier for v-on is only valid on components but it was used on <" + tag + ">."),
           context
@@ -65977,12 +66470,6 @@ function resolveAsyncComponent (
       ? factory.loadingComp
       : factory.resolved
   }
-}
-
-/*  */
-
-function isAsyncPlaceholder (node) {
-  return node.isComment && node.asyncFactory
 }
 
 /*  */
@@ -66353,7 +66840,8 @@ function updateChildComponent (
   var hasDynamicScopedSlot = !!(
     (newScopedSlots && !newScopedSlots.$stable) ||
     (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
-    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
+    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key) ||
+    (!newScopedSlots && vm.$scopedSlots.$key)
   );
 
   // Any static slot children from the parent may have changed during parent's
@@ -66807,11 +67295,8 @@ Watcher.prototype.run = function run () {
       var oldValue = this.value;
       this.value = value;
       if (this.user) {
-        try {
-          this.cb.call(this.vm, value, oldValue);
-        } catch (e) {
-          handleError(e, this.vm, ("callback for watcher \"" + (this.expression) + "\""));
-        }
+        var info = "callback for watcher \"" + (this.expression) + "\"";
+        invokeWithErrorHandling(this.cb, this.vm, [value, oldValue], this.vm, info);
       } else {
         this.cb.call(this.vm, value, oldValue);
       }
@@ -67033,6 +67518,8 @@ function initComputed (vm, computed) {
         warn(("The computed property \"" + key + "\" is already defined in data."), vm);
       } else if (vm.$options.props && key in vm.$options.props) {
         warn(("The computed property \"" + key + "\" is already defined as a prop."), vm);
+      } else if (vm.$options.methods && key in vm.$options.methods) {
+        warn(("The computed property \"" + key + "\" is already defined as a method."), vm);
       }
     }
   }
@@ -67186,11 +67673,10 @@ function stateMixin (Vue) {
     options.user = true;
     var watcher = new Watcher(vm, expOrFn, cb, options);
     if (options.immediate) {
-      try {
-        cb.call(vm, watcher.value);
-      } catch (error) {
-        handleError(error, vm, ("callback for immediate watcher \"" + (watcher.expression) + "\""));
-      }
+      var info = "callback for immediate watcher \"" + (watcher.expression) + "\"";
+      pushTarget();
+      invokeWithErrorHandling(cb, vm, [watcher.value], vm, info);
+      popTarget();
     }
     return function unwatchFn () {
       watcher.teardown();
@@ -67489,6 +67975,8 @@ function initAssetRegisters (Vue) {
 
 
 
+
+
 function getComponentName (opts) {
   return opts && (opts.Ctor.options.name || opts.tag)
 }
@@ -67510,9 +67998,9 @@ function pruneCache (keepAliveInstance, filter) {
   var keys = keepAliveInstance.keys;
   var _vnode = keepAliveInstance._vnode;
   for (var key in cache) {
-    var cachedNode = cache[key];
-    if (cachedNode) {
-      var name = getComponentName(cachedNode.componentOptions);
+    var entry = cache[key];
+    if (entry) {
+      var name = entry.name;
       if (name && !filter(name)) {
         pruneCacheEntry(cache, key, keys, _vnode);
       }
@@ -67526,9 +68014,9 @@ function pruneCacheEntry (
   keys,
   current
 ) {
-  var cached$$1 = cache[key];
-  if (cached$$1 && (!current || cached$$1.tag !== current.tag)) {
-    cached$$1.componentInstance.$destroy();
+  var entry = cache[key];
+  if (entry && (!current || entry.tag !== current.tag)) {
+    entry.componentInstance.$destroy();
   }
   cache[key] = null;
   remove(keys, key);
@@ -67546,6 +68034,32 @@ var KeepAlive = {
     max: [String, Number]
   },
 
+  methods: {
+    cacheVNode: function cacheVNode() {
+      var ref = this;
+      var cache = ref.cache;
+      var keys = ref.keys;
+      var vnodeToCache = ref.vnodeToCache;
+      var keyToCache = ref.keyToCache;
+      if (vnodeToCache) {
+        var tag = vnodeToCache.tag;
+        var componentInstance = vnodeToCache.componentInstance;
+        var componentOptions = vnodeToCache.componentOptions;
+        cache[keyToCache] = {
+          name: getComponentName(componentOptions),
+          tag: tag,
+          componentInstance: componentInstance,
+        };
+        keys.push(keyToCache);
+        // prune oldest entry
+        if (this.max && keys.length > parseInt(this.max)) {
+          pruneCacheEntry(cache, keys[0], keys, this._vnode);
+        }
+        this.vnodeToCache = null;
+      }
+    }
+  },
+
   created: function created () {
     this.cache = Object.create(null);
     this.keys = [];
@@ -67560,12 +68074,17 @@ var KeepAlive = {
   mounted: function mounted () {
     var this$1 = this;
 
+    this.cacheVNode();
     this.$watch('include', function (val) {
       pruneCache(this$1, function (name) { return matches(val, name); });
     });
     this.$watch('exclude', function (val) {
       pruneCache(this$1, function (name) { return !matches(val, name); });
     });
+  },
+
+  updated: function updated () {
+    this.cacheVNode();
   },
 
   render: function render () {
@@ -67601,12 +68120,9 @@ var KeepAlive = {
         remove(keys, key);
         keys.push(key);
       } else {
-        cache[key] = vnode;
-        keys.push(key);
-        // prune oldest entry
-        if (this.max && keys.length > parseInt(this.max)) {
-          pruneCacheEntry(cache, keys[0], keys, this._vnode);
-        }
+        // delay setting the cache until update
+        this.vnodeToCache = vnode;
+        this.keyToCache = key;
       }
 
       vnode.data.keepAlive = true;
@@ -67689,7 +68205,7 @@ Object.defineProperty(Vue, 'FunctionalRenderContext', {
   value: FunctionalRenderContext
 });
 
-Vue.version = '2.6.12';
+Vue.version = '2.6.14';
 
 /*  */
 
@@ -67726,7 +68242,7 @@ var isBooleanAttr = makeMap(
   'default,defaultchecked,defaultmuted,defaultselected,defer,disabled,' +
   'enabled,formnovalidate,hidden,indeterminate,inert,ismap,itemscope,loop,multiple,' +
   'muted,nohref,noresize,noshade,novalidate,nowrap,open,pauseonexit,readonly,' +
-  'required,reversed,scoped,seamless,selected,sortable,translate,' +
+  'required,reversed,scoped,seamless,selected,sortable,' +
   'truespeed,typemustmatch,visible'
 );
 
@@ -67850,7 +68366,7 @@ var isHTMLTag = makeMap(
 // contain child elements.
 var isSVG = makeMap(
   'svg,animate,circle,clippath,cursor,defs,desc,ellipse,filter,font-face,' +
-  'foreignObject,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' +
+  'foreignobject,g,glyph,image,line,marker,mask,missing-glyph,path,pattern,' +
   'polygon,polyline,rect,switch,symbol,text,textpath,tspan,use,view',
   true
 );
@@ -68055,7 +68571,8 @@ var hooks = ['create', 'activate', 'update', 'remove', 'destroy'];
 
 function sameVnode (a, b) {
   return (
-    a.key === b.key && (
+    a.key === b.key &&
+    a.asyncFactory === b.asyncFactory && (
       (
         a.tag === b.tag &&
         a.isComment === b.isComment &&
@@ -68063,7 +68580,6 @@ function sameVnode (a, b) {
         sameInputType(a, b)
       ) || (
         isTrue(a.isAsyncPlaceholder) &&
-        a.asyncFactory === b.asyncFactory &&
         isUndef(b.asyncFactory.error)
       )
     )
@@ -68953,7 +69469,7 @@ function updateAttrs (oldVnode, vnode) {
     cur = attrs[key];
     old = oldAttrs[key];
     if (old !== cur) {
-      setAttr(elm, key, cur);
+      setAttr(elm, key, cur, vnode.data.pre);
     }
   }
   // #4391: in IE9, setting type can reset value for input[type=radio]
@@ -68973,8 +69489,8 @@ function updateAttrs (oldVnode, vnode) {
   }
 }
 
-function setAttr (el, key, value) {
-  if (el.tagName.indexOf('-') > -1) {
+function setAttr (el, key, value, isInPre) {
+  if (isInPre || el.tagName.indexOf('-') > -1) {
     baseSetAttr(el, key, value);
   } else if (isBooleanAttr(key)) {
     // set attribute for blank value
@@ -71499,7 +72015,7 @@ var isNonPhrasingTag = makeMap(
 
 // Regular Expressions for parsing tags and attributes
 var attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
-var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
+var dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+?\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/;
 var ncname = "[a-zA-Z_][\\-\\.0-9_a-zA-Z" + (unicodeRegExp.source) + "]*";
 var qnameCapture = "((?:" + ncname + "\\:)?" + ncname + ")";
 var startTagOpen = new RegExp(("^<" + qnameCapture));
@@ -71805,7 +72321,7 @@ var modifierRE = /\.[^.\]]+(?=[^\]]*$)/g;
 var slotRE = /^v-slot(:|$)|^#/;
 
 var lineBreakRE = /[\r\n]/;
-var whitespaceRE$1 = /\s+/g;
+var whitespaceRE$1 = /[ \f\t\r\n]+/g;
 
 var invalidAttributeRE = /[\s"'<>\/=]/;
 
@@ -71853,8 +72369,12 @@ function parse (
   platformMustUseProp = options.mustUseProp || no;
   platformGetTagNamespace = options.getTagNamespace || no;
   var isReservedTag = options.isReservedTag || no;
-  maybeComponent = function (el) { return !!el.component || !isReservedTag(el.tag); };
-
+  maybeComponent = function (el) { return !!(
+    el.component ||
+    el.attrsMap[':is'] ||
+    el.attrsMap['v-bind:is'] ||
+    !(el.attrsMap.is ? isReservedTag(el.attrsMap.is) : isReservedTag(el.tag))
+  ); };
   transforms = pluckModuleFunction(options.modules, 'transformNode');
   preTransforms = pluckModuleFunction(options.modules, 'preTransformNode');
   postTransforms = pluckModuleFunction(options.modules, 'postTransformNode');
@@ -73105,9 +73625,9 @@ function genHandler (handler) {
       code += genModifierCode;
     }
     var handlerCode = isMethodPath
-      ? ("return " + (handler.value) + "($event)")
+      ? ("return " + (handler.value) + ".apply(null, arguments)")
       : isFunctionExpression
-        ? ("return (" + (handler.value) + ")($event)")
+        ? ("return (" + (handler.value) + ").apply(null, arguments)")
         : isFunctionInvocation
           ? ("return " + (handler.value))
           : handler.value;
@@ -73193,7 +73713,8 @@ function generate (
   options
 ) {
   var state = new CodegenState(options);
-  var code = ast ? genElement(ast, state) : '_c("div")';
+  // fix #11483, Root level <script> tags should not be rendered.
+  var code = ast ? (ast.tag === 'script' ? 'null' : genElement(ast, state)) : '_c("div")';
   return {
     render: ("with(this){return " + code + "}"),
     staticRenderFns: state.staticRenderFns
@@ -73658,7 +74179,7 @@ function genComment (comment) {
 function genSlot (el, state) {
   var slotName = el.slotName || '"default"';
   var children = genChildren(el, state);
-  var res = "_t(" + slotName + (children ? ("," + children) : '');
+  var res = "_t(" + slotName + (children ? (",function(){return " + children + "}") : '');
   var attrs = el.attrs || el.dynamicAttrs
     ? genProps((el.attrs || []).concat(el.dynamicAttrs || []).map(function (attr) { return ({
         // slot props are camelized
@@ -75487,6 +76008,17 @@ var index = {
 
 
 
+/***/ }),
+
+/***/ "./node_modules/quasar/package.json":
+/*!******************************************!*\
+  !*** ./node_modules/quasar/package.json ***!
+  \******************************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = JSON.parse('{"name":"quasar","version":"1.15.23","description":"Build high-performance VueJS user interfaces (SPA, PWA, SSR, Mobile and Desktop) in record time","module":"src/index.esm.js","typings":"dist/types/index.d.ts","main":"dist/quasar.common.js","files":["dist","lang","icon-set","src","wrappers"],"scripts":{"clean":"node build/script.clean.js","dev":"cd ./dev && node ./script.dev.js dev && cd ..","dev:ssr":"cd ./dev && node ./script.dev.js dev -m ssr && cd ..","dev:cordova:ios":"cd ./dev && node ./script.dev.js dev -m cordova -T ios && cd ..","dev:cordova:android":"cd ./dev && node ./script.dev.js dev -m cordova -T android && cd ..","dev:capacitor:ios":"cd ./dev && node ./script.dev.js dev -m capacitor -T ios && cd ..","dev:capacitor:android":"cd ./dev && node ./script.dev.js dev -m capacitor -T android && cd ..","dev:umd":"node build/script.test-umd.js","dev:quploader":"cd dev/upload-server && yarn && cd ../.. && node dev/upload-server/server.js","build":"node build/script.build.js","test":"yarn lint && yarn build","lint":"eslint --ext .js,.vue src dev","lint-fix":"eslint --ext .js,.vue src dev --fix"},"repository":{"type":"git","url":"git+https://github.com/quasarframework/quasar.git"},"keywords":["vuejs","vue","quasar","js","phone","tablet","desktop","spa","pwa","website","electron"],"author":{"name":"Razvan Stoenescu","email":"razvan.stoenescu@gmail.com","url":"https://quasar.dev"},"license":"MIT","bugs":{"url":"https://github.com/quasarframework/quasar/issues"},"funding":{"type":"github","url":"https://donate.quasar.dev"},"homepage":"https://quasar.dev","devDependencies":{"@quasar/app":"^2.0.6","@quasar/extras":"^1.10.0","@rollup/plugin-buble":"^0.21.1","@rollup/plugin-json":"^4.0.2","@rollup/plugin-node-resolve":"^7.1.0","babel-eslint":"^10.0.2","babel-preset-es2015-rollup":"^3.0.0","eslint":"^7.4.0","eslint-config-standard":"^12.0.0","eslint-friendly-formatter":"^4.0.1","eslint-loader":"^4.0.2","eslint-plugin-import":"^2.18.2","eslint-plugin-node":"^9.1.0","eslint-plugin-promise":"^4.2.1","eslint-plugin-standard":"^4.0.1","eslint-plugin-vue":"^5.2.3","friendly-errors-webpack-plugin":"^1.7.0","json-beautify":"^1.1.1","module-alias":"^2.2.2","recast":"^0.18.5","rimraf":"^3.0.1","rollup":"^1.31.0","table":"^5.4.6","uglify-es":"^3.3.9"},"vetur":{"tags":"dist/vetur/quasar-tags.json","attributes":"dist/vetur/quasar-attributes.json"},"web-types":"dist/web-types/web-types.json","browserslist":["last 1 version, not dead, ie >= 11"],"engines":{"node":">= 10.0.0","npm":">= 5.6.0","yarn":">= 1.6.0"}}');
+
 /***/ })
 
 /******/ 	});
@@ -75497,8 +76029,9 @@ var index = {
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
 /******/ 		// Check if module is in cache
-/******/ 		if(__webpack_module_cache__[moduleId]) {
-/******/ 			return __webpack_module_cache__[moduleId].exports;
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = __webpack_module_cache__[moduleId] = {

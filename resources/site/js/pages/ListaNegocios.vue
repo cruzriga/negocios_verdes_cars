@@ -12,11 +12,17 @@
 				</q-input>
 
         <!-- Filtro de Categorías -->
-        <q-select v-model="categoriaSeleccionada" @input="AXIO_GET_EMPRESAS" :options="categorias" clearable label="Filtrar por categorías" style="min-width: 250px; max-width:400px;" class="q-pl-lg">
+        <q-select v-model="categoriaSeleccionada" @input="AXIO_GET_EMPRESAS" :options="categorias"  label="Filtrar por categorías" style="min-width: 350px; max-width:600px;" class="q-pl-lg text-primary" color="teal">
           <template v-slot:no-option>
             <q-item>
               <q-item-section class="text-grey">Seleccione un filtro </q-item-section>
             </q-item>
+          </template>
+          <template v-slot:append v-if="categoriaSeleccionada.value != null">
+            <q-icon name="cancel" @click.stop="categoriaSeleccionada = {
+              label: 'Seleccionar categoría',
+              value: null,
+            }" class="cursor-pointer" />
           </template>
         </q-select>
         <!-- /Filtro de Categorías -->

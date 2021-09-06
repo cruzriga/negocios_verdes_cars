@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <dataSource name="@corpoguajira">
-  <database-model serializer="dbm" dbms="MYSQL" family-id="MYSQL" format-version="4.20">
+  <database-model serializer="dbm" dbms="MYSQL" family-id="MYSQL" format-version="4.23">
     <root id="1">
       <ServerVersion>5.7.35</ServerVersion>
       <DefaultEngine>MyISAM</DefaultEngine>
@@ -726,9 +726,6 @@
     </collation>
     <user id="227" parent="1" name="corpogua_verdes">
       <Host>%</Host>
-      <ObjectGrants>ALL PRIVILEGES|corpogua\_web
-ALL PRIVILEGES|corpogua\_verdes
-</ObjectGrants>
     </user>
     <table id="228" parent="2" name="verdes_action_log_config">
       <Engine>InnoDB</Engine>
