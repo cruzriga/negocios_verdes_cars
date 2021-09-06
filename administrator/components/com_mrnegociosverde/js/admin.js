@@ -60439,7 +60439,7 @@ var render = function() {
                       _vm._v(" "),
                       _c(
                         "q-card",
-                        { staticClass: "my-card q-ma-md" },
+                        {},
                         [
                           _c("q-card-section", [
                             _c(

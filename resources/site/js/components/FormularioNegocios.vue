@@ -244,7 +244,7 @@
                 </q-input>
               </div>
             </div>
-            <q-card class="my-card q-ma-md">
+            <q-card class="">
               <q-card-section>
                 <div class="row fit justify-between">
                   <span class="text-h6">Productos</span>
