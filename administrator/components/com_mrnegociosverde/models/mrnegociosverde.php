@@ -252,6 +252,11 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
                     }
                 }
 
+                // Filtrar por Municipio
+                if (!empty($filtros->municipioFiltro) && !in_array($row->municipio, $filtros->municipioFiltro)) {
+                    continue;
+                }
+
                 // Filtrar por Nivel de Cumplimiento
                 if (!empty($filtros->nivelCumplimientoFiltro)) {
                     if (!$this->nivelDeCumplimiento($row, $filtros->nivelCumplimientoFiltro)) {
@@ -378,6 +383,11 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
                     if (!in_array($row->estado, $filtros->estadosFiltro)) {
                         continue;
                     }
+                }
+
+                // Filtrar por Municipio
+                if (!empty($filtros->municipioFiltro) && !in_array($row->municipio, $filtros->municipioFiltro)) {
+                    continue;
                 }
 
                 // Filtrar por Nivel de Cumplimiento

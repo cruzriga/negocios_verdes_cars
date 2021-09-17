@@ -49,6 +49,20 @@
 
       <q-separator />
 
+        <div class="q-pl-md q-pt-md text-weight-medium">Municipio</div>
+        <q-item v-for="municipio in $store.state.formulario.municipios" :key="municipio.id" >
+          <q-checkbox 
+            v-model="municipioFiltro" 
+            :val="municipio.label" 
+            :label="municipio.label"
+            color="teal"
+            size="xs"
+            @input="filtrar"
+          />
+        </q-item>
+
+      <q-separator />
+
       <q-item class="q-mt-lg">
         <!-- download-excel :data="json_data">
           Descargar
@@ -303,6 +317,7 @@ export default {
       items : [1],
       adic: 60,
       cump : 80,
+      municipioFiltro: [],
       nivelCumplimientoFiltro: [],
       nivelCumplimiento: [
         {
@@ -376,6 +391,7 @@ export default {
   computed: {
     getURLToDownload: function() {
       let filtros = {
+          municipioFiltro: this.municipioFiltro,
           nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
           categoriasFiltro: this.categoriasFiltro,
           estadosFiltro: this.estadosFiltro,
@@ -391,6 +407,7 @@ export default {
       pagina: this.pagina,
       numlist: this.numlist,
       filtros: {
+        municipioFiltro: this.municipioFiltro,
         nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
         categoriasFiltro: this.categoriasFiltro,
         estadosFiltro: this.estadosFiltro,
@@ -436,6 +453,7 @@ export default {
         buscar: this.search,
         campo: 'e.nombreempresa',
         filtros: {
+          municipioFiltro: this.municipioFiltro,
           nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
           categoriasFiltro: this.categoriasFiltro,
           estadosFiltro: this.estadosFiltro,
@@ -448,6 +466,7 @@ export default {
         buscar: this.search,
         campo: 'e.nombreempresa',
         filtros: {
+          municipioFiltro: this.municipioFiltro,
           nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
           categoriasFiltro: this.categoriasFiltro,
           estadosFiltro: this.estadosFiltro,
@@ -462,6 +481,7 @@ export default {
           pagina: this.$store.state.admin.empresas.data.pagina+n,
           numlist: this.$store.state.admin.empresas.data.numList,
           filtros: {
+            municipioFiltro: this.municipioFiltro,
             nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
             categoriasFiltro: this.categoriasFiltro,
             estadosFiltro: this.estadosFiltro,
@@ -478,6 +498,7 @@ export default {
           pagina: this.$store.state.admin.empresas.data.pagina+n,
           numlist: this.$store.state.admin.empresas.data.numList,
           filtros: {
+            municipioFiltro: this.municipioFiltro,
             nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
             categoriasFiltro: this.categoriasFiltro,
             estadosFiltro: this.estadosFiltro,

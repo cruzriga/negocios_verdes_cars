@@ -4397,7 +4397,68 @@ var store = {
       subcategorias: [],
       tiposubcategorias: []
     },
-    cargando: false
+    cargando: false,
+    municipios: [{
+      label: 'Albania',
+      value: 'Albania',
+      icon: 'img:media/iconospng/Flag_of_Albania.png'
+    }, {
+      label: 'Barrancas',
+      value: 'Barrancas',
+      icon: 'img:media/iconospng/Flag_of_Barrancas.png'
+    }, {
+      label: 'Dibulla',
+      value: 'Dibulla',
+      icon: 'img:media/iconospng/Flag_of_Dibulla.png'
+    }, {
+      label: 'Distracción',
+      value: 'Distracción',
+      icon: 'img:media/iconospng/Flag_of_Distracción.png'
+    }, {
+      label: 'El Molino',
+      value: 'El Molino',
+      icon: 'img:media/iconospng/Flag_of_El_Molino.png'
+    }, {
+      label: 'Fonseca',
+      value: 'Fonseca',
+      icon: 'img:media/iconospng/Flag_of_Fonseca.png'
+    }, {
+      label: 'Hatonuevo',
+      value: 'Hatonuevo',
+      icon: 'img:media/iconospng/Flag_of_Hatonuevo.png'
+    }, {
+      label: 'La Jagua del Pilar',
+      value: 'La Jagua del Pilar',
+      icon: 'img:media/iconospng/Flag_of_La_Jagua_del_Pilar.png'
+    }, {
+      label: 'Maicao',
+      value: 'Maicao',
+      icon: 'img:media/iconospng/Flag_of_Maicao.png'
+    }, {
+      label: 'Manaure',
+      value: 'Manaure',
+      icon: 'img:media/iconospng/Flag_of_Manaure.png'
+    }, {
+      label: 'Riohacha',
+      value: 'Riohacha',
+      icon: 'img:media/iconospng/Flag_of_Riohacha.png'
+    }, {
+      label: 'San Juan del Cesar',
+      value: 'San Juan del Cesar',
+      icon: 'img:media/iconospng/Flag_of_San_Juan_del_Cesar.png'
+    }, {
+      label: 'Uribia',
+      value: 'Uribia',
+      icon: 'img:media/iconospng/Flag_of_Uribia.png'
+    }, {
+      label: 'Urumita',
+      value: 'Urumita',
+      icon: 'img:media/iconospng/Flag_of_Urumita.png'
+    }, {
+      label: 'Villanueva',
+      value: 'Villanueva',
+      icon: 'img:media/iconospng/Flag_of_Villanueva.png'
+    }]
   },
   getters: {
     bg: function bg(state) {

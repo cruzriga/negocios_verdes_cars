@@ -2831,6 +2831,20 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Negocios',
@@ -2848,6 +2862,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       items: [1],
       adic: 60,
       cump: 80,
+      municipioFiltro: [],
       nivelCumplimientoFiltro: [],
       nivelCumplimiento: [{
         id: 0,
@@ -2909,6 +2924,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   computed: {
     getURLToDownload: function getURLToDownload() {
       var filtros = {
+        municipioFiltro: this.municipioFiltro,
         nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
         categoriasFiltro: this.categoriasFiltro,
         estadosFiltro: this.estadosFiltro
@@ -2921,6 +2937,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       pagina: this.pagina,
       numlist: this.numlist,
       filtros: {
+        municipioFiltro: this.municipioFiltro,
         nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
         categoriasFiltro: this.categoriasFiltro,
         estadosFiltro: this.estadosFiltro
@@ -2987,6 +3004,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         buscar: this.search,
         campo: 'e.nombreempresa',
         filtros: {
+          municipioFiltro: this.municipioFiltro,
           nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
           categoriasFiltro: this.categoriasFiltro,
           estadosFiltro: this.estadosFiltro
@@ -2999,6 +3017,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         buscar: this.search,
         campo: 'e.nombreempresa',
         filtros: {
+          municipioFiltro: this.municipioFiltro,
           nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
           categoriasFiltro: this.categoriasFiltro,
           estadosFiltro: this.estadosFiltro
@@ -3014,6 +3033,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           pagina: this.$store.state.admin.empresas.data.pagina + n,
           numlist: this.$store.state.admin.empresas.data.numList,
           filtros: {
+            municipioFiltro: this.municipioFiltro,
             nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
             categoriasFiltro: this.categoriasFiltro,
             estadosFiltro: this.estadosFiltro
@@ -3031,6 +3051,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           pagina: this.$store.state.admin.empresas.data.pagina + n,
           numlist: this.$store.state.admin.empresas.data.numList,
           filtros: {
+            municipioFiltro: this.municipioFiltro,
             nivelCumplimientoFiltro: this.nivelCumplimientoFiltro,
             categoriasFiltro: this.categoriasFiltro,
             estadosFiltro: this.estadosFiltro
@@ -5595,7 +5616,68 @@ var store = {
       subcategorias: [],
       tiposubcategorias: []
     },
-    cargando: false
+    cargando: false,
+    municipios: [{
+      label: 'Albania',
+      value: 'Albania',
+      icon: 'img:media/iconospng/Flag_of_Albania.png'
+    }, {
+      label: 'Barrancas',
+      value: 'Barrancas',
+      icon: 'img:media/iconospng/Flag_of_Barrancas.png'
+    }, {
+      label: 'Dibulla',
+      value: 'Dibulla',
+      icon: 'img:media/iconospng/Flag_of_Dibulla.png'
+    }, {
+      label: 'Distracción',
+      value: 'Distracción',
+      icon: 'img:media/iconospng/Flag_of_Distracción.png'
+    }, {
+      label: 'El Molino',
+      value: 'El Molino',
+      icon: 'img:media/iconospng/Flag_of_El_Molino.png'
+    }, {
+      label: 'Fonseca',
+      value: 'Fonseca',
+      icon: 'img:media/iconospng/Flag_of_Fonseca.png'
+    }, {
+      label: 'Hatonuevo',
+      value: 'Hatonuevo',
+      icon: 'img:media/iconospng/Flag_of_Hatonuevo.png'
+    }, {
+      label: 'La Jagua del Pilar',
+      value: 'La Jagua del Pilar',
+      icon: 'img:media/iconospng/Flag_of_La_Jagua_del_Pilar.png'
+    }, {
+      label: 'Maicao',
+      value: 'Maicao',
+      icon: 'img:media/iconospng/Flag_of_Maicao.png'
+    }, {
+      label: 'Manaure',
+      value: 'Manaure',
+      icon: 'img:media/iconospng/Flag_of_Manaure.png'
+    }, {
+      label: 'Riohacha',
+      value: 'Riohacha',
+      icon: 'img:media/iconospng/Flag_of_Riohacha.png'
+    }, {
+      label: 'San Juan del Cesar',
+      value: 'San Juan del Cesar',
+      icon: 'img:media/iconospng/Flag_of_San_Juan_del_Cesar.png'
+    }, {
+      label: 'Uribia',
+      value: 'Uribia',
+      icon: 'img:media/iconospng/Flag_of_Uribia.png'
+    }, {
+      label: 'Urumita',
+      value: 'Urumita',
+      icon: 'img:media/iconospng/Flag_of_Urumita.png'
+    }, {
+      label: 'Villanueva',
+      value: 'Villanueva',
+      icon: 'img:media/iconospng/Flag_of_Villanueva.png'
+    }]
   },
   getters: {
     bg: function bg(state) {
@@ -6112,7 +6194,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* .no-results{\n\n} */\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* .no-results{\n\n} */\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -58619,6 +58701,38 @@ var render = function() {
                       _vm.nivelCumplimientoFiltro = $$v
                     },
                     expression: "nivelCumplimientoFiltro"
+                  }
+                })
+              ],
+              1
+            )
+          }),
+          _vm._v(" "),
+          _c("q-separator"),
+          _vm._v(" "),
+          _c("div", { staticClass: "q-pl-md q-pt-md text-weight-medium" }, [
+            _vm._v("Municipio")
+          ]),
+          _vm._v(" "),
+          _vm._l(_vm.$store.state.formulario.municipios, function(municipio) {
+            return _c(
+              "q-item",
+              { key: municipio.id },
+              [
+                _c("q-checkbox", {
+                  attrs: {
+                    val: municipio.label,
+                    label: municipio.label,
+                    color: "teal",
+                    size: "xs"
+                  },
+                  on: { input: _vm.filtrar },
+                  model: {
+                    value: _vm.municipioFiltro,
+                    callback: function($$v) {
+                      _vm.municipioFiltro = $$v
+                    },
+                    expression: "municipioFiltro"
                   }
                 })
               ],

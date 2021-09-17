@@ -259,11 +259,8 @@ class MrNegociosVerdeController extends JControllerLegacy {
             'instagram' => 'Instagram',
             'linkvideo' => 'Link Video',
             'imagenlogo' => 'Imágen Logo',
-            'idcategoria' => 'ID Categoría',
             'nombrecategoria' => 'Categoría',
-            'idsubcategoria' => 'ID Subcategoría',
             'nombresubcategoria' => 'Subcategoría',
-            'idtiposubcategoria' => 'ID Tipo subcategoría',
             'nombretiposubcategoria' => 'Nombre Tipo subcategoría',
             'cumplimiento' => 'Cumplimiento',
             'adic' => 'Adicional',
@@ -323,11 +320,8 @@ class MrNegociosVerdeController extends JControllerLegacy {
             echo '<td>' . $empresa->instagram . '</td>';
             echo '<td>' . $empresa->linkvideo . '</td>';
             echo '<td>' . $empresa->imagenlogo . '</td>';
-            echo '<td>' . $empresa->idcategoria . '</td>';
             echo '<td>' . $empresa->nombrecategoria . '</td>';
-            echo '<td>' . $empresa->idsubcategoria . '</td>';
             echo '<td>' . $empresa->nombresubcategoria . '</td>';
-            echo '<td>' . $empresa->idtiposubcategoria . '</td>';
             echo '<td>' . $empresa->nombretiposubcategoria . '</td>';
             echo '<td>' . $empresa->cumplimiento . '</td>';
             echo '<td>' . $empresa->adic . '</td>';

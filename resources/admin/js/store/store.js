@@ -10,7 +10,7 @@ const store = new Vuex.Store(
         modules:{
             formulario: formulario,
             admin: administrar,
-            listado: listado
+            listado: listado,
         }
     });
 export default store

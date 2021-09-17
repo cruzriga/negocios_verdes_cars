@@ -67,7 +67,7 @@ const store =
                 var datopost = 'filtros=' + JSON.stringify(datos.filtros);
                 let resp = await request('?option=com_mrnegociosverde&task=getempresasadmin&format=json&buscar=' + datos.buscar + '&campo=' + datos.campo, datopost)
                 // console.log(resp)
-                if(resp.ok){
+                if(resp.ok) {
                     commit(CARGANDO,false)
                     if (datos.campo=='e.idempresa') {                        
                         return(resp.resp.data.empresas[0])
