@@ -14,6 +14,29 @@ defined('_JEXEC') or die('Restricted access');
  * @since  0.0.1
  */
 class MrNegociosVerdeController extends JControllerLegacy {
+
+    protected $estados = [
+        [
+            'id' => 0,
+            'label' => 'Preinscrito',
+            'color' => 'cyan-4'
+        ],
+        [
+            'id'=> 1,
+            'label'=> 'En revision',
+            'color'=> 'orange-5'
+        ],
+        [
+            'id'=> 2,
+            'label'=> 'Rechazado',
+            'color'=> 'deep-orange-5'
+        ],
+        [
+            'id'=> 3,
+            'label'=> 'Aceptado',
+            'color'=> 'green-5'
+        ],
+    ];
     
     public function divide2($a, $b)  
     {
@@ -308,7 +331,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
             echo '<tr>';
             echo '<td>' . $empresa->idempresa. '</td>';
             echo '<td>' . $empresa->nombreempresa . '</td>';
-            echo '<td>' . $empresa->estado . '</td>';
+            echo '<td>' . $this->estados[$empresa->estado]['label'] . '</td>';
             echo '<td>' . $empresa->representantelegal . '</td>';
             echo '<td>' . $empresa->descripcion . '</td>';
             echo '<td>' . $empresa->telefono . '</td>';
