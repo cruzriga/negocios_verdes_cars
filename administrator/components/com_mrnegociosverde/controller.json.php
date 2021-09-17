@@ -37,6 +37,45 @@ class MrNegociosVerdeController extends JControllerLegacy {
             'color'=> 'green-5'
         ],
     ];
+
+    protected $nivelCumplimiento = [
+        [
+            'id' => 0,
+            'start' => 0,
+            'end' => 10,
+            'label' => 'Inicial',
+        ],
+        [
+            'id' => 1,
+            'start' => 11,
+            'end' => 30,
+            'label' => 'Básico',
+        ],
+        [
+            'id' => 2,
+            'start' => 31,
+            'end' => 50,
+            'label' => 'Intermedio',
+        ],
+        [
+            'id' => 3,
+            'start' => 51,
+            'end' => 80,
+            'label' => 'Satisfactorio',
+        ],
+        [
+            'id' =>4,
+            'start' => 81,
+            'end' => 100,
+            'label' => 'Avanzado',
+        ],
+        [
+            'id' =>5,
+            'start' => 'adic',
+            'end' => 100,
+            'label' => '81-100 - Ideal + Adicional (50-100)',
+        ]
+    ];
     
     public function divide2($a, $b)  
     {
@@ -287,6 +326,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
             'nombretiposubcategoria' => 'Nombre Tipo subcategoría',
             'cumplimiento' => 'Cumplimiento',
             'adic' => 'Adicional',
+            'cumplimientoLabel' => 'Descripción Cumplimiento',
             'activo' => 'Activo',
             'isActivo' => 'isActive',
             'fechaCreacion' => 'Fecha de Creación',
@@ -348,6 +388,7 @@ class MrNegociosVerdeController extends JControllerLegacy {
             echo '<td>' . $empresa->nombretiposubcategoria . '</td>';
             echo '<td>' . $empresa->cumplimiento . '</td>';
             echo '<td>' . $empresa->adic . '</td>';
+            echo '<td>' . $this->getNivelDeCumplimiento($empresa) . '</td>';
             echo '<td>' . $empresa->activo . '</td>';
             echo '<td>' . $empresa->isActivo . '</td>';
             echo '<td>' . $empresa->fechaCreacion . '</td>';
@@ -356,5 +397,27 @@ class MrNegociosVerdeController extends JControllerLegacy {
         }
         
         echo '</table></body></html>';
+    }
+
+    private function getNivelDeCumplimiento($empresa)
+    {
+        $value = $empresa->cumplimiento;
+        $cumple = 0;
+        $cumpleLabel = '';
+        foreach ($this->nivelCumplimiento as $nivel) {
+            $min = $nivel['start'];
+            $max = $nivel['end'];
+            if ($min == 'adic' && $cumple == 100) {
+                if (($empresa->adic >= 50) && ($empresa->adic <= 100)) {
+                    $cumpleLabel = $nivel['label'];
+                    return $cumpleLabel;
+                }
+            }
+            if (($min <= $value) && ($value <= $max)) {
+                $cumple = $max;
+                $cumpleLabel = $nivel['label'];
+            }
+        }
+        return $cumpleLabel;
     }
 }

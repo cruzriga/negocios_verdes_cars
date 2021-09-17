@@ -271,7 +271,7 @@ class MrNegociosVerdeModelMrNegociosVerde extends JModelItem
         return false;
     }
 
-    private function nivelDeCumplimiento($empresa, $filtros) {
+    public function nivelDeCumplimiento($empresa, $filtros) {
         $value = $empresa->cumplimiento;
         $cumple = 0;
         foreach($filtros as $nivel) {
